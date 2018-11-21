@@ -41,7 +41,7 @@ lengthSound = fs*5;
 
 
 %% Exciter
-Fmax = 500000000;
+Fmax = 50000000000;
 exciterLength = floor(1e-3 * fs);
 q = 2; 
 Fe = Fmax/2*(1-cos(q*pi*(0:exciterLength)/exciterLength));
@@ -60,17 +60,19 @@ connectionWidth = 5;
 EcA(floor(NA/5):floor(NA/5)+connectionWidth) = (1-cos(2*pi*(0:connectionWidth)/connectionWidth));
 jA = (k^2 * EcA) / (1 + s0A * k);
 
+% connA = find(EcA > 0);
 EcB = zeros(NB, 1);
-
-EcB(floor(NA/5):floor(NA/5)+connectionWidth) = (1-cos(2*pi*(0:connectionWidth)/connectionWidth));
-jB = -(k^2 * EcB * 1) / (1 + s0B * k);
+EcB(5) = 1;
+massratio = 1; 
+% EcB(floor(NA/5):floor(NA/5)+connectionWidth) = (1-cos(2*pi*(0:connectionWidth)/connectionWidth));
+jB = -(k^2 * EcB * massratio) / (1 + s0B * k);
 J = [jA; jB];
 
 %% Spring coefficients 
 
 sx = 0; 
-w0 = 100; 
-w1 = 100; 
+w0 = 1; 
+w1 = 4000; 
 
 
 
@@ -163,6 +165,8 @@ for n = 1 : lengthSound
     if mod(n,1) == 0 && drawBar == true
         subplot(2,1,1)
         plot(u(1:NA))
+        hold on;
+        
         subplot(2,1,2)
         plot(u(NA+1:end));
 %         plot (J)
