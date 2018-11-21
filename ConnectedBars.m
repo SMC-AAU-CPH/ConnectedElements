@@ -57,22 +57,24 @@ Q = 1; % amount of connections
 EcA = zeros(NA, 1);
 connectionWidth = 5;
 
-EcA(floor(NA/5):floor(NA/5)+connectionWidth) = (1-cos(2*pi*(0:connectionWidth)/connectionWidth));
+% EcA(floor(NA/5):floor(NA/5)+connectionWidth) = (1-cos(2*pi*(0:connectionWidth)/connectionWidth));
+EcA(10) = 1;
 jA = (k^2 * EcA) / (1 + s0A * k);
+connA = find(EcA > 0);
 
-% connA = find(EcA > 0);
 EcB = zeros(NB, 1);
 EcB(5) = 1;
 massratio = 1; 
 % EcB(floor(NA/5):floor(NA/5)+connectionWidth) = (1-cos(2*pi*(0:connectionWidth)/connectionWidth));
 jB = -(k^2 * EcB * massratio) / (1 + s0B * k);
+connB = find(EcB > 0);
 J = [jA; jB];
 
 %% Spring coefficients 
 
 sx = 0; 
-w0 = 1; 
-w1 = 4000; 
+w0 = 10000; 
+w1 = 40000; 
 
 
 
@@ -137,6 +139,18 @@ drawBar = false;
 etaRPrev = 0;
 L = [hA * EcA', -hB * EcB']; % Add rows for more connections 
 
+if length(connA) == 1
+    scatA = true;
+else
+    scatA = false;
+end 
+
+if length(connB) == 1
+    scatB = true;
+else
+    scatB = false;
+end 
+
 for n = 1 : lengthSound
     
     % calculate relative displacement
@@ -163,14 +177,27 @@ for n = 1 : lengthSound
     out(n) = u(round(NA/5));
     out2(n) = u(round(NA + NB/5));
     if mod(n,1) == 0 && drawBar == true
-        subplot(2,1,1)
-        plot(u(1:NA))
+%         subplot(2,1,1)
+        clf
+        plot(u(1:NA) + 500)
         hold on;
+        if scatA
+            scatter(connA, u(connA) + 500, '.')
+        else
+            plot(connA, u(connA) + 500, 'LineWidth', 1)
+        end
+        ylim([-2000 2000])
+%         subplot(2,1,2)
         
-        subplot(2,1,2)
-        plot(u(NA+1:end));
+        plot(u(NA+1:end) - 500);
+        hold on;
+        if scatB
+            scatter(connB, u(connB + NA) - 500, '.')
+        else
+            plot(connB, u(NA + 1 + connB) - 500, 'LineWidth', 1)
+        end
 %         plot (J)
-%         ylim([-1 1])
+        ylim([-2000 2000])
         drawnow;
     end
     uPrev = u;
