@@ -8,7 +8,7 @@
 
 #pragma once
 
-#include "../../SenselWrapper.h"
+#include "../SenselWrapper/SenselWrapper.h"
 #include "../JuceLibraryCode/JuceHeader.h"
 
 //==============================================================================
@@ -37,9 +37,8 @@ public:
 private:
     //==============================================================================
     // Your private member variables go here...
-    OwnedArray<Sensel> sensels;
-    
     const unsigned int amountOfSensels = 2; 
+    OwnedArray<Sensel> sensels;
     
     //static constexpr char* CONTACT_STATE_STRING[] = { "CONTACT_INVALID","CONTACT_START", "CONTACT_MOVE", "CONTACT_END" };
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainComponent)

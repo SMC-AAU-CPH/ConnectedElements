@@ -2,6 +2,32 @@
 
 <JUCERPROJECT id="ILvBqS" name="ConnectedElements" projectType="guiapp" jucerVersion="5.4.1">
   <MAINGROUP id="qV0zWR" name="ConnectedElements">
+    <GROUP id="{E399A643-3511-66C1-BAF8-F737D4AD2BA0}" name="SenselWrapper">
+      <GROUP id="{65767978-087E-4F37-B2D1-31CADB56B208}" name="lib">
+        <FILE id="Bb0bKy" name="sensel.c" compile="1" resource="0" file="SenselWrapper/lib/sensel.c"/>
+        <FILE id="Qaiwoh" name="sensel.h" compile="0" resource="0" file="SenselWrapper/lib/sensel.h"/>
+        <FILE id="FxREo5" name="sensel_device.h" compile="0" resource="0" file="SenselWrapper/lib/sensel_device.h"/>
+        <FILE id="cLhDBi" name="sensel_device_vidpid.h" compile="0" resource="0"
+              file="SenselWrapper/lib/sensel_device_vidpid.h"/>
+        <FILE id="OKRbtk" name="sensel_protocol.h" compile="0" resource="0"
+              file="SenselWrapper/lib/sensel_protocol.h"/>
+        <FILE id="EoKZxS" name="sensel_register.c" compile="1" resource="0"
+              file="SenselWrapper/lib/sensel_register.c"/>
+        <FILE id="tgmRtH" name="sensel_register.h" compile="0" resource="0"
+              file="SenselWrapper/lib/sensel_register.h"/>
+        <FILE id="A4yUBO" name="sensel_register_map.h" compile="0" resource="0"
+              file="SenselWrapper/lib/sensel_register_map.h"/>
+        <FILE id="n2kaww" name="sensel_serial.h" compile="0" resource="0" file="SenselWrapper/lib/sensel_serial.h"/>
+        <FILE id="P0qTjv" name="sensel_serial_linux.c" compile="1" resource="0"
+              file="SenselWrapper/lib/sensel_serial_linux.c"/>
+        <FILE id="oCGZxz" name="sensel_serial_win.c" compile="1" resource="0"
+              file="SenselWrapper/lib/sensel_serial_win.c"/>
+        <FILE id="u8lAoj" name="sensel_types.h" compile="0" resource="0" file="SenselWrapper/lib/sensel_types.h"/>
+      </GROUP>
+      <FILE id="n6bKjh" name="LICENSE" compile="0" resource="1" file="SenselWrapper/LICENSE"/>
+      <FILE id="dWdpEh" name="README.md" compile="0" resource="1" file="SenselWrapper/README.md"/>
+      <FILE id="ZKt6JY" name="SenselWrapper.h" compile="0" resource="0" file="SenselWrapper/SenselWrapper.h"/>
+    </GROUP>
     <GROUP id="{C397437D-6387-2E58-15AE-F03A3C683002}" name="Source">
       <FILE id="gjexQL" name="MainComponent.h" compile="0" resource="0" file="Source/MainComponent.h"/>
       <FILE id="cWwux7" name="MainComponent.cpp" compile="1" resource="0"
