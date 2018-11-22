@@ -4,164 +4,164 @@ clc;
 
 fs = 44100;      % Sampling rate
 k = 1 / fs;     % Time step
-L = 1;          % Bar length
 
-% kappa = sqrt((E * inertia) / (rho * A * L^2));  % Stiffness
-kappaA = 10;
-s0A = 0.1;
-s1A = 0.005;
-hA = sqrt(2 * k * (s1A^2 + sqrt(kappaA^2 + s1A^2)));
-NA = floor(1/hA); % Number of gridpoints
-hA = 1/NA; % Recalculate gridspacing
 
-kappaB = 50;
-s0B = 0.1;
-s1B = 0.005;
-hB = sqrt(2 * k * (s1B^2 + sqrt(kappaB^2 + s1B^2)));
-NB = floor(1/hB); % Number of gridpoints
-hB = 1/NB; % Recalculate gridspacing
-% muSq = (k * kappa / h^2)^2; % Courant number squared (always 0.25)
-% lambdaSq = (k^2*kappa^2) / h^4;
+%% Create objects 
+% Bars: stiffness, freq. dep. damping, freq. indep. damping
+% Strings: wavespeed, stiffness, freq. dep. damping, freq. indep. damping
 
-P = 1/5; % plucking position
+objectVars{1, 1} = "string";
+freq1 = 196.0;
+objectVars{1, 2} = [freq1*2, 2, 0.1, 0.005];
 
-%% Raised cosine input
-% cosWidth = floor(NA / 10);
-% raisedCos = 0.5 * (cos(pi:(2*pi)/cosWidth:3*pi) + 1);
-% PIdx = floor (P * NA);
+objectVars{2, 1} = "string";
+freq2 = 196.0*2^(7/12);
+objectVars{2, 2} = [freq2*2, 2, 0.1, 0.005];
+
+% objectVars{3, 1} = "plate";
+% objectVars{3, 2} = [1, 1, 0.005, 4];
+
+Q = length(objectVars); % amount of objects
+
+%initialise cells/vectors depending on the number of objects
+Bpre = cell(Q, 1);
+Cpre = cell(Q, 1);
+N = zeros(Q,1);
+h = zeros(Q,1);
+matIdx = zeros(Q,1);
+
+Ntot = 0;
+numPlates = 0;
+for q = 1:Q
+    
+    if objectVars{q, 1} == "bar"
+        [Bpre{q}, Cpre{q}, N(q), h(q), s0(q)] = createBar(objectVars{q, 2}, fs);
+    elseif objectVars{q, 1} == "string"
+        [Bpre{q}, Cpre{q}, N(q), h(q), s0(q)] = createString(objectVars{q, 2}, fs);
+    elseif objectVars{q, 1} == "plate"
+        numPlates = numPlates + 1;
+        [Bpre{q}, Cpre{q}, N(q), h(q), s0(q), Nx(numPlates), Ny(numPlates)] = createPlate(objectVars{q, 2}, fs);
+    end
+    matIdx(q) = Ntot + 1;
+    Ntot = Ntot + N(q);
+end
+
+
+%% Create full matrices
+B = zeros(Ntot);
+C = zeros(Ntot);
+
+for q = 1:Q
+    B(matIdx(q):matIdx(q)+N(q) - 1, matIdx(q):matIdx(q)+N(q) - 1) = Bpre{q};
+    C(matIdx(q):matIdx(q)+N(q) - 1, matIdx(q):matIdx(q)+N(q) - 1) = Cpre{q};
+end
+
 
 %% Initialise state vectors
-u = zeros(NA + NB, 1);
-% u(ceil(NA * P - cosWidth / 2 : ceil(NA * P + cosWidth / 2))) = raisedCos;
-% u(ceil(NA + NA * P - cosWidth / 2 : NA + ceil(NA * P + cosWidth / 2))) = raisedCos;
+u = zeros(Ntot, 1);
 uPrev = u;
-uNext = zeros(NA + NB, 1);
+uNext = u;
 
+%% Length of the sound
 lengthSound = fs*5;
 
-
 %% Exciter
-Fmax = 50000000000;
+Fmax = 500;
 exciterLength = floor(1e-3 * fs);
-q = 2; 
-Fe = Fmax/2*(1-cos(q*pi*(0:exciterLength)/exciterLength));
+v = 2; 
+Fe = Fmax/2*(1-cos(v*pi*(0:exciterLength)/exciterLength));
 exciter = [Fe, zeros(1,lengthSound-exciterLength - 1)];
 
+OTE = 2; % Object To Excite
+exciterPos = 1/2;
 rcW = 3;
-Ee = zeros(NA + NB, 1);
-Ee(floor(NA/4):floor(NA/4)+rcW) = 1-cos(q*pi*(0:rcW)/rcW);
-K = k^2 * Ee / (1 + s0A*k);
 
+if objectVars{OTE,1} == "plate"
+%     Ee = zeros(Ntot, 1);
+%     Ee (matIdx(OTE) + exciterPos*N(OTE)-floor(rcW/2):matIdx(OTE) + exciterPos*N(OTE)+ceil(rcW/2)) = 1-cos(v*pi*(0:rcW)/rcW);
+%     K = k^2 * Ee / (1 + s0(OTE)*k);
+else
+    Ee = zeros(Ntot, 1);
+    Ee (matIdx(OTE) + exciterPos*N(OTE)-floor(rcW/2):matIdx(OTE) + exciterPos*N(OTE)+ceil(rcW/2)) = 1-cos(v*pi*(0:rcW)/rcW);
+    K = k^2 * Ee / (1 + s0(OTE)*k);
+end
 %% Connections
-Q = 1; % amount of connections
-EcA = zeros(NA, 1);
-connectionWidth = 5;
 
-% EcA(floor(NA/5):floor(NA/5)+connectionWidth) = (1-cos(2*pi*(0:connectionWidth)/connectionWidth));
-EcA(10) = 1;
-jA = (k^2 * EcA) / (1 + s0A * k);
-connA = find(EcA > 0);
+% 1st, 2nd object,
+% location of connection at 1st, 2nd object
+% width of connection at 1st, 2nd object
+conn = [1, 2, 0.5, 0.3, 5, 5];
+%         1, 2, 0.9, 0.6, 1, 1];
+%         1, 2, 0.9, 0.5, 1, 1];
+    
+Qc = length(conn(:,1)); % amount of connections
+J = zeros(Ntot, Qc);
+massRatio = 1; 
 
-EcB = zeros(NB, 1);
-EcB(5) = 1;
-massratio = 1; 
-% EcB(floor(NA/5):floor(NA/5)+connectionWidth) = (1-cos(2*pi*(0:connectionWidth)/connectionWidth));
-jB = -(k^2 * EcB * massratio) / (1 + s0B * k);
-connB = find(EcB > 0);
-J = [jA; jB];
+L = zeros(Qc, Ntot);
+
+for qc = 1:Qc
+    curConn = conn(qc,:);
+    if curConn(3) * N(curConn(1)) + floor(curConn(5)/2) > N(curConn(1)) || curConn(3) * N(curConn(1)) - floor(curConn(5)/2) < 1
+        error(['Connection ', num2str(qc), ' at component ', num2str(curConn(1)), ' is out of bounds. Change excitation position or width.'])  
+    end
+    
+    if curConn(4) * N(curConn(2)) + floor(curConn(6)/2) > N(curConn(2)) || curConn(4) * N(curConn(2)) - floor(curConn(6)/2) < 1
+        error(['Connection ', num2str(qc), ' at component ', num2str(curConn(1)), ' is out of bounds. Change excitation position or width.'])
+    end
+
+    [J(:,qc), L(qc,:)] = createConnection(curConn, [N(curConn(1)) N(curConn(2)) Ntot], k, [h(1) h(2)], massRatio, [s0(curConn(1)) s0 curConn(2)], [matIdx(curConn(1)) matIdx(curConn(2))]);
+
+end
 
 %% Spring coefficients 
+sx = zeros(Qc, 1);
+w0 = zeros(Qc, 1);
+w1 = zeros(Qc, 1);
 
-sx = 0; 
-w0 = 10000; 
-w1 = 40000; 
+sx(1) = 0;
+w0(1) = 1; 
+w1(1) = 1; 
 
+% sx(2) = 0;
+% w0(2) = 1; 
+% w1(2) = 1; 
+% 
+% sx(3) = 3;
+% w0(3) = 1000; 
+% w1(3) = 10; 
 
-
-
-%% Matrix representation
-NA = NA - 4;
-NB = NB - 4;
-
-DxxxxA = (sparse(3:NA, 1:NA-2, ones(1, NA-2), NA, NA) + ...
-        sparse(2:NA, 1:NA-1, -4 * ones(1, NA-1), NA, NA) + ...
-        sparse(1:NA, 1:NA, 6 * ones(1, NA), NA, NA) + ...
-        sparse(1:NA-1, 2:NA, -4 * ones(1, NA-1), NA, NA) + ...
-        sparse(1:NA-2, 3:NA, ones(1, NA-2), NA, NA));
-DxxA =   (sparse(2:NA, 1:NA-1, ones(1, NA-1), NA, NA) + ...
-        sparse(1:NA, 1:NA, -2 * ones(1, NA), NA, NA) + ...
-        sparse(1:NA-1, 2:NA, ones(1, NA-1), NA, NA));
-    
-DxxxxB = (sparse(3:NB, 1:NB-2, ones(1, NB-2), NB, NB) + ...
-        sparse(2:NB, 1:NB-1, -4 * ones(1, NB-1), NB, NB) + ...
-        sparse(1:NB, 1:NB, 6 * ones(1, NB), NB, NB) + ...
-        sparse(1:NB-1, 2:NB, -4 * ones(1, NB-1), NB, NB) + ...
-        sparse(1:NB-2, 3:NB, ones(1, NB-2), NB, NB));
-DxxB =   (sparse(2:NB, 1:NB-1, ones(1, NB-1), NB, NB) + ...
-        sparse(1:NB, 1:NB, -2 * ones(1, NB), NB, NB) + ...
-        sparse(1:NB-1, 2:NB, ones(1, NB-1), NB, NB));
- 
-NA = NA + 4;
-NB = NB + 4;
-
-DxxxxA2 = zeros(NA);
-DxxxxA2(3:end-2, 3:end-2) = DxxxxA;
-DxxxxA = DxxxxA2;
-
-DxxA2 = zeros(NA);
-DxxA2(3:end-2, 3:end-2) = DxxA;
-DxxA = DxxA2;
-
-DxxxxB2 = zeros(NB);
-DxxxxB2(3:end-2, 3:end-2) = DxxxxB;
-DxxxxB = DxxxxB2;
-
-DxxB2 = zeros(NB);
-DxxB2(3:end-2, 3:end-2) = DxxB;
-DxxB = DxxB2;
-
-BA = (2 * eye(NA) - kappaA^2 * k^2 * DxxxxA / hA^4 + 2 * s1A * k * DxxA / hA^2) / (1 + s0A * k);
-CA = -((1 - s0A * k) * eye(NA) + 2 * s1A * k * DxxA / hA^2) / (1 + s0A * k);
-
-BB = (2 * eye(NB) - kappaB^2 * k^2 * DxxxxB / hB^4 + 2 * s1B * k * DxxB / hB^2) / (1 + s0B * k);
-CB = -((1 - s0B * k) * eye(NB) + 2 * s1B * k * DxxB / hB^2) / (1 + s0B * k);
-
-zeroMat = zeros(NA, NB);
-
-
-B = [BA zeroMat; zeroMat' BB]; 
-C = [CA zeroMat; zeroMat' CB]; 
 
 out = zeros(lengthSound, 1);
 out2 = zeros(lengthSound, 1);
 drawBar = false;
 
-etaRPrev = 0;
-L = [hA * EcA', -hB * EcB']; % Add rows for more connections 
+etaRPrev = zeros(Qc, 1);
 
-if length(connA) == 1
-    scatA = true;
-else
-    scatA = false;
-end 
-
-if length(connB) == 1
-    scatB = true;
-else
-    scatB = false;
-end 
-
+% Plotstuff
+% if length(connA) == 1
+%     scatA = true;
+% else
+%     scatA = false;
+% end 
+% 
+% if length(connB) == 1
+%     scatB = true;
+% else
+%     scatB = false;
+% end 
+% plateMat = zeros(Ny-1, Nx-1);
 for n = 1 : lengthSound
     
     % calculate relative displacement
     etaR = L*u;
     
     % update r and p
-    rn = (2*sx/k - w0^2 - w1^4*(etaR)^2)/(2*sx/k + w0^2 + w1^4*(etaR)^2);
-    pn = -2/(2*sx/k + w0^2 + w1^4*(etaR)^2);
+    rn = (2*sx/k - w0.^2 - w1.^4.*(etaR).^2)./(2*sx/k + w0.^2 + w1.^4.*(etaR).^2);
+    pn = -2./(2*sx/k + w0.^2 + w1.^4.*(etaR).^2);
     
-    Rn = eye(Q)*rn; 
-    Pn = eye(Q)*pn; 
+    Rn = eye(Qc).*rn; 
+    Pn = eye(Qc).*pn; 
     
     % temporary value for the next u (without the spring forces)
     uTemp = B * u + C * uPrev + K*exciter(n);
@@ -170,39 +170,30 @@ for n = 1 : lengthSound
     bn = L * uTemp; 
     an = Rn * etaRPrev; 
     
-    Fc = (an - bn)/(L*J-Pn);
+    Fc = (L*J-Pn)\(an - bn);
  
-    uNext = uTemp + J * Fc; 
+    uNext = uTemp + J * Fc;
     
-    out(n) = u(round(NA/5));
-    out2(n) = u(round(NA + NB/5));
+    out(n) = u(round(N(1)/5));
+    out2(n) = u(round(Ntot - 5));
     if mod(n,1) == 0 && drawBar == true
-%         subplot(2,1,1)
-        clf
-        plot(u(1:NA) + 500)
-        hold on;
-        if scatA
-            scatter(connA, u(connA) + 500, '.')
-        else
-            plot(connA, u(connA) + 500, 'LineWidth', 1)
-        end
-        ylim([-2000 2000])
-%         subplot(2,1,2)
-        
-        plot(u(NA+1:end) - 500);
-        hold on;
-        if scatB
-            scatter(connB, u(connB + NA) - 500, '.')
-        else
-            plot(connB, u(NA + 1 + connB) - 500, 'LineWidth', 1)
-        end
-%         plot (J)
-        ylim([-2000 2000])
+        subplot(2,1,1)
+        plot(u(matIdx(1):matIdx(1)+N(1)-1))
+%         u = ones(length(u),1);
+        subplot(2,1,2)
+        plot(u(matIdx(2):matIdx(2)+N(2)-1))
+%         for it = 1:Nx-1
+%             plateMat(:,it) = u(matIdx(3) + (it - 1) * (Ny-1): matIdx(3) + it * (Ny-1) - 1);
+%         end
+%         surf(plateMat, 'FaceAlpha', 0.5);
+%         zlim([-0.5e50 0.5e50])
         drawnow;
     end
     uPrev = u;
     u = uNext;
     etaRPrev = etaR;
 end
-
+subplot(2,1,1)
+plot(out)
+subplot(2,1,2)
 plot(out2)
