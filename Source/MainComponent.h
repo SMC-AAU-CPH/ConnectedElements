@@ -8,38 +8,56 @@
 
 #pragma once
 
-#include "../SenselWrapper/SenselWrapper.h"
 #include "../JuceLibraryCode/JuceHeader.h"
-
+#include "ViolinString.h"
+#include "../SenselWrapper/SenselWrapper.h"
 //==============================================================================
 /*
     This component lives inside our window, and this is where you should put all
     your controls and content.
 */
-class MainComponent   : public AudioAppComponent, public HighResolutionTimer
+class MainComponent : public AudioAppComponent,
+                      public HighResolutionTimer
 {
 public:
-    //==============================================================================
-    MainComponent();
-    ~MainComponent();
+  //==============================================================================
+  MainComponent();
+  ~MainComponent();
 
-    //==============================================================================
-    void prepareToPlay (int samplesPerBlockExpected, double sampleRate) override;
-    void getNextAudioBlock (const AudioSourceChannelInfo& bufferToFill) override;
-    void releaseResources() override;
-    
+  //==============================================================================
+  void prepareToPlay(int samplesPerBlockExpected, double sampleRate) override;
+  void getNextAudioBlock(const AudioSourceChannelInfo &bufferToFill) override;
+  void releaseResources() override;
 
-    //==============================================================================
-    void paint (Graphics& g) override;
-    void resized() override;
-    void hiResTimerCallback() override;
+  //==============================================================================
+  void paint(Graphics &g) override;
+  void resized() override;
+
+  void mouseDown(const MouseEvent &e) override;
+  void mouseUp(const MouseEvent &e) override;
+  void mouseDrag(const MouseEvent &e) override;
+  void hiResTimerCallback() override;
     
 private:
-    //==============================================================================
-    // Your private member variables go here...
-    const unsigned int amountOfSensels = 2; 
-    OwnedArray<Sensel> sensels;
-    
-    //static constexpr char* CONTACT_STATE_STRING[] = { "CONTACT_INVALID","CONTACT_START", "CONTACT_MOVE", "CONTACT_END" };
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainComponent)
+  //==============================================================================
+  double fs;
+  double bufferSize;
+
+  float minOut;
+  float maxOut;
+  OwnedArray<ViolinString> violinStrings;
+
+  OwnedArray<Sensel> sensels;
+  static const unsigned int amountOfSensels = 2;
+
+  static const unsigned int numStrings = 2;
+
+  array<float, amountOfSensels> force = {0.0};
+  array<float, amountOfSensels> xpos = {0.0};
+  array<float, amountOfSensels> ypos = {0.0};
+  array<float, amountOfSensels> Vb = {0.0};
+  array<float, amountOfSensels> Fb = {0.0};
+  array<bool, amountOfSensels> state = {0};
+
+  JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MainComponent)
 };
