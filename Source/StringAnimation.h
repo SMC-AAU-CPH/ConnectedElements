@@ -58,9 +58,9 @@ public:
     {
      
         //auto h = height;
-
+        auto stringYstart = height/2;
         Path stringPath;
-        stringPath.startNewSubPath (0, height/2);
+        stringPath.startNewSubPath (0, stringYstart);
 
         auto spacing = double(length) / double(states.size());
         auto x = spacing * 800 + 20;
