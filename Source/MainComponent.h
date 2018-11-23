@@ -55,7 +55,7 @@ private:
     
     OwnedArray<Sensel> sensels;
     
-    unsigned long stateUpdateCounter = 0; 
+    unsigned long stateUpdateCounter = 0;
     
     static const unsigned int amountOfSensels = 2;
     
@@ -67,7 +67,5 @@ private:
     array<float, amountOfSensels> Vb = {0.0};
     array<float, amountOfSensels> Fb = {0.0};
     array<bool, amountOfSensels> state = {0};
-    
-    
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MainComponent)
 };

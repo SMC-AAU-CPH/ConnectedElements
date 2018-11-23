@@ -40,9 +40,9 @@ void MainComponent::prepareToPlay(int samplesPerBlockExpected, double sampleRate
     {
         violinStrings.add(new ViolinString(frequencyInHz[i], fs));
         
-        int lengthInPixels = (int)(760 / (frequencyInHz[i] / 110.0));
+        int lengthInPixels = (int)(760) ;/// (frequencyInHz[i] / 110.0));
         auto c = Colour::fromHSV(Random().nextFloat(), 0.6f, 0.9f, 1.0f);
-        stringLines.add(new StringAnimation(lengthInPixels, c));
+        stringLines.add(new StringAnimation(lengthInPixels, c, getHeight()/2.0));
         addAndMakeVisible(stringLines[i]);
     }
 
@@ -53,7 +53,7 @@ void MainComponent::prepareToPlay(int samplesPerBlockExpected, double sampleRate
     Connection conn(violinStrings[0], violinStrings[1],
                     0.2, 0.4,
                     1, 1,
-                    1, 1, 1000, fs);
+                    1, 1, 1, fs);
     conn1 = conn;
     resized();
 }
@@ -94,13 +94,14 @@ void MainComponent::hiResTimerCallback()
         }
     }
     
-    if (stateUpdateCounter % 5 == 0)
+    if (stateUpdateCounter % 10 == 0)
     {
         for (int s = 0; s < numStrings; s++)
         {
-            stringLines[s]->updateStringStates(violinStrings[s]->getState());
+            stringLines[s]->updateStringStates(violinStrings[s]->getState(), xpos[s], ypos[s], Fb[s]);
         }
-        
+        //if (repaintFlag)
+        //    repaint();
     }
     stateUpdateCounter++;
         
@@ -178,7 +179,7 @@ void MainComponent::paint(Graphics &g)
 void MainComponent::resized()
 {
     auto xPos = 20;
-    auto yPos = getHeight() / 2.0 / 2.0;
+    auto yPos = 0;
     auto yDistance = getHeight() / 2.0;
     
     for (auto stringLine : stringLines)
@@ -205,7 +206,6 @@ void MainComponent::mouseDrag(const MouseEvent &e)
 {
     double maxVb = 0.2;
 
-    
     double bp = e.x / static_cast<double>(getWidth());
     
     if (e.y < getHeight() / 2.0)

@@ -18,8 +18,8 @@ class StringAnimation   : public Component,
                           private Timer
 {
 public:
-    StringAnimation (int lengthInPixels, Colour stringColour)
-        : length (lengthInPixels), colour (stringColour)
+    StringAnimation (int lengthInPixels, Colour stringColour, int height)
+        : length (lengthInPixels), colour (stringColour), height(height)
     {
         // ignore mouse-clicks so that our parent can get them instead.
         setInterceptsMouseClicks (false, false);
@@ -42,6 +42,9 @@ public:
     {
         g.setColour (colour);
         g.strokePath (generateStringPathAdvanced(), PathStrokeType (2.0f));
+        g.setColour (Colours::yellow);
+        g.setOpacity (0.5);
+        g.fillEllipse (floor(bowingPointX * getWidth()), floor(bowingPointY * height) - height / 2.0, 5 + floor(force / 2.0), height);
     }
 
     Path generateStringPathSimple() const
@@ -58,7 +61,7 @@ public:
     {
      
         //auto h = height;
-        auto stringBounds = 50;//height/2;
+        auto stringBounds = height/2.0;
         Path stringPath;
         stringPath.startNewSubPath (0, stringBounds);
 
@@ -79,9 +82,12 @@ public:
         return stringPath;
     }
     
-    void updateStringStates(vector<double> &newStates)
+    void updateStringStates(vector<double> &newStates, double bpX, double bpY, double f)
     {
         states = newStates;
+        bowingPointX = bpX;
+        bowingPointY = bpY;
+        force = f;
     }
     //==============================================================================
     void timerCallback() override
@@ -116,10 +122,14 @@ private:
 
     vector<double> states;
 
-    int height = 200;
+    int height;
     float amplitude = 0.0f;
     const float maxAmplitude = 12.0f;
     float phase = 0.0f;
-
+    
+    double bowingPointX;
+    double bowingPointY;
+    double force;
+    
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (StringAnimation)
 };
