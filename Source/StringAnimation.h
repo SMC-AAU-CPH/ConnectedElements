@@ -47,8 +47,19 @@ public:
         g.fillEllipse (floor(bowingPointX * getWidth()), floor(bowingPointY * height) - height / 2.0, 5 + floor(force / 2.0), height);
     }
 
-    Path generateStringPathSimple() const
+/*    Path generateStringPathSimple() const
     {
+        // this determines the decay of the visible string vibration.
+        amplitude *= 0.99f;
+        // this determines the visible vibration frequency.
+        // just an arbitrary number chosen to look OK:
+        auto phaseStep = 400.0f / length;
+        
+        phase += phaseStep;
+        
+        if (phase >= MathConstants<float>::twoPi)
+            phase -= MathConstants<float>::twoPi;
+        
         auto y = height / 2.0f;
 
         Path stringPath;
@@ -56,35 +67,34 @@ public:
         stringPath.quadraticTo (length / 2.0f, y + (std::sin (phase) * amplitude), (float) length, y);
         return stringPath;
     }
-
+*/
     Path generateStringPathAdvanced() const
     {
-     
-        //auto h = height;
         auto stringBounds = height/2.0;
         Path stringPath;
         stringPath.startNewSubPath (0, stringBounds);
 
         auto spacing = double(getWidth()) / double(states.size() + 1);
-//        auto spacing = 3;
         auto x = spacing;
         
         for (int y = 0; y < states.size(); y++)
         {
-            
             const float newY = states[y] * 50000 + stringBounds;
             stringPath.lineTo(x, newY);
             x += spacing;
         }
         stringPath.lineTo(length, stringBounds);
-        //stringPath.closeSubPath();
-        //stringPath.quadraticTo (length / 2.0f, y + (std::sin (phase) * amplitude), (float) length, y);
+
         return stringPath;
     }
     
     void updateStringStates(vector<double> &newStates, double bpX, double bpY, double f)
     {
-        states = newStates;
+        if(isnan(newStates[5]))
+            fill(states.begin(), states.end(), 0.0);
+        else
+            states = newStates;
+        
         bowingPointX = bpX;
         bowingPointY = bpY;
         force = f;
@@ -92,27 +102,7 @@ public:
     //==============================================================================
     void timerCallback() override
     {
-        updateAmplitude();
-        updatePhase();
         repaint();
-    }
-
-    void updateAmplitude()
-    {
-        // this determines the decay of the visible string vibration.
-        amplitude *= 0.99f;
-    }
-
-    void updatePhase()
-    {
-        // this determines the visible vibration frequency.
-        // just an arbitrary number chosen to look OK:
-        auto phaseStep = 400.0f / length;
-
-        phase += phaseStep;
-
-        if (phase >= MathConstants<float>::twoPi)
-            phase -= MathConstants<float>::twoPi;
     }
 
 private:

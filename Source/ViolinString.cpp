@@ -39,6 +39,8 @@ ViolinString::ViolinString (double freq, double fs) : fs (fs), freq (freq)
     uPrev.resize (N);
     uNext.resize (N);
     
+    reset();
+    
     // Courant numbers
     lambdaSq = pow (gamma * k / h, 2);
     muSq = pow (k * kappa / (h * h), 2);
@@ -59,6 +61,13 @@ ViolinString::ViolinString (double freq, double fs) : fs (fs), freq (freq)
     
     _bp.store(floor (N / 4.0));
     
+}
+
+void ViolinString::reset()
+{
+    fill(u.begin(), u.end(), 0.0);
+    fill(uPrev.begin(), uPrev.end(), 0.0);
+    fill(uNext.begin(), uNext.end(), 0.0);
 }
 
 void ViolinString::setFrequency (double freq)
@@ -108,6 +117,12 @@ void ViolinString::resized()
 
 void ViolinString::bow()
 {
+    if(isnan(u[9]))
+    {
+        reset();
+        return;
+    }
+    
     double Fb = _Fb.load();
     int bp = _bp.load();
     bool isBowing = _isBowing.load();
