@@ -52,7 +52,7 @@ public:
     void updateUVectors();
     
 private:
-    double fs, freq, gamma, k, s0, s1, B, kappa, h, N, lambdaSq, muSq, kOh, gOh, a, BM, pickup, tol, q, qPrev, b, eps, fp, ff;
+    double fs, freq, gamma, k, s0, s1, B, kappa, h, N, lambdaSq, muSq, kOh, gOh, a, BM, tol, q, qPrev, b, eps, fp, ff;
     atomic<double> _Vb, _Fb, _bp;
     atomic<bool> _isBowing{false};
 

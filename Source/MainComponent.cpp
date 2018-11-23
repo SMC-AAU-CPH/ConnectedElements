@@ -49,7 +49,7 @@ void MainComponent::prepareToPlay(int samplesPerBlockExpected, double sampleRate
         sensels.add(new Sensel(i)); // chooses the device in the sensel device list
     
     Connection conn(violinStrings[0], violinStrings[1],
-                    0.3, 0.3,
+                    0.2, 0.4,
                     1, 1,
                     1, 100, 100, fs);
     conn1 = conn;
@@ -115,13 +115,10 @@ void MainComponent::getNextAudioBlock(const AudioSourceChannelInfo &bufferToFill
                 {
                     double JFc = conn1.calculateJFc()[j];
                     violinStrings[j]->addJFc(JFc, conn1.getCPIdx()[j]);
+                    violinStrings[j]->updateUVectors();
+                    output = output + violinStrings[j]->getOutput(0.25) * 600;
                 }
                 
-                for (int j = 0; j < numStrings; ++j)
-                {
-                    violinStrings[j]->updateUVectors();
-                }
-                output = output + violinStrings[1]->getOutput(0.25) * 600;
 
                 if (output > maxOut)
                 {
@@ -160,9 +157,9 @@ void MainComponent::paint(Graphics &g)
     for (int i = 0; i < numStrings; ++i)
     {
         g.setColour(Colour::fromRGB(50 + i * 200.0 / static_cast<double>(numStrings), 0, 0));
-        g.fillRect(round(i * getWidth() / static_cast<double>(numStrings)), 0, round(getWidth() / static_cast<double>(numStrings)), getHeight());
+        g.fillRect(0, 0, getWidth(), getHeight()/2.0);
         g.setColour(Colours::grey);
-        g.drawRect(round(i * getWidth() / static_cast<double>(numStrings)), 0, round(getWidth() / static_cast<double>(numStrings)), getHeight(), 2);
+        g.drawRect(0, getHeight() / 2.0, getWidth(), getHeight() / 2.0);
     }
     // You can add your drawing code here!
 }
@@ -176,7 +173,7 @@ void MainComponent::resized()
 
 void MainComponent::mouseDown(const MouseEvent &e)
 {
-    if (e.x < getWidth() / 2.0)
+    if (e.y < getHeight() / 2.0)
     {
         violinStrings[0]->setBow(true);
     }
@@ -188,14 +185,22 @@ void MainComponent::mouseDown(const MouseEvent &e)
 
 void MainComponent::mouseDrag(const MouseEvent &e)
 {
-        double maxVb = 0.2;
-        double Vb = (e.y - getHeight() * 0.5) / (static_cast<double>(getHeight() * 0.5)) * maxVb;
+    double maxVb = 0.2;
+    double Vb;
+    double bp;
+    if (e.y < getHeight() / 2.0)
+    {
+        Vb = (e.y - getHeight() * 0.25) / (static_cast<double>(getHeight() * 0.25)) * maxVb;
+        bp = e.x / static_cast<double>(getWidth());
+        violinStrings[0]->setVb(Vb);
+        violinStrings[0]->setBowPos(bp);
     //    double Fb = e.x / (static_cast<double>(getWidth())) * 100;
-        for (int j = 0; j < numStrings; ++j)
-        {
-            violinStrings[j]->setVb(Vb);
-//            violinStrings[j]->setFb(Fb);
-        }
+    } else {
+        Vb = (e.y - getHeight() * 0.75) / (static_cast<double>(getHeight() * 0.25)) * maxVb;
+        bp = e.x / static_cast<double>(getWidth());
+        violinStrings[1]->setVb(Vb);
+        violinStrings[1]->setBowPos(bp);
+    }
 }
 
 void MainComponent::mouseUp(const MouseEvent &e)

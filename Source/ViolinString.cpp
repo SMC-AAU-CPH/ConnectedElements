@@ -52,7 +52,6 @@ ViolinString::ViolinString (double freq, double fs) : fs (fs), freq (freq)
     
     _Vb.store(0.2);                               // Bowing speed
     _Fb.store(20);                                // Bowing force / total mass of bow
-    pickup = floor(3 * N / 4);                    // Pickup position
     
     // Initialise variables for Newton Raphson
     tol = 1e-4;
