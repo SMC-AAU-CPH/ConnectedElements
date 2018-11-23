@@ -24,10 +24,11 @@ public:
     void paint(Graphics &) override;
     void resized() override;
 
-    double bow();
-
+    void bow();
+    void addJFc (double JFc, int index);
+    
     void newtonRaphson();
-    double getOutput();
+    double getOutput (double ratio);
 
     void setFrequency(double freq);
     void setFingerPoint(double val) { fp = val; };
@@ -41,14 +42,17 @@ public:
     
     
     double getNumPoints() { return N; };
-    
     double getPrevStateAt (int idx) { return uPrev[idx]; };
     double getStateAt (int idx) { return u[idx]; };
+    double getNextStateAt (int idx) { return uNext[idx]; };
     double getGridSpacing() { return h; };
     double getS0() { return s0; };
     
+    
+    void updateUVectors();
+    
 private:
-    double fs, freq, gamma, k, s0, s1, B, kappa, h, N, lambdaSq, muSq, kOh, gOh, a, BM, pickup, tol, q, qPrev, b, eps, fp, ff;
+    double fs, freq, gamma, k, s0, s1, B, kappa, h, N, lambdaSq, muSq, kOh, gOh, a, BM, tol, q, qPrev, b, eps, fp, ff;
     atomic<double> _Vb, _Fb, _bp;
     atomic<bool> _isBowing{false};
 

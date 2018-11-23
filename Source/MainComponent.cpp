@@ -34,23 +34,25 @@ void MainComponent::prepareToPlay(int samplesPerBlockExpected, double sampleRate
     fs = sampleRate;
     bufferSize = samplesPerBlockExpected;
 
+    double frequencyInHz[] = {110.0, 110.0 * pow(2, 7.0 / 12.0)};
+
     for (int i = 0; i < numStrings; ++i)
     {
-        double frequencyInHz = 110.0 * (i + 1);
-        violinStrings.add(new ViolinString(frequencyInHz, fs));
+        violinStrings.add(new ViolinString(frequencyInHz[i], fs));
         
-        int lengthInPixels = (int)(760 / (frequencyInHz / 110.0));
+        int lengthInPixels = (int)(760 / (frequencyInHz[i] / 110.0));
         auto c = Colour::fromHSV(Random().nextFloat(), 0.6f, 0.9f, 1.0f);
         stringLines.add(new StringAnimation(lengthInPixels, c));
     }
+
 
     for (int i = 0; i < amountOfSensels; i++)
         sensels.add(new Sensel(i)); // chooses the device in the sensel device list
     
     Connection conn(violinStrings[0], violinStrings[1],
-                    0.3, 0.3,
+                    0.2, 0.4,
                     1, 1,
-                    1, 1000, 1000);
+                    1, 100, 1000, fs);
     conn1 = conn;
 }
 
@@ -93,7 +95,6 @@ void MainComponent::hiResTimerCallback()
 
 void MainComponent::getNextAudioBlock(const AudioSourceChannelInfo &bufferToFill)
 {
-    double test = conn1.calculateJFc (1.0 / fs);
     for (int channel = 0; channel < bufferToFill.buffer->getNumChannels(); ++channel)
     {
         float *const channelData = bufferToFill.buffer->getWritePointer(channel, bufferToFill.startSample);
@@ -104,11 +105,20 @@ void MainComponent::getNextAudioBlock(const AudioSourceChannelInfo &bufferToFill
             {
 
                 float output = 0.0;
+                conn1.calculateCoefs();
                 for (int j = 0; j < numStrings; ++j)
                 {
-                    float stringSound = violinStrings[j]->bow() * 600;
-                    output = output + stringSound;
+                    violinStrings[j]->bow();
                 }
+                
+                for (int j = 0; j < numStrings; ++j)
+                {
+                    double JFc = conn1.calculateJFc()[j];
+                    violinStrings[j]->addJFc(JFc, conn1.getCPIdx()[j]);
+                    violinStrings[j]->updateUVectors();
+                    output = output + violinStrings[j]->getOutput(0.25) * 600;
+                }
+                
 
                 if (output > maxOut)
                 {
@@ -158,7 +168,7 @@ void MainComponent::resized(){}
 
 void MainComponent::mouseDown(const MouseEvent &e)
 {
-    if (e.x < getWidth() / 2.0)
+    if (e.y < getHeight() / 2.0)
     {
         violinStrings[0]->setBow(true);
     }
@@ -171,11 +181,19 @@ void MainComponent::mouseDown(const MouseEvent &e)
 void MainComponent::mouseDrag(const MouseEvent &e)
 {
     double maxVb = 0.2;
-    double Vb = (e.y - getHeight() * 0.5) / (static_cast<double>(getHeight() * 0.5)) * maxVb;
 
-    for (auto string : violinStrings)    
-        string->setVb(Vb);
-
+    double Vb = (e.y - getHeight() * 0.75) / (static_cast<double>(getHeight() * 0.25)) * maxVb;
+    double bp = e.x / static_cast<double>(getWidth());
+    
+    if (e.y < getHeight() / 2.0)
+    {
+        violinStrings[0]->setVb(Vb);
+        violinStrings[0]->setBowPos(bp);
+    } else {
+        
+        violinStrings[1]->setVb(Vb);
+        violinStrings[1]->setBowPos(bp);
+    }
 }
 
 void MainComponent::mouseUp(const MouseEvent &e)

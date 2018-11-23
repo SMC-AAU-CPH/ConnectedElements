@@ -21,16 +21,25 @@ public:
     Connection(ViolinString* object1, ViolinString* object2,
                double cp1, double cp2,
                double width1, double width2,
-               double sx, double w0, double w1);
-    double calculateJFc(double k);
+               double sx, double w0, double w1, double k);
+    vector<double> calculateJFc();
+    void calculateCoefs();
+    
+    vector<int> getCPIdx() { return cpIdx; };
+
+    
 private:
     ViolinString* object1;
     ViolinString* object2;
-    int cpIdx1, cpIdx2;
+    vector<int> cpIdx;
     double width1, width2;  // Width of the connection
     double sx, w0, w1; // Spring damping, linear spring constant, non-linear spring constant
     
     double etaRPrev = 0;
     double massRatio = 1;
-    double Fc;
+    double hA, hB, s0A, s0B, Fc;
+    double etaR, rn, pn, an, bn, jA, jB;
+    vector<double> JFc;
+    
+    double k;
 };

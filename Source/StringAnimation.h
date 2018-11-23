@@ -68,11 +68,11 @@ public:
         for (int y = 0; y < states.size(); y++)
         {
             
-            const float newY = height/2;//states[y];
+            const float newY = Random().nextFloat()*200-100;//height/2;//states[y];
             stringPath.lineTo(x, newY);
             x += spacing;
         }
-        //stringPath.lineTo(length, height/2);
+        stringPath.lineTo(length, height/2);
         stringPath.closeSubPath();
         //stringPath.quadraticTo (length / 2.0f, y + (std::sin (phase) * amplitude), (float) length, y);
         return stringPath;
