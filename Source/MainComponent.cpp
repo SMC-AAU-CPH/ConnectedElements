@@ -172,14 +172,14 @@ void MainComponent::mouseDown(const MouseEvent &e)
 
 void MainComponent::mouseDrag(const MouseEvent &e)
 {
-    //    double maxVb = 0.2;
-    //    double Vb = (e.y - getHeight() * 0.5) / (static_cast<double>(getHeight() * 0.5)) * maxVb;
+        double maxVb = 0.2;
+        double Vb = (e.y - getHeight() * 0.5) / (static_cast<double>(getHeight() * 0.5)) * maxVb;
     //    double Fb = e.x / (static_cast<double>(getWidth())) * 100;
-    //    for (int j = 0; j < numStrings; ++j)
-    //    {
-    //        violinStrings[j]->setVb(Vb);
-    //        violinStrings[j]->setFb(Fb);
-    //    }
+        for (int j = 0; j < numStrings; ++j)
+        {
+            violinStrings[j]->setVb(Vb);
+//            violinStrings[j]->setFb(Fb);
+        }
 }
 
 void MainComponent::mouseUp(const MouseEvent &e)
