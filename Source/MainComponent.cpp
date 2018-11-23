@@ -53,7 +53,7 @@ void MainComponent::prepareToPlay(int samplesPerBlockExpected, double sampleRate
     Connection conn(violinStrings[0], violinStrings[1],
                     0.2, 0.4,
                     1, 1,
-                    1, 100, 100, fs);
+                    1, 1, 1000, fs);
     conn1 = conn;
     resized();
 }

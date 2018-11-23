@@ -58,7 +58,7 @@ public:
     {
      
         //auto h = height;
-        auto stringBounds = 0;//height/2;
+        auto stringBounds = 50;//height/2;
         Path stringPath;
         stringPath.startNewSubPath (0, stringBounds);
 
@@ -69,7 +69,7 @@ public:
         for (int y = 0; y < states.size(); y++)
         {
             
-            const float newY = states[y] * 50000;
+            const float newY = states[y] * 50000 + stringBounds;
             stringPath.lineTo(x, newY);
             x += spacing;
         }
