@@ -29,6 +29,8 @@
       <FILE id="ZKt6JY" name="SenselWrapper.h" compile="0" resource="0" file="SenselWrapper/SenselWrapper.h"/>
     </GROUP>
     <GROUP id="{C397437D-6387-2E58-15AE-F03A3C683002}" name="Source">
+      <FILE id="Usn3NT" name="StringAnimation.h" compile="0" resource="0"
+            file="Source/StringAnimation.h"/>
       <FILE id="NqzLol" name="Connection.cpp" compile="1" resource="0" file="Source/Connection.cpp"/>
       <FILE id="D0EyA8" name="Connection.h" compile="0" resource="0" file="Source/Connection.h"/>
       <FILE id="hSG1t0" name="ViolinString.cpp" compile="1" resource="0"

@@ -11,6 +11,7 @@
 #include "../JuceLibraryCode/JuceHeader.h"
 #include "ViolinString.h"
 #include "../SenselWrapper/SenselWrapper.h"
+#include "StringAnimation.h"
 //==============================================================================
 /*
     This component lives inside our window, and this is where you should put all
@@ -45,7 +46,9 @@ private:
 
   float minOut;
   float maxOut;
+  
   OwnedArray<ViolinString> violinStrings;
+  OwnedArray<StringComponent> stringLines;
 
   OwnedArray<Sensel> sensels;
   static const unsigned int amountOfSensels = 2;

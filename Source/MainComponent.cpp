@@ -44,7 +44,12 @@ void MainComponent::prepareToPlay(int samplesPerBlockExpected, double sampleRate
 
     for (int i = 0; i < numStrings; ++i)
     {
-        violinStrings.add(new ViolinString(110.0 * (i + 1), fs));
+        double frequencyInHz = 110.0 * (i + 1);
+        violinStrings.add(new ViolinString(frequencyInHz, fs));
+        
+        int lengthInPixels = (int)(760 / (frequencyInHz / 110.0));
+        auto c = Colour::fromHSV(Random().nextFloat(), 0.6f, 0.9f, 1.0f);
+        stringLines.add(new StringComponent(lengthInPixels, c));
     }
 
     for (int i = 0; i < amountOfSensels; i++)
@@ -77,8 +82,17 @@ void MainComponent::hiResTimerCallback()
             violinStrings[index]->setVb(Vb[index]);
             violinStrings[index]->setFb(Fb[index]);
             violinStrings[index]->setBowPos(xpos[index]);
+
+            if (state[index])
+            {
+                auto position = xpos[index];
+            
+                stringLines[index]->stringPlucked (position);
+            }
         }
     }
+
+
 
     //    for (int i = 0; i < numStrings; i++)
     //    {
@@ -139,8 +153,8 @@ void MainComponent::releaseResources()
 void MainComponent::paint(Graphics &g)
 {
     // (Our component is opaque, so we must completely fill the background with a solid colour)
-    g.fillAll(getLookAndFeel().findColour(ResizableWindow::backgroundColourId));
-
+    //g.fillAll(getLookAndFeel().findColour(ResizableWindow::backgroundColourId));
+    /*
     for (int i = 0; i < numStrings; ++i)
     {
         g.setColour(Colour::fromRGB(50 + i * 200.0 / static_cast<double>(numStrings), 0, 0));
@@ -148,7 +162,19 @@ void MainComponent::paint(Graphics &g)
         g.setColour(Colours::grey);
         g.drawRect(round(i * getWidth() / static_cast<double>(numStrings)), 0, round(getWidth() / static_cast<double>(numStrings)), getHeight(), 2);
     }
+ */
     // You can add your drawing code here!
+    auto xPos = 20;
+    auto yPos = 20;
+    auto yDistance = 50;
+    
+    for (auto stringLine : stringLines)
+    {
+        stringLine->setTopLeftPosition(xPos, yPos);
+        yPos += yDistance;
+        addAndMakeVisible(stringLine);
+    }
+    
 }
 
 void MainComponent::resized()
@@ -156,6 +182,7 @@ void MainComponent::resized()
     // This is called when the MainContentComponent is resized.
     // If you add any child components, this is where you should
     // update their positions.
+    
 }
 
 void MainComponent::mouseDown(const MouseEvent &e)
@@ -172,14 +199,27 @@ void MainComponent::mouseDown(const MouseEvent &e)
 
 void MainComponent::mouseDrag(const MouseEvent &e)
 {
-        double maxVb = 0.2;
-        double Vb = (e.y - getHeight() * 0.5) / (static_cast<double>(getHeight() * 0.5)) * maxVb;
+    double maxVb = 0.2;
+    double Vb = (e.y - getHeight() * 0.5) / (static_cast<double>(getHeight() * 0.5)) * maxVb;
     //    double Fb = e.x / (static_cast<double>(getWidth())) * 100;
-        for (int j = 0; j < numStrings; ++j)
+    for (int j = 0; j < numStrings; ++j)
+    {
+        violinStrings[j]->setVb(Vb);
+        //            violinStrings[j]->setFb(Fb);
+    }
+    
+   /* for (auto i = 0; i < stringLines.size(); ++i)
+    {
+        auto* stringLine = stringLines.getUnchecked (i);
+        
+        if (stringLine->getBounds().contains (e.getPosition()))
         {
-            violinStrings[j]->setVb(Vb);
-//            violinStrings[j]->setFb(Fb);
+            auto position = (e.position.x - stringLine->getX()) / stringLine->getWidth();
+            
+            stringLine->stringPlucked (position);
+            //stringSynths.getUnchecked (i)->stringPlucked (position);
         }
+    }*/
 }
 
 void MainComponent::mouseUp(const MouseEvent &e)
