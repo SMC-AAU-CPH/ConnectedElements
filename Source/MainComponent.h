@@ -10,6 +10,7 @@
 
 #include "../JuceLibraryCode/JuceHeader.h"
 #include "ViolinString.h"
+#include "Connection.h"
 #include "../SenselWrapper/SenselWrapper.h"
 #include "StringAnimation.h"
 //==============================================================================
@@ -38,7 +39,7 @@ public:
   void mouseUp(const MouseEvent &e) override;
   void mouseDrag(const MouseEvent &e) override;
   void hiResTimerCallback() override;
-    
+
 private:
   //==============================================================================
   double fs;
@@ -46,10 +47,10 @@ private:
 
   float minOut;
   float maxOut;
-  
+
   OwnedArray<ViolinString> violinStrings;
   OwnedArray<StringComponent> stringLines;
-
+  Connection conn1;
   OwnedArray<Sensel> sensels;
   static const unsigned int amountOfSensels = 2;
 
