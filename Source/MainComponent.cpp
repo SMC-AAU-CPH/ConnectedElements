@@ -41,7 +41,7 @@ void MainComponent::prepareToPlay(int samplesPerBlockExpected, double sampleRate
         
         int lengthInPixels = (int)(760 / (frequencyInHz / 110.0));
         auto c = Colour::fromHSV(Random().nextFloat(), 0.6f, 0.9f, 1.0f);
-        stringLines.add(new StringComponent(lengthInPixels, c));
+        stringLines.add(new StringAnimation(lengthInPixels, c));
     }
 
     for (int i = 0; i < amountOfSensels; i++)

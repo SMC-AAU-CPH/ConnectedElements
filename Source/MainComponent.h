@@ -49,9 +49,12 @@ private:
   float maxOut;
 
   OwnedArray<ViolinString> violinStrings;
-  OwnedArray<StringComponent> stringLines;
   Connection conn1;
+  
+  OwnedArray<StringAnimation> stringLines;
+
   OwnedArray<Sensel> sensels;
+
   static const unsigned int amountOfSensels = 2;
 
   static const unsigned int numStrings = 2;
