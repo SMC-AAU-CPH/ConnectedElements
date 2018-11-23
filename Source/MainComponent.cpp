@@ -91,16 +91,6 @@ void MainComponent::hiResTimerCallback()
             }
         }
     }
-
-
-
-    //    for (int i = 0; i < numStrings; i++)
-    //    {
-    ////        violinStrings[i]->setBow(state[i]);
-    ////        violinStrings[i]->setVb(Vb[i]);
-    ////        violinStrings[i]->setFb(Fb[i]);
-    ////        violinStrings[i]->setBowPos(xpos[i]);
-    //    }
 }
 
 void MainComponent::getNextAudioBlock(const AudioSourceChannelInfo &bufferToFill)
