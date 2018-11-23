@@ -42,10 +42,8 @@ void MainComponent::prepareToPlay(int samplesPerBlockExpected, double sampleRate
     fs = sampleRate;
     bufferSize = samplesPerBlockExpected;
 
-    for (int i = 0; i < numStrings; ++i)
-    {
-        violinStrings.add(new ViolinString(110.0 * (i + 1), fs));
-    }
+    violinStrings.add(new ViolinString(110.0, fs));
+    violinStrings.add(new ViolinString(110.0 * pow(2, 7.0 / 12.0), fs));
 
     for (int i = 0; i < amountOfSensels; i++)
         sensels.add(new Sensel(i)); // chooses the device in the sensel device list
@@ -53,7 +51,7 @@ void MainComponent::prepareToPlay(int samplesPerBlockExpected, double sampleRate
     Connection conn(violinStrings[0], violinStrings[1],
                     0.3, 0.3,
                     1, 1,
-                    1, 1000, 1000);
+                    1, 100, 100, fs);
     conn1 = conn;
 }
 
@@ -97,7 +95,6 @@ void MainComponent::hiResTimerCallback()
 
 void MainComponent::getNextAudioBlock(const AudioSourceChannelInfo &bufferToFill)
 {
-    double test = conn1.calculateJFc (1.0 / fs);
     for (int channel = 0; channel < bufferToFill.buffer->getNumChannels(); ++channel)
     {
         float *const channelData = bufferToFill.buffer->getWritePointer(channel, bufferToFill.startSample);
@@ -108,11 +105,23 @@ void MainComponent::getNextAudioBlock(const AudioSourceChannelInfo &bufferToFill
             {
 
                 float output = 0.0;
+                conn1.calculateCoefs();
                 for (int j = 0; j < numStrings; ++j)
                 {
-                    float stringSound = violinStrings[j]->bow() * 600;
-                    output = output + stringSound;
+                    violinStrings[j]->bow();
                 }
+                
+                for (int j = 0; j < numStrings; ++j)
+                {
+                    double JFc = conn1.calculateJFc()[j];
+                    violinStrings[j]->addJFc(JFc, conn1.getCPIdx()[j]);
+                }
+                
+                for (int j = 0; j < numStrings; ++j)
+                {
+                    violinStrings[j]->updateUVectors();
+                }
+                output = output + violinStrings[1]->getOutput(0.25) * 600;
 
                 if (output > maxOut)
                 {

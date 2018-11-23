@@ -107,7 +107,7 @@ void ViolinString::resized()
 
 }
 
-double ViolinString::bow()
+void ViolinString::bow()
 {
     double Fb = _Fb.load();
     int bp = _bp.load();
@@ -126,6 +126,7 @@ double ViolinString::bow()
             uNext[l] = uNext[l] - excitation;
         }
     }
+    
 //    if (fingerOn)
 //    {
 //        int fingerPos = floor(fp * N);
@@ -135,10 +136,6 @@ double ViolinString::bow()
 //        }
 //        uNext[fingerPos] = uNext[fingerPos] * ff;
 //    }
-    
-    uPrev = u;
-    u = uNext;
-    return uNext[pickup];
 }
 
 void ViolinString::newtonRaphson()
@@ -167,4 +164,22 @@ void ViolinString::newtonRaphson()
             std::cout << "Nope" << std::endl;
         }
     }
+}
+
+void ViolinString::addJFc (double JFc, int index)
+{
+    uNext[index] = uNext[index] + JFc;
+}
+
+double ViolinString::getOutput (double ratio)
+{
+    int index = floor(ratio * N);
+    return uNext[index];
+}
+
+
+void ViolinString::updateUVectors()
+{
+    uPrev = u;
+    u = uNext;
 }
