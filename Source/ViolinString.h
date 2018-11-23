@@ -20,7 +20,7 @@ class ViolinString : public Component
 public:
     ViolinString(double freq, double fs);
     ~ViolinString();
-
+    
     void paint(Graphics &) override;
     void resized() override;
 
@@ -41,7 +41,12 @@ public:
     
     
     double getNumPoints() { return N; };
-
+    
+    double getPrevStateAt (int idx) { return uPrev[idx]; };
+    double getStateAt (int idx) { return u[idx]; };
+    double getGridSpacing() { return h; };
+    double getS0() { return s0; };
+    
 private:
     double fs, freq, gamma, k, s0, s1, B, kappa, h, N, lambdaSq, muSq, kOh, gOh, a, BM, pickup, tol, q, qPrev, b, eps, fp, ff;
     atomic<double> _Vb, _Fb, _bp;

@@ -49,6 +49,12 @@ void MainComponent::prepareToPlay(int samplesPerBlockExpected, double sampleRate
 
     for (int i = 0; i < amountOfSensels; i++)
         sensels.add(new Sensel(i)); // chooses the device in the sensel device list
+    
+    Connection conn(violinStrings[0], violinStrings[1],
+                    0.3, 0.3,
+                    1, 1,
+                    1, 1000, 1000);
+    conn1 = conn;
 }
 
 void MainComponent::hiResTimerCallback()
@@ -91,6 +97,7 @@ void MainComponent::hiResTimerCallback()
 
 void MainComponent::getNextAudioBlock(const AudioSourceChannelInfo &bufferToFill)
 {
+    double test = conn1.calculateJFc (1.0 / fs);
     for (int channel = 0; channel < bufferToFill.buffer->getNumChannels(); ++channel)
     {
         float *const channelData = bufferToFill.buffer->getWritePointer(channel, bufferToFill.startSample);

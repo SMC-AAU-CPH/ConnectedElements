@@ -10,6 +10,7 @@
 
 #include "../JuceLibraryCode/JuceHeader.h"
 #include "ViolinString.h"
+#include "Connection.h"
 #include "../SenselWrapper/SenselWrapper.h"
 //==============================================================================
 /*
@@ -39,25 +40,26 @@ public:
   void hiResTimerCallback() override;
     
 private:
-  //==============================================================================
-  double fs;
-  double bufferSize;
+    //==============================================================================
+    double fs;
+    double bufferSize;
 
-  float minOut;
-  float maxOut;
-  OwnedArray<ViolinString> violinStrings;
+    float minOut;
+    float maxOut;
+    OwnedArray<ViolinString> violinStrings;
+    Connection conn1;
 
-  OwnedArray<Sensel> sensels;
-  static const unsigned int amountOfSensels = 2;
+    OwnedArray<Sensel> sensels;
+    static const unsigned int amountOfSensels = 2;
 
-  static const unsigned int numStrings = 2;
+    static const unsigned int numStrings = 2;
 
-  array<float, amountOfSensels> force = {0.0};
-  array<float, amountOfSensels> xpos = {0.0};
-  array<float, amountOfSensels> ypos = {0.0};
-  array<float, amountOfSensels> Vb = {0.0};
-  array<float, amountOfSensels> Fb = {0.0};
-  array<bool, amountOfSensels> state = {0};
+    array<float, amountOfSensels> force = {0.0};
+    array<float, amountOfSensels> xpos = {0.0};
+    array<float, amountOfSensels> ypos = {0.0};
+    array<float, amountOfSensels> Vb = {0.0};
+    array<float, amountOfSensels> Fb = {0.0};
+    array<bool, amountOfSensels> state = {0};
 
-  JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MainComponent)
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MainComponent)
 };
