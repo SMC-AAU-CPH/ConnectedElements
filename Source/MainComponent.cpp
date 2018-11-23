@@ -205,15 +205,16 @@ void MainComponent::mouseDrag(const MouseEvent &e)
 {
     double maxVb = 0.2;
 
-    double Vb = (e.y - getHeight() * 0.75) / (static_cast<double>(getHeight() * 0.25)) * maxVb;
+    
     double bp = e.x / static_cast<double>(getWidth());
     
     if (e.y < getHeight() / 2.0)
     {
+        double Vb = (e.y - getHeight() * 0.25) / (static_cast<double>(getHeight() * 0.25)) * maxVb;
         violinStrings[0]->setVb(Vb);
         violinStrings[0]->setBowPos(bp);
     } else {
-        
+        double Vb = (e.y - getHeight() * 0.75) / (static_cast<double>(getHeight() * 0.25)) * maxVb;
         violinStrings[1]->setVb(Vb);
         violinStrings[1]->setBowPos(bp);
     }
