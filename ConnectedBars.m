@@ -16,7 +16,7 @@ objectVars{1, 2} = [freq1*2, 2, 0.1, 0.005];
 
 objectVars{2, 1} = "bowedString";
 freq2 = 110;
-objectVars{2, 2} = [freq1*2, 2, 0.1, 0.005];
+objectVars{2, 2} = [freq1*4, 2, 0.1, 0.005];
 
 % objectVars{3, 1} = "plate";
 % objectVars{3, 2} = [1, 1, 0.005, 4];
@@ -78,7 +78,7 @@ uPrev = u;
 uNext = u;
 
 %% Length of the sound
-lengthSound = fs*10;
+lengthSound = fs*5;
 
 
 %% Exciter
@@ -86,7 +86,7 @@ if whatExciter == "bowed"
     %Bow Model
     a = 100;                % free parameter
     BM = sqrt(2*a)*exp(1/2);
-    Fb = 5;
+    Fb = 50;
     Vb = 0.2;
     Ee = zeros(Ntot, 1);
     Ee(N(1) + floor(N(2)/4)) = 1;
@@ -141,8 +141,8 @@ w0 = zeros(Qc, 1);
 w1 = zeros(Qc, 1);
 
 sx(1) = 0;
-w0(1) = 10; 
-w1(1) = 10; 
+w0(1) = 1000000; 
+w1(1) = 1000000; 
 
 % sx(2) = 0;
 % w0(2) = 1; 

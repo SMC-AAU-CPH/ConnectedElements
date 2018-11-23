@@ -45,6 +45,8 @@ public:
     double getPrevStateAt (int idx) { return uPrev[idx]; };
     double getStateAt (int idx) { return u[idx]; };
     double getNextStateAt (int idx) { return uNext[idx]; };
+    
+    vector<double>& getState() { return u; };
     double getGridSpacing() { return h; };
     double getS0() { return s0; };
     

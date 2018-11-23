@@ -58,28 +58,30 @@ public:
     {
      
         //auto h = height;
-        auto stringYstart = height/2;
+        auto stringBounds = 0;//height/2;
         Path stringPath;
-        stringPath.startNewSubPath (0, stringYstart);
+        stringPath.startNewSubPath (0, stringBounds);
 
-        auto spacing = double(length) / double(states.size());
-        auto x = spacing * 800 + 20;
+        auto spacing = double(getWidth()) / double(states.size() + 1);
+//        auto spacing = 3;
+        auto x = spacing;
         
         for (int y = 0; y < states.size(); y++)
         {
             
-            const float newY = Random().nextFloat()*200-100;//height/2;//states[y];
+            const float newY = states[y] * 50000;
             stringPath.lineTo(x, newY);
             x += spacing;
         }
-        stringPath.lineTo(length, height/2);
-        stringPath.closeSubPath();
+        stringPath.lineTo(length, stringBounds);
+        //stringPath.closeSubPath();
         //stringPath.quadraticTo (length / 2.0f, y + (std::sin (phase) * amplitude), (float) length, y);
         return stringPath;
     }
+    
     void updateStringStates(vector<double> &newStates)
     {
-
+        states = newStates;
     }
     //==============================================================================
     void timerCallback() override
@@ -114,7 +116,7 @@ private:
 
     vector<double> states;
 
-    int height = 20;
+    int height = 200;
     float amplitude = 0.0f;
     const float maxAmplitude = 12.0f;
     float phase = 0.0f;

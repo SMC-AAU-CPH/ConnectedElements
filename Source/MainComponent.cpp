@@ -43,6 +43,7 @@ void MainComponent::prepareToPlay(int samplesPerBlockExpected, double sampleRate
         int lengthInPixels = (int)(760 / (frequencyInHz[i] / 110.0));
         auto c = Colour::fromHSV(Random().nextFloat(), 0.6f, 0.9f, 1.0f);
         stringLines.add(new StringAnimation(lengthInPixels, c));
+        addAndMakeVisible(stringLines[i]);
     }
 
 
@@ -52,14 +53,15 @@ void MainComponent::prepareToPlay(int samplesPerBlockExpected, double sampleRate
     Connection conn(violinStrings[0], violinStrings[1],
                     0.2, 0.4,
                     1, 1,
-                    1, 100, 1000, fs);
+                    1, 100, 100, fs);
     conn1 = conn;
+    resized();
 }
 
 void MainComponent::hiResTimerCallback()
 {
     double maxVb = 0.2;
-
+    
     for (auto sensel : sensels)
     {
         if (sensel->senselDetected)
@@ -91,6 +93,18 @@ void MainComponent::hiResTimerCallback()
             }
         }
     }
+    
+    if (stateUpdateCounter % 5 == 0)
+    {
+        for (int s = 0; s < numStrings; s++)
+        {
+            stringLines[s]->updateStringStates(violinStrings[s]->getState());
+        }
+        
+    }
+    stateUpdateCounter++;
+        
+    
 }
 
 void MainComponent::getNextAudioBlock(const AudioSourceChannelInfo &bufferToFill)
@@ -151,20 +165,29 @@ void MainComponent::releaseResources()
 //==============================================================================
 void MainComponent::paint(Graphics &g)
 {
+    for (int i = 0; i < numStrings; ++i)
+    {
+        g.setColour(Colour::fromRGBA(50 + i * 200.0 / static_cast<double>(numStrings), 0, 0, 0.2));
+        g.fillRect(0, 0, getWidth(), getHeight()/2.0);
+        g.setColour(Colours::grey);
+        g.drawRect(0, getHeight() / 2.0, getWidth(), getHeight() / 2.0);
+    }
+    
+}
+
+void MainComponent::resized()
+{
     auto xPos = 20;
-    auto yPos = 20;
-    auto yDistance = 50;
+    auto yPos = getHeight() / 2.0 / 2.0;
+    auto yDistance = getHeight() / 2.0;
     
     for (auto stringLine : stringLines)
     {
         stringLine->setTopLeftPosition(xPos, yPos);
         yPos += yDistance;
-        addAndMakeVisible(stringLine);
+        
     }
-    
 }
-
-void MainComponent::resized(){}
 
 void MainComponent::mouseDown(const MouseEvent &e)
 {
