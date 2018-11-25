@@ -42,33 +42,22 @@ public:
     {
         g.setColour (colour);
         g.strokePath (generateStringPathAdvanced(), PathStrokeType (2.0f));
+        //double y = states[conn1] * 50000 + height / 2.0;
+        //g.drawEllipse(conn1, y, 10, 10, 1);
+        g.setColour(Colours::orange);
+        g.drawEllipse(floor(cx - 5), floor(cy - 5), 10, 10, 2);
         g.setColour (Colours::yellow);
-        g.setOpacity (0.5);
-        g.fillEllipse (floor(bowingPointX * getWidth()), floor(bowingPointY * height) - height / 2.0, 5 + floor(force / 2.0), height);
+        double opa = force / 100.0;
+        if (opa >= 1.0)
+        {
+            g.setOpacity (1.0);
+        } else {
+            g.setOpacity(opa);
+        }
+        g.fillRect (floor(bowingPointX * getWidth()), floor(bowingPointY * height) - height / 2.0, 10, height);
     }
-
-/*    Path generateStringPathSimple() const
-    {
-        // this determines the decay of the visible string vibration.
-        amplitude *= 0.99f;
-        // this determines the visible vibration frequency.
-        // just an arbitrary number chosen to look OK:
-        auto phaseStep = 400.0f / length;
-        
-        phase += phaseStep;
-        
-        if (phase >= MathConstants<float>::twoPi)
-            phase -= MathConstants<float>::twoPi;
-        
-        auto y = height / 2.0f;
-
-        Path stringPath;
-        stringPath.startNewSubPath (0, y);
-        stringPath.quadraticTo (length / 2.0f, y + (std::sin (phase) * amplitude), (float) length, y);
-        return stringPath;
-    }
-*/
-    Path generateStringPathAdvanced() const
+    
+    Path generateStringPathAdvanced()
     {
         auto stringBounds = height/2.0;
         Path stringPath;
@@ -81,6 +70,11 @@ public:
         {
             const float newY = states[y] * 50000 + stringBounds;
             stringPath.lineTo(x, newY);
+            if (y == conn1)
+            {
+                cx = x;
+                cy = newY;
+            }
             x += spacing;
         }
         stringPath.lineTo(length, stringBounds);
@@ -88,7 +82,9 @@ public:
         return stringPath;
     }
     
-    void updateStringStates(vector<double> &newStates, double bpX, double bpY, double f)
+    
+    
+    void updateStringStates(vector<double> &newStates, double bpX, double bpY, double f, int conn)
     {
         if(isnan(newStates[5]))
             fill(states.begin(), states.end(), 0.0);
@@ -98,6 +94,7 @@ public:
         bowingPointX = bpX;
         bowingPointY = bpY;
         force = f;
+        conn1 = conn;
     }
     //==============================================================================
     void timerCallback() override
@@ -121,5 +118,9 @@ private:
     double bowingPointY;
     double force;
     
+    int cx = 0;
+    int cy = 0;
+    
+    int conn1;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (StringAnimation)
 };

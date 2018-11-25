@@ -39,7 +39,7 @@ public:
     void mouseUp(const MouseEvent &e) override;
     void mouseDrag(const MouseEvent &e) override;
     void hiResTimerCallback() override;
-    
+    float clip(float output);
 private:
     //==============================================================================
     double fs;

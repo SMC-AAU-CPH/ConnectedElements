@@ -41,7 +41,8 @@ void MainComponent::prepareToPlay(int samplesPerBlockExpected, double sampleRate
         violinStrings.add(new ViolinString(frequencyInHz[i], fs));
         
         int lengthInPixels = (int)(760) ;/// (frequencyInHz[i] / 110.0));
-        auto c = Colour::fromHSV(Random().nextFloat(), 0.6f, 0.9f, 1.0f);
+//        auto c = Colour::fromHSV(Random().nextFloat(), 0.6f, 0.9f, 1.0f);
+        auto c = Colours::cyan;
         stringLines.add(new StringAnimation(lengthInPixels, c, getHeight()/2.0));
         addAndMakeVisible(stringLines[i]);
     }
@@ -51,9 +52,9 @@ void MainComponent::prepareToPlay(int samplesPerBlockExpected, double sampleRate
         sensels.add(new Sensel(i)); // chooses the device in the sensel device list
     
     Connection conn(violinStrings[0], violinStrings[1],
-                    0.2, 0.4,
+                    0.5, 0.4,
                     1, 1,
-                    1, 1, 1, fs);
+                    1, 500, 1000, fs);
     conn1 = conn;
     resized();
 }
@@ -98,7 +99,7 @@ void MainComponent::hiResTimerCallback()
     {
         for (int s = 0; s < numStrings; s++)
         {
-            stringLines[s]->updateStringStates(violinStrings[s]->getState(), xpos[s], ypos[s], Fb[s]);
+            stringLines[s]->updateStringStates(violinStrings[s]->getState(), xpos[s], ypos[s], Fb[s], conn1.getCPIdx()[s]);
         }
         //if (repaintFlag)
         //    repaint();
@@ -110,49 +111,48 @@ void MainComponent::hiResTimerCallback()
 
 void MainComponent::getNextAudioBlock(const AudioSourceChannelInfo &bufferToFill)
 {
-    for (int channel = 0; channel < bufferToFill.buffer->getNumChannels(); ++channel)
+    
+    float *const channelData1 = bufferToFill.buffer->getWritePointer(0, bufferToFill.startSample);
+    float *const channelData2 = bufferToFill.buffer->getWritePointer(1, bufferToFill.startSample);
+
+    float output1 = 0.0;
+    float output2 = 0.0;
+    
+    for (int i = 0; i < bufferToFill.buffer->getNumSamples(); i++)
     {
-        float *const channelData = bufferToFill.buffer->getWritePointer(channel, bufferToFill.startSample);
 
-        if (channel == 0)
+        conn1.calculateCoefs();
+        for (int j = 0; j < numStrings; ++j)
         {
-            for (int i = 0; i < bufferToFill.buffer->getNumSamples(); i++)
-            {
-
-                float output = 0.0;
-                conn1.calculateCoefs();
-                for (int j = 0; j < numStrings; ++j)
-                {
-                    violinStrings[j]->bow();
-                }
-                
-                for (int j = 0; j < numStrings; ++j)
-                {
-                    double JFc = conn1.calculateJFc()[j];
-                    violinStrings[j]->addJFc(JFc, conn1.getCPIdx()[j]);
-                    violinStrings[j]->updateUVectors();
-                    output = output + violinStrings[j]->getOutput(0.25) * 600;
-                }
-                
-
-                if (output > maxOut)
-                {
-                    output = maxOut;
-                }
-                else if (output < minOut)
-                {
-                    output = minOut;
-                }
-                channelData[i] = output;
-            }
+            violinStrings[j]->bow();
         }
-        else
+        
+        for (int j = 0; j < numStrings; ++j)
         {
-            memcpy(channelData,
-                   bufferToFill.buffer->getReadPointer(0),
-                   bufferToFill.numSamples * sizeof(float));
+            double JFc = conn1.calculateJFc()[j];
+            violinStrings[j]->addJFc(JFc, conn1.getCPIdx()[j]);
+            violinStrings[j]->updateUVectors();
         }
+        
+        output1 = violinStrings[0]->getOutput(0.25) * 600;
+        output2 = violinStrings[1]->getOutput(0.25) * 600;
+        
+        channelData1[i] = clip(output1);
+        channelData2[i] = clip(output2);
     }
+    
+}
+float MainComponent::clip(float output)
+{
+    if (output > maxOut)
+    {
+        return output = maxOut;
+    }
+    else if (output < minOut)
+    {
+        return output = minOut;
+    }
+    return output;
 }
 
 void MainComponent::releaseResources()
