@@ -134,8 +134,8 @@ void MainComponent::getNextAudioBlock(const AudioSourceChannelInfo &bufferToFill
             violinStrings[j]->updateUVectors();
         }
         
-        output1 = violinStrings[0]->getOutput(0.25) * 600;
-        output2 = violinStrings[1]->getOutput(0.25) * 600;
+        output1 = violinStrings[0]->getOutput(0.8) * 600;
+        output2 = violinStrings[1]->getOutput(0.8) * 600;
         
         channelData1[i] = clip(output1);
         channelData2[i] = clip(output2);
@@ -192,13 +192,16 @@ void MainComponent::resized()
 
 void MainComponent::mouseDown(const MouseEvent &e)
 {
-    if (e.y < getHeight() / 2.0)
+    if (ModifierKeys::getCurrentModifiers() == ModifierKeys::leftButtonModifier)
     {
-        violinStrings[0]->setBow(true);
-    }
-    else
-    {
-        violinStrings[1]->setBow(true);
+        if (e.y < getHeight() / 2.0)
+        {
+            violinStrings[0]->setBow(true);
+        }
+        else
+        {
+            violinStrings[1]->setBow(true);
+        }
     }
 }
 
@@ -206,22 +209,45 @@ void MainComponent::mouseDrag(const MouseEvent &e)
 {
     double maxVb = 0.2;
 
-    double bp = e.x / static_cast<double>(getWidth());
+    double bp = e.x < getWidth() ? e.x / static_cast<double>(getWidth()) : getWidth();
+    double fp = e.x < getWidth() ? e.x / static_cast<double>(getWidth()) : getWidth();
     
     if (e.y < getHeight() / 2.0)
     {
-        double Vb = (e.y - getHeight() * 0.25) / (static_cast<double>(getHeight() * 0.25)) * maxVb;
-        violinStrings[0]->setVb(Vb);
-        violinStrings[0]->setBowPos(bp);
+        if (ModifierKeys::getCurrentModifiers() == ModifierKeys::altModifier + ModifierKeys::leftButtonModifier)
+        {
+            conn1.setCPIdx1(violinStrings[0]->getNumPoints() * e.x / static_cast<double>(getWidth()));
+        }
+        else if (ModifierKeys::getCurrentModifiers() == ModifierKeys::ctrlModifier + ModifierKeys::leftButtonModifier)
+        {
+            violinStrings[0]->setFingerPoint (fp);
+            stringLines[0]->setFingerPoint (fp, violinStrings[0]->getNumPoints());
+        } else {
+            double Vb = (e.y - getHeight() * 0.25) / (static_cast<double>(getHeight() * 0.25)) * maxVb;
+            violinStrings[0]->setVb(Vb);
+            violinStrings[0]->setBowPos(bp);
+        }
     } else {
-        double Vb = (e.y - getHeight() * 0.75) / (static_cast<double>(getHeight() * 0.25)) * maxVb;
-        violinStrings[1]->setVb(Vb);
-        violinStrings[1]->setBowPos(bp);
+        if (ModifierKeys::getCurrentModifiers() == ModifierKeys::altModifier + ModifierKeys::leftButtonModifier)
+        {
+            conn1.setCPIdx2(violinStrings[1]->getNumPoints() * e.x / static_cast<double>(getWidth()));
+        }
+        else if (ModifierKeys::getCurrentModifiers() == ModifierKeys::ctrlModifier + ModifierKeys::leftButtonModifier)
+        {
+            violinStrings[1]->setFingerPoint (fp);
+            stringLines[1]->setFingerPoint (fp, violinStrings[1]->getNumPoints());
+        } else {
+            double Vb = (e.y - getHeight() * 0.75) / (static_cast<double>(getHeight() * 0.25)) * maxVb;
+            violinStrings[1]->setVb(Vb);
+            violinStrings[1]->setBowPos(bp);
+        }
     }
 }
 
 void MainComponent::mouseUp(const MouseEvent &e)
 {
-    for (auto string : violinStrings)    
+    for (auto string : violinStrings)
+    {
         string->setBow(false);
+    }
 }

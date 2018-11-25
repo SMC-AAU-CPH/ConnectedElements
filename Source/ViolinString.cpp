@@ -140,16 +140,11 @@ void ViolinString::bow()
             uNext[l] = uNext[l] - excitation;
         }
     }
-    
-//    if (fingerOn)
-//    {
-//        int fingerPos = floor(fp * N);
-//        if (ff > 1)
-//        {
-//            std::cout << "wait" << std::endl;
-//        }
-//        uNext[fingerPos] = uNext[fingerPos] * ff;
-//    }
+    if (ff > 1)
+    {
+        ff = 1; std::cout << "wait" << std::endl;
+    }
+    uNext[fp] = uNext[fp] * (1 - ff);
 }
 
 void ViolinString::newtonRaphson()

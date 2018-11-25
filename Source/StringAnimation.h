@@ -46,6 +46,11 @@ public:
         //g.drawEllipse(conn1, y, 10, 10, 1);
         g.setColour(Colours::orange);
         g.drawEllipse(floor(cx - 5), floor(cy - 5), 10, 10, 2);
+        
+        g.setColour(Colours::yellow);
+        g.fillEllipse(fpx - 5, height/2 - 5, 10, 10);
+        
+        // draw bow
         g.setColour (Colours::yellow);
         double opa = force / 100.0;
         if (opa >= 1.0)
@@ -63,7 +68,7 @@ public:
         Path stringPath;
         stringPath.startNewSubPath (0, stringBounds);
 
-        auto spacing = double(getWidth()) / double(states.size() + 1);
+        auto spacing = double(getWidth()) / double(states.size());
         auto x = spacing;
         
         for (int y = 0; y < states.size(); y++)
@@ -74,6 +79,10 @@ public:
             {
                 cx = x;
                 cy = newY;
+            }
+            if (y == fingerPoint)
+            {
+                fpx = x;
             }
             x += spacing;
         }
@@ -101,7 +110,11 @@ public:
     {
         repaint();
     }
-
+    
+    void setFingerPoint (float fp, int N) {
+        fingerPoint = floor(fp * N);
+    };
+    
 private:
     //==============================================================================
     int length;
@@ -122,5 +135,7 @@ private:
     int cy = 0;
     
     int conn1;
+    int fpx = 0;
+    int fingerPoint = 0;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (StringAnimation)
 };

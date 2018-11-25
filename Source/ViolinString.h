@@ -31,7 +31,7 @@ public:
     double getOutput (double ratio);
 
     void setFrequency(double freq);
-    void setFingerPoint(double val) { fp = val; };
+    void setFingerPoint(double val) { fp = floor (val * N); };
     void setFingerForce(double val) { ff = val; };
     //void setFingerOn (bool val) { fingerOn = val; };
 
@@ -39,7 +39,7 @@ public:
     void setVb(double val) { _Vb.store(val); }
     void setFb(double val) { _Fb.store(val); }
     void setBowPos(double val) { _bp.store(floor(val * N)); }
-    
+    void setFingerOn (bool val) { fingerOn = val; };
     
     double getNumPoints() { return N; };
     double getPrevStateAt (int idx) { return uPrev[idx]; };
@@ -54,7 +54,8 @@ public:
     void updateUVectors();
     
 private:
-    double fs, freq, gamma, k, s0, s1, B, kappa, h, N, lambdaSq, muSq, kOh, gOh, a, BM, tol, q, qPrev, b, eps, fp, ff;
+    double fs, freq, gamma, k, s0, s1, B, kappa, h, N, lambdaSq, muSq, kOh, gOh, a, BM, tol, q, qPrev, b, eps, fp;
+    double ff = 0.7;
     atomic<double> _Vb, _Fb, _bp;
     atomic<bool> _isBowing{false};
 
@@ -63,5 +64,7 @@ private:
 
     unsigned long count;
     unsigned long t = 0;
+    
+    bool fingerOn = false;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ViolinString)
 };

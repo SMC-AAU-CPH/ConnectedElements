@@ -26,7 +26,8 @@ public:
     void calculateCoefs();
     
     vector<int> getCPIdx() { return cpIdx; };
-
+    void setCPIdx1 (int idx) { cpIdx[0] = idx; };
+    void setCPIdx2 (int idx) { cpIdx[1] = idx; };
     
 private:
     ViolinString* object1;
