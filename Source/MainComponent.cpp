@@ -39,18 +39,17 @@ void MainComponent::prepareToPlay(int samplesPerBlockExpected, double sampleRate
     for (int i = 0; i < numStrings; ++i)
     {
         violinStrings.add(new ViolinString(frequencyInHz[i], fs));
-        
-        int lengthInPixels = (int)(getWidth() - 40) ;/// (frequencyInHz[i] / 110.0));
-//        auto c = Colour::fromHSV(Random().nextFloat(), 0.6f, 0.9f, 1.0f);
+
+        int lengthInPixels = (int)(getWidth() - 40); /// (frequencyInHz[i] / 110.0));
+                                                     //        auto c = Colour::fromHSV(Random().nextFloat(), 0.6f, 0.9f, 1.0f);
         auto c = Colours::cyan;
-        stringLines.add(new StringAnimation(lengthInPixels, c, getHeight()/2.0));
+        stringLines.add(new StringAnimation(lengthInPixels, c, getHeight() / 2.0));
         addAndMakeVisible(stringLines[i]);
     }
 
-
     for (int i = 0; i < amountOfSensels; i++)
         sensels.add(new Sensel(i)); // chooses the device in the sensel device list
-    
+
     Connection conn(violinStrings[0], violinStrings[1],
                     0.5, 0.4,
                     1, 1,
@@ -62,7 +61,7 @@ void MainComponent::prepareToPlay(int samplesPerBlockExpected, double sampleRate
 void MainComponent::hiResTimerCallback()
 {
     double maxVb = 0.2;
-    
+
     for (auto sensel : sensels)
     {
         if (sensel->senselDetected)
@@ -73,28 +72,35 @@ void MainComponent::hiResTimerCallback()
             int index = sensel->senselIndex;
             for (int f = 0; f < fingerCount; f++)
             {
-
-                state[index] = sensel->fingers[f].state;
-                xpos[index] = sensel->fingers[f].x;
-                ypos[index] = sensel->fingers[f].y;
-                Vb[index] = sensel->fingers[f].delta_y * maxVb;
-                Fb[index] = sensel->fingers[f].force * 1000;
+                if (f == 0)
+                {
+                    state[index] = sensel->fingers[f].state;
+                    xpos[index] = sensel->fingers[f].x;
+                    ypos[index] = sensel->fingers[f].y;
+                    Vb[index] = sensel->fingers[f].delta_y * maxVb;
+                    Fb[index] = sensel->fingers[f].force * 1000;
+                }
+                if (f == 1)
+                    fingerPoint[index] = sensel->fingers[f].x;
+                if (f == 2)
+                    connectionPoint[index] = sensel->fingers[f].x;
             }
 
             violinStrings[index]->setBow(state[index]);
             violinStrings[index]->setVb(Vb[index]);
             violinStrings[index]->setFb(Fb[index]);
             violinStrings[index]->setBowPos(xpos[index]);
-
+            violinStrings[index]->setFingerPoint(fingerPoint[index]);
+            conn1.setCPIdx1(connectionPoint[index]);
             if (state[index])
             {
                 auto position = xpos[index];
-            
-                stringLines[index]->stringPlucked (position);
+
+                stringLines[index]->stringPlucked(position);
             }
         }
     }
-    
+
     if (stateUpdateCounter % 10 == 0)
     {
         for (int s = 0; s < numStrings; s++)
@@ -105,19 +111,17 @@ void MainComponent::hiResTimerCallback()
         //    repaint();
     }
     stateUpdateCounter++;
-        
-    
 }
 
 void MainComponent::getNextAudioBlock(const AudioSourceChannelInfo &bufferToFill)
 {
-    
+
     float *const channelData1 = bufferToFill.buffer->getWritePointer(0, bufferToFill.startSample);
     float *const channelData2 = bufferToFill.buffer->getWritePointer(1, bufferToFill.startSample);
 
     float output1 = 0.0;
     float output2 = 0.0;
-    
+
     for (int i = 0; i < bufferToFill.buffer->getNumSamples(); i++)
     {
 
@@ -126,21 +130,20 @@ void MainComponent::getNextAudioBlock(const AudioSourceChannelInfo &bufferToFill
         {
             violinStrings[j]->bow();
         }
-        
+
         for (int j = 0; j < numStrings; ++j)
         {
             double JFc = conn1.calculateJFc()[j];
             violinStrings[j]->addJFc(JFc, conn1.getCPIdx()[j]);
             violinStrings[j]->updateUVectors();
         }
-        
+
         output1 = violinStrings[0]->getOutput(0.8) * 600;
         output2 = violinStrings[1]->getOutput(0.8) * 600;
-        
+
         channelData1[i] = clip(output1);
         channelData2[i] = clip(output2);
     }
-    
 }
 float MainComponent::clip(float output)
 {
@@ -169,11 +172,10 @@ void MainComponent::paint(Graphics &g)
     for (int i = 0; i < numStrings; ++i)
     {
         g.setColour(Colour::fromRGBA(50 + i * 200.0 / static_cast<double>(numStrings), 0, 0, 0.2));
-        g.fillRect(0, 0, getWidth(), getHeight()/2.0);
+        g.fillRect(0, 0, getWidth(), getHeight() / 2.0);
         g.setColour(Colours::grey);
         g.drawRect(0, getHeight() / 2.0, getWidth(), getHeight() / 2.0);
     }
-    
 }
 
 void MainComponent::resized()
@@ -181,12 +183,11 @@ void MainComponent::resized()
     auto xPos = 20;
     auto yPos = 0;
     auto yDistance = getHeight() / 2.0;
-    
+
     for (auto stringLine : stringLines)
     {
         stringLine->setTopLeftPosition(xPos, yPos);
         yPos += yDistance;
-        
     }
 }
 
@@ -219,7 +220,7 @@ void MainComponent::mouseDrag(const MouseEvent &e)
     {
         fp = 0;
     }
-    
+
     if (e.y < getHeight() / 2.0)
     {
         if (ModifierKeys::getCurrentModifiers() == ModifierKeys::altModifier + ModifierKeys::leftButtonModifier)
@@ -233,14 +234,18 @@ void MainComponent::mouseDrag(const MouseEvent &e)
         }
         else if (ModifierKeys::getCurrentModifiers() == ModifierKeys::ctrlModifier + ModifierKeys::leftButtonModifier)
         {
-            violinStrings[0]->setFingerPoint (fp);
-            stringLines[0]->setFingerPoint (fp, violinStrings[0]->getNumPoints());
-        } else {
+            violinStrings[0]->setFingerPoint(fp);
+            stringLines[0]->setFingerPoint(fp, violinStrings[0]->getNumPoints());
+        }
+        else
+        {
             double Vb = (e.y - getHeight() * 0.25) / (static_cast<double>(getHeight() * 0.25)) * maxVb;
             violinStrings[0]->setVb(Vb);
             violinStrings[0]->setBowPos(bp);
         }
-    } else {
+    }
+    else
+    {
         if (ModifierKeys::getCurrentModifiers() == ModifierKeys::altModifier + ModifierKeys::leftButtonModifier)
         {
             double cp = e.x < getWidth() ? violinStrings[1]->getNumPoints() * e.x / static_cast<double>(getWidth()) : violinStrings[1]->getNumPoints();
@@ -249,13 +254,15 @@ void MainComponent::mouseDrag(const MouseEvent &e)
                 cp = 0;
             }
             conn1.setCPIdx2(cp);
-//            conn1.setCPIdx2(violinStrings[1]->getNumPoints() * e.x / static_cast<double>(getWidth()));
+            //            conn1.setCPIdx2(violinStrings[1]->getNumPoints() * e.x / static_cast<double>(getWidth()));
         }
         else if (ModifierKeys::getCurrentModifiers() == ModifierKeys::ctrlModifier + ModifierKeys::leftButtonModifier)
         {
-            violinStrings[1]->setFingerPoint (fp);
-            stringLines[1]->setFingerPoint (fp, violinStrings[1]->getNumPoints());
-        } else {
+            violinStrings[1]->setFingerPoint(fp);
+            stringLines[1]->setFingerPoint(fp, violinStrings[1]->getNumPoints());
+        }
+        else
+        {
             double Vb = (e.y - getHeight() * 0.75) / (static_cast<double>(getHeight() * 0.25)) * maxVb;
             violinStrings[1]->setVb(Vb);
             violinStrings[1]->setBowPos(bp);

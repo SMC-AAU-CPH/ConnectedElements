@@ -66,6 +66,8 @@ private:
     array<float, amountOfSensels> ypos = {0.0};
     array<float, amountOfSensels> Vb = {0.0};
     array<float, amountOfSensels> Fb = {0.0};
+    array<float, amountOfSensels> fingerPoint = {0.0};
+    array<float, amountOfSensels> connectionPoint = {0.0};
     array<bool, amountOfSensels> state = {0};
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MainComponent)
 };
