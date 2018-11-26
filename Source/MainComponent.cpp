@@ -15,7 +15,7 @@ MainComponent::MainComponent() : minOut(-1.0), maxOut(1.0)
     // Make sure you set the size of the component after
     // you add any child components.
 
-    setSize(800, 600);
+    setSize(1440, 900);
 
     // specify the number of input and output channels that we want to open
     setAudioChannels(0, 2);
@@ -40,7 +40,7 @@ void MainComponent::prepareToPlay(int samplesPerBlockExpected, double sampleRate
     {
         violinStrings.add(new ViolinString(frequencyInHz[i], fs));
         
-        int lengthInPixels = (int)(760) ;/// (frequencyInHz[i] / 110.0));
+        int lengthInPixels = (int)(getWidth() - 40) ;/// (frequencyInHz[i] / 110.0));
 //        auto c = Colour::fromHSV(Random().nextFloat(), 0.6f, 0.9f, 1.0f);
         auto c = Colours::cyan;
         stringLines.add(new StringAnimation(lengthInPixels, c, getHeight()/2.0));
@@ -211,12 +211,25 @@ void MainComponent::mouseDrag(const MouseEvent &e)
 
     double bp = e.x < getWidth() ? e.x / static_cast<double>(getWidth()) : getWidth();
     double fp = e.x < getWidth() ? e.x / static_cast<double>(getWidth()) : getWidth();
+    if (bp <= 0)
+    {
+        bp = 0;
+    }
+    if (fp <= 0)
+    {
+        fp = 0;
+    }
     
     if (e.y < getHeight() / 2.0)
     {
         if (ModifierKeys::getCurrentModifiers() == ModifierKeys::altModifier + ModifierKeys::leftButtonModifier)
         {
-            conn1.setCPIdx1(violinStrings[0]->getNumPoints() * e.x / static_cast<double>(getWidth()));
+            double cp = e.x < getWidth() ? violinStrings[0]->getNumPoints() * e.x / static_cast<double>(getWidth()) : violinStrings[0]->getNumPoints();
+            if (cp <= 0)
+            {
+                cp = 0;
+            }
+            conn1.setCPIdx1(cp);
         }
         else if (ModifierKeys::getCurrentModifiers() == ModifierKeys::ctrlModifier + ModifierKeys::leftButtonModifier)
         {
@@ -230,7 +243,13 @@ void MainComponent::mouseDrag(const MouseEvent &e)
     } else {
         if (ModifierKeys::getCurrentModifiers() == ModifierKeys::altModifier + ModifierKeys::leftButtonModifier)
         {
-            conn1.setCPIdx2(violinStrings[1]->getNumPoints() * e.x / static_cast<double>(getWidth()));
+            double cp = e.x < getWidth() ? violinStrings[1]->getNumPoints() * e.x / static_cast<double>(getWidth()) : violinStrings[1]->getNumPoints();
+            if (cp <= 0)
+            {
+                cp = 0;
+            }
+            conn1.setCPIdx2(cp);
+//            conn1.setCPIdx2(violinStrings[1]->getNumPoints() * e.x / static_cast<double>(getWidth()));
         }
         else if (ModifierKeys::getCurrentModifiers() == ModifierKeys::ctrlModifier + ModifierKeys::leftButtonModifier)
         {
