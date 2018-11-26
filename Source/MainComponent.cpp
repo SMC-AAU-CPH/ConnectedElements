@@ -55,6 +55,8 @@ void MainComponent::prepareToPlay(int samplesPerBlockExpected, double sampleRate
                     1, 1,
                     1, 500, 1000, fs);
     conn1 = conn;
+//    connectionPoint[0] = conn1.getCPIdx()[0];
+//    connectionPoint[1] = conn1.getCPIdx()[1];
     resized();
 }
 
@@ -76,14 +78,20 @@ void MainComponent::hiResTimerCallback()
                 {
                     state[index] = sensel->fingers[f].state;
                     xpos[index] = sensel->fingers[f].x;
+                    
                     ypos[index] = sensel->fingers[f].y;
                     Vb[index] = sensel->fingers[f].delta_y * maxVb;
                     Fb[index] = sensel->fingers[f].force * 1000;
                 }
+
                 if (f == 1)
-                    fingerPoint[index] = sensel->fingers[f].x;
-                if (f == 2)
-                    connectionPoint[index] = sensel->fingers[f].x;
+                {
+                    if (sensel->fingers[f].y < 0.1)
+                        connectionPoint[index] = sensel->fingers[f].x;
+                    else
+                        fingerPoint[index] = sensel->fingers[f].x;
+                
+                }
             }
 
             violinStrings[index]->setBow(state[index]);
@@ -91,7 +99,12 @@ void MainComponent::hiResTimerCallback()
             violinStrings[index]->setFb(Fb[index]);
             violinStrings[index]->setBowPos(xpos[index]);
             violinStrings[index]->setFingerPoint(fingerPoint[index]);
-            conn1.setCPIdx1(connectionPoint[index]);
+           
+            if (index == 0)
+                conn1.setCPIdx1(violinStrings[index]->getNumPoints() * connectionPoint[index]);
+            else
+                conn1.setCPIdx2(violinStrings[index]->getNumPoints() * connectionPoint[index]);
+
             if (state[index])
             {
                 auto position = xpos[index];
@@ -105,6 +118,7 @@ void MainComponent::hiResTimerCallback()
     {
         for (int s = 0; s < numStrings; s++)
         {
+            stringLines[s]->setFingerPoint(fingerPoint[s], violinStrings[s]->getNumPoints());
             stringLines[s]->updateStringStates(violinStrings[s]->getState(), xpos[s], ypos[s], Fb[s], conn1.getCPIdx()[s]);
         }
         //if (repaintFlag)
@@ -210,8 +224,8 @@ void MainComponent::mouseDrag(const MouseEvent &e)
 {
     double maxVb = 0.2;
 
-    double bp = e.x < getWidth() ? e.x / static_cast<double>(getWidth()) : getWidth();
-    double fp = e.x < getWidth() ? e.x / static_cast<double>(getWidth()) : getWidth();
+    double bp = e.x < getWidth() ? e.x / static_cast<double>(getWidth()) : 1;
+    double fp = e.x < getWidth() ? e.x / static_cast<double>(getWidth()) : 1;
     if (bp <= 0)
     {
         bp = 0;
