@@ -23,8 +23,7 @@ MainComponent::MainComponent() : minOut(-1.0), maxOut(1.0)
         addAndMakeVisible (violinStrings[i]);
     }
     
-    // start the hi-res timer
-    startTimer(1000.0 / 150.0);
+    
     setSize(1440, 900);
     
     setAudioChannels(0, 2);
@@ -33,6 +32,7 @@ MainComponent::MainComponent() : minOut(-1.0), maxOut(1.0)
 MainComponent::~MainComponent()
 {
     // This shuts down the audio device and clears the audio source.
+    stopTimer();
     shutdownAudio();
 }
 
@@ -51,6 +51,9 @@ void MainComponent::prepareToPlay (int samplesPerBlockExpected, double sampleRat
                     1, 1,
                     1, 500, 10, fs);
     conn1 = conn;
+    
+    // start the hi-res timer
+    startTimer(1000.0 / 150.0);
 }
 
 void MainComponent::hiResTimerCallback()
@@ -90,7 +93,7 @@ void MainComponent::hiResTimerCallback()
             violinStrings[index]->setVb(Vb[index]);
             violinStrings[index]->setFb(Fb[index]);
             violinStrings[index]->setBowPos(xpos[index], ypos[index]);
-            violinStrings[index]->setFingerPoint(fingerPoint[index]);
+            violinStrings[index]->setFingerPoint(fp[index]);
             
             conn1.setCP(index, cp[index]);
         }
@@ -104,6 +107,7 @@ void MainComponent::hiResTimerCallback()
         }
     }
     stateUpdateCounter++;
+    
 }
 
 void MainComponent::getNextAudioBlock(const AudioSourceChannelInfo &bufferToFill)

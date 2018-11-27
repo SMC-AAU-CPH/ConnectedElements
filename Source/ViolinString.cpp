@@ -242,7 +242,7 @@ void ViolinString::timerCallback()
     repaint();
 }
 
-Path ViolinString::generateStringPathAdvanced()
+Path ViolinString::generateStringPathAdvanced() 
 {
     auto stringBounds = height / 2.0;
     Path stringPath;
