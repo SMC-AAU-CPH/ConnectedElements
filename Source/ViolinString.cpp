@@ -23,9 +23,9 @@ ViolinString::ViolinString (double freq, double fs) : fs (fs), freq (freq)
     s0 = 1;                               // Frequency-independent damping
     s1 = 0.005;                             // Frequency-dependent damping
 
-    B = 0.0001;                             // Inharmonicity coefficient
-    kappa = sqrt (B) * (gamma / double_Pi); // Stiffness Factor
-    
+//    B = 0.0001;                             // Inharmonicity coefficient
+//    kappa = sqrt (B) * (gamma / double_Pi); // Stiffness Factor
+    kappa = 2;
     // Grid spacing
     h = sqrt ((gamma * gamma * k * k + 4.0 * s1 * k
               + sqrt (pow (gamma * gamma * k * k + 4.0 * s1 * k, 2.0)
@@ -70,28 +70,28 @@ void ViolinString::reset()
     fill(uNext.begin(), uNext.end(), 0.0);
 }
 
-void ViolinString::setFrequency (double freq)
-{
-    gamma = freq * 2;                       // Wave speed
-   // we dont want to set the kappa according to the gamma 
-//    kappa = sqrt (B) * (gamma / double_Pi); // Stiffness Factor
-    
-    // Grid spacing
-    h = sqrt ((gamma * gamma * k * k + 4.0 * s1 * k
-               + sqrt (pow (gamma * gamma * k * k + 4.0 * s1 * k, 2.0)
-                       + 16.0 * kappa * kappa * k * k)) * 0.5);
-
-    N = floor (1.0 / h);                    // Number of gridpoints
-    h = 1.0 / N;                            // Recalculate gridspacing
-    N = 100;
-    
-    // Courant numbers
-    lambdaSq = pow (gamma * k / h, 2);
-    muSq = pow (k * kappa / (h * h), 2);
-    
-    kOh = (kappa * kappa) / (h * h);
-    gOh = (gamma * gamma) / (h * h);
-}
+//void ViolinString::setFrequency (double freq)
+//{
+//    gamma = freq * 2;                       // Wave speed
+//   // we dont want to set the kappa according to the gamma 
+////    kappa = sqrt (B) * (gamma / double_Pi); // Stiffness Factor
+//    
+//    // Grid spacing
+//    h = sqrt ((gamma * gamma * k * k + 4.0 * s1 * k
+//               + sqrt (pow (gamma * gamma * k * k + 4.0 * s1 * k, 2.0)
+//                       + 16.0 * kappa * kappa * k * k)) * 0.5);
+//
+//    N = floor (1.0 / h);                    // Number of gridpoints
+//    h = 1.0 / N;                            // Recalculate gridspacing
+//    N = 100;
+//    
+//    // Courant numbers
+//    lambdaSq = pow (gamma * k / h, 2);
+//    muSq = pow (k * kappa / (h * h), 2);
+//    
+//    kOh = (kappa * kappa) / (h * h);
+//    gOh = (gamma * gamma) / (h * h);
+//}
 
 ViolinString::~ViolinString()
 {
@@ -126,6 +126,7 @@ void ViolinString::bow()
     double Fb = _Fb.load();
     int bp = _bp.load();
     bool isBowing = _isBowing.load();
+    
     newtonRaphson();
     double excitation = k * k * (1 / h) * Fb * BM * q * exp (-a * q * q);
     for (int l = 2; l < N - 2; ++l)
@@ -191,4 +192,22 @@ void ViolinString::updateUVectors()
 {
     uPrev = u;
     u = uNext;
+}
+
+void ViolinString::setRaisedCos (double exciterPos, double width)
+{
+    int j = 0;
+    for (int i = floor(exciterPos*N) - floor(width / 2.0); i < floor(exciterPos*N) + floor(width / 2.0); ++i)
+    {
+        u[i] = (1 - cos(2 * double_Pi * j / width)) * 0.5;
+        uPrev = u;
+        ++j;
+    }
+    
+}
+
+void ViolinString::setRaisedCosSinglePoint (double exciterPos)
+{
+    u[floor(exciterPos * N)] = 1;
+    uPrev = u;
 }

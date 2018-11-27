@@ -30,7 +30,7 @@ public:
     void newtonRaphson();
     double getOutput (double ratio);
 
-    void setFrequency(double freq);
+//    void setFrequency(double freq);
     void setFingerPoint(double val) { fp = floor (val * N); };
     void setFingerForce(double val) { ff = val; };
     //void setFingerOn (bool val) { fingerOn = val; };
@@ -52,6 +52,9 @@ public:
     
     
     void updateUVectors();
+    
+    void setRaisedCos (double exciterPos, double width);
+    void setRaisedCosSinglePoint (double exciterPos);
     
 private:
     double fs, freq, gamma, k, s0, s1, B, kappa, h, N, lambdaSq, muSq, kOh, gOh, a, BM, tol, q, qPrev, b, eps, fp;

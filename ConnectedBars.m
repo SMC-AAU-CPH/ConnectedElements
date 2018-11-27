@@ -11,12 +11,12 @@ k = 1 / fs;     % Time step
 % Strings: wavespeed, stiffness, freq. dep. damping, freq. indep. damping
 
 objectVars{1, 1} = "string";
-freq1 = 196.0;
-objectVars{1, 2} = [freq1*2, 2, 0.1, 0.005];
+freq1 = 110.0;
+objectVars{1, 2} = [freq1*2, 2, 1, 0.005];
 
 objectVars{2, 1} = "bowedString";
-freq2 = 110;
-objectVars{2, 2} = [freq1*4, 2, 0.1, 0.005];
+freq2 = freq1 * 2^(7/12);
+objectVars{2, 2} = [freq2*2, 2, 1, 0.005];
 
 % objectVars{3, 1} = "plate";
 % objectVars{3, 2} = [1, 1, 0.005, 4];
@@ -39,7 +39,7 @@ Ny = cell(Q, 1);
 
 Ntot = 0;
 
-whatExciter = "normal";
+whatExciter = "raisedCos";
 
 for q = 1:Q
     
@@ -48,7 +48,7 @@ for q = 1:Q
     elseif objectVars{q, 1} == "string"
         [Bpre{q}, Cpre{q}, N(q), h(q), s0(q)] = createString(objectVars{q, 2}, fs);
     elseif objectVars{q, 1} == "bowedString"
-        whatExciter = "bowed";
+%         whatExciter = "bowed";
         [Bpre{q}, Cpre{q}, bB{q}, bC{q}, N(q), h(q), s0(q)] = createBowedString(objectVars{q, 2}, fs);
     elseif objectVars{q, 1} == "plate"
         [Bpre{q}, Cpre{q}, N(q), h(q), s0(q), Nx{q}, Ny{q}] = createPlate(objectVars{q, 2}, fs);
@@ -74,6 +74,10 @@ end
 
 %% Initialise state vectors
 u = zeros(Ntot, 1);
+rcW = 2;
+exciterPos = 0.5;
+% u(matIdx(1) + floor(exciterPos*N(1)-rcW/2):matIdx(1) + floor(exciterPos*N(1)+rcW/2)) = (1-cos(2*pi*(0:rcW)/rcW)) * 0.5;
+u(floor(exciterPos*N(1))) = 1;
 uPrev = u;
 uNext = u;
 
@@ -111,7 +115,7 @@ end
 %% Connections
 
 % 1st, 2nd object, 1st, 2nd location of connection and 1st, 2nd width of connection
-conn = [1, 2, 0.5, 0.25, 1, 1];
+conn = [1, 2, 0.5, 0.4, 1, 1];
 %         1, 2, 0.9, 0.6, 1, 1];
 %         1, 2, 0.9, 0.5, 1, 1];
 
@@ -140,8 +144,8 @@ sx = zeros(Qc, 1);
 w0 = zeros(Qc, 1);
 w1 = zeros(Qc, 1);
 
-sx(1) = 0;
-w0(1) = 1000000; 
+sx(1) = 1;
+w0(1) = 10; 
 w1(1) = 1000000; 
 
 % sx(2) = 0;
@@ -192,17 +196,17 @@ for n = 1 : lengthSound
         uTemp = B * u + C * uPrev - excitation';
     else
         % temporary value for the next u (without the spring forces)
-        uTemp = B * u + C * uPrev + K*exciter(n);
+        uTemp = B * u + C * uPrev; % + K*exciter(n);
     end 
     % find Fc
     bn = L * uTemp; 
     an = Rn * etaRPrev; 
     
     Fc = (L*J-Pn)\(an - bn);
- 
-    uNext = uTemp + J * Fc;
+    JFc = J * Fc;
+    uNext = uTemp + JFc;
     
-    out(n) = u(round(N(1)/5));
+    out(n) = uNext(floor(N(1)/2));
     out2(n) = u(round(Ntot - 15));
     if mod(n,1) == 0 && drawBar == true
         subplot(2,1,1)

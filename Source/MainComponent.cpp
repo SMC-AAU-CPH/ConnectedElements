@@ -46,17 +46,16 @@ void MainComponent::prepareToPlay(int samplesPerBlockExpected, double sampleRate
         stringLines.add(new StringAnimation(lengthInPixels, c, getHeight() / 2.0));
         addAndMakeVisible(stringLines[i]);
     }
-
+    
+//    violinStrings[0]->setRaisedCosSinglePoint(0.5);
     for (int i = 0; i < amountOfSensels; i++)
         sensels.add(new Sensel(i)); // chooses the device in the sensel device list
 
     Connection conn(violinStrings[0], violinStrings[1],
                     0.5, 0.4,
                     1, 1,
-                    1, 500, 1000, fs);
+                    1, 10, 1000000, fs);
     conn1 = conn;
-//    connectionPoint[0] = conn1.getCPIdx()[0];
-//    connectionPoint[1] = conn1.getCPIdx()[1];
     resized();
 }
 
@@ -145,18 +144,18 @@ void MainComponent::getNextAudioBlock(const AudioSourceChannelInfo &bufferToFill
             violinStrings[j]->bow();
         }
 
+        vector<double> JFc = conn1.calculateJFc();
         for (int j = 0; j < numStrings; ++j)
         {
-            double JFc = conn1.calculateJFc()[j];
-            violinStrings[j]->addJFc(JFc, conn1.getCPIdx()[j]);
+            violinStrings[j]->addJFc(JFc[j], conn1.getCPIdx()[j]);
             violinStrings[j]->updateUVectors();
         }
 
-        output1 = violinStrings[0]->getOutput(0.8) * 600;
-        output2 = violinStrings[1]->getOutput(0.8) * 600;
-
-        channelData1[i] = clip(output1);
-        channelData2[i] = clip(output2);
+        output1 = violinStrings[0]->getOutput(0.25) * 600;
+        output2 = violinStrings[1]->getOutput(0.25) * 600;
+        
+        channelData1[i] = clip (output1);
+        channelData2[i] = clip (output2);
     }
 }
 float MainComponent::clip(float output)
