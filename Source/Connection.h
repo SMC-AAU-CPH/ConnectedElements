@@ -26,12 +26,10 @@ public:
     void calculateCoefs();
     
     vector<int> getCPIdx() { return cpIdx; };
-    void setCPIdx1 (int idx) { cpIdx[0] = idx; };
-    void setCPIdx2 (int idx) { cpIdx[1] = idx; };
+    void setCP (int idx, double ratio) { cpIdx[idx] = floor(ratio * objects[idx]->getNumPoints()); };
     
 private:
-    ViolinString* object1;
-    ViolinString* object2;
+    vector<ViolinString*> objects;
     vector<int> cpIdx;
     double width1, width2;  // Width of the connection
     double sx, w0, w1; // Spring damping, linear spring constant, non-linear spring constant

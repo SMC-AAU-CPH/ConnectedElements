@@ -16,6 +16,10 @@ ViolinString::ViolinString (double freq, double fs) : fs (fs), freq (freq)
 {
     // In your constructor, you should add any child components, and
     // initialise any special settings that your component needs.
+    setInterceptsMouseClicks (false, false);
+    
+    _bpX.store(0.25);
+    _bpY.store(0);
     
     gamma = freq * 2;                       // Wave speed
     k = 1 / fs;                             // Time-step
@@ -53,14 +57,15 @@ ViolinString::ViolinString (double freq, double fs) : fs (fs), freq (freq)
 
     
     _Vb.store(0.2);                               // Bowing speed
-    _Fb.store(20);                                // Bowing force / total mass of bow
-    
+    _Fb.store(20);                                // Bowing force / total mass of bow;
     // Initialise variables for Newton Raphson
     tol = 1e-4;
     qPrev = 0;
     
-    _bp.store(floor (N / 4.0));
     
+
+    
+    startTimerHz (60);
 }
 
 void ViolinString::reset()
@@ -106,6 +111,26 @@ void ViolinString::paint (Graphics& g)
        drawing code..
     */
 
+    g.setColour (Colours::cyan);
+    g.strokePath (generateStringPathAdvanced(), PathStrokeType (2.0f));
+    //double y = states[conn1] * 50000 + height / 2.0;
+    //g.drawEllipse(conn1, y, 10, 10, 1);
+    g.setColour(Colours::orange);
+    g.drawEllipse(floor(_cx.load() - 5), floor(_cy.load() - 5), 10, 10, 2);
+    
+    g.setColour(Colours::yellow);
+    g.fillEllipse(fpx - 5, height/2.0 - 5, 10, 10);
+    
+    // draw bow
+    g.setColour (Colours::yellow);
+    double opa = 100.0 / 100.0;
+    if (opa >= 1.0)
+    {
+        g.setOpacity (1.0);
+    } else {
+        g.setOpacity(opa);
+    }
+    g.fillRect (floor(_bpX.load() * getWidth()), floor(_bpY.load() * getHeight()) - getHeight() / 2.0, 10, getHeight());
 }
 
 void ViolinString::resized()
@@ -124,7 +149,7 @@ void ViolinString::bow()
     }
     
     double Fb = _Fb.load();
-    int bp = _bp.load();
+    int bp = _bpX.load() * N;
     bool isBowing = _isBowing.load();
     
     newtonRaphson();
@@ -152,7 +177,7 @@ void ViolinString::newtonRaphson()
 {
     double Vb = _Vb.load();
     double Fb = _Fb.load();
-    int bp = _bp.load();
+    int bp = _bpX.load() * N;
     
     b = 2.0 / k * Vb - (2.0 / (k * k)) * (u[bp] - uPrev[bp])
     - gOh * (u[bp + 1] - 2 * u[bp] + u[bp - 1])
@@ -210,4 +235,43 @@ void ViolinString::setRaisedCosSinglePoint (double exciterPos)
 {
     u[floor(exciterPos * N)] = 1;
     uPrev = u;
+}
+
+void ViolinString::timerCallback()
+{
+    repaint();
+}
+
+Path ViolinString::generateStringPathAdvanced()
+{
+    auto stringBounds = height / 2.0;
+    Path stringPath;
+    stringPath.startNewSubPath (0, stringBounds);
+    
+    auto spacing = width / double(N);
+    auto x = spacing;
+    
+    for (int y = 0; y < N; y++)
+    {
+        const float newY = uNext[y] * 50000 + stringBounds;
+        stringPath.lineTo(x, newY);
+        if (y == _cpIdx.load())
+        {
+            _cx.store(x);
+            _cy.store(newY);
+        }
+        if (y == fp)
+        {
+            fpx = x;
+        }
+        x += spacing;
+    }
+    stringPath.lineTo(width, stringBounds);
+    
+    return stringPath;
+}
+
+void ViolinString::mouseDrag(const MouseEvent &e)
+{
+    std::cout << e.y << std::endl;
 }

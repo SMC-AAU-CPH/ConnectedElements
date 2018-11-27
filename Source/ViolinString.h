@@ -15,7 +15,7 @@ using namespace std;
 //==============================================================================
 /*
 */
-class ViolinString : public Component
+class ViolinString : public Component, public Timer
 {
 public:
     ViolinString(double freq, double fs);
@@ -38,7 +38,7 @@ public:
     void setBow(bool val) { _isBowing.store(val); };
     void setVb(double val) { _Vb.store(val); }
     void setFb(double val) { _Fb.store(val); }
-    void setBowPos(double val) { _bp.store(floor(val * N)); }
+    void setBowPos(double bpX, double bpY) { _bpX.store(bpX); _bpY.store(bpY); };
     void setFingerOn (bool val) { fingerOn = val; };
     
     double getNumPoints() { return N; };
@@ -56,10 +56,18 @@ public:
     void setRaisedCos (double exciterPos, double width);
     void setRaisedCosSinglePoint (double exciterPos);
     
+    Path generateStringPathAdvanced();
+    
+    void setConnection (double cp) { _cpIdx.store(floor(cp * N)); };
+    
+    void timerCallback() override;
+    void mouseDrag(const MouseEvent& e) override;
+    
 private:
     double fs, freq, gamma, k, s0, s1, B, kappa, h, N, lambdaSq, muSq, kOh, gOh, a, BM, tol, q, qPrev, b, eps, fp;
     double ff = 0.7;
-    atomic<double> _Vb, _Fb, _bp;
+    atomic<double> _Vb, _Fb, _bpX, _bpY;
+    atomic<int> _cx, _cy, _cpIdx;
     atomic<bool> _isBowing{false};
 
     vector<double> u, uPrev, uNext;
@@ -69,5 +77,9 @@ private:
     unsigned long t = 0;
     
     bool fingerOn = false;
+    int fpx = 0;
+    int width = 1440;
+    int height = 450;
+    
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ViolinString)
 };

@@ -12,7 +12,6 @@
 #include "ViolinString.h"
 #include "Connection.h"
 #include "../SenselWrapper/SenselWrapper.h"
-#include "StringAnimation.h"
 //==============================================================================
 /*
  This component lives inside our window, and this is where you should put all
@@ -40,6 +39,7 @@ public:
     void mouseDrag(const MouseEvent &e) override;
     void hiResTimerCallback() override;
     float clip(float output);
+    
 private:
     //==============================================================================
     double fs;
@@ -51,8 +51,6 @@ private:
     OwnedArray<ViolinString> violinStrings;
     Connection conn1;
     
-    OwnedArray<StringAnimation> stringLines;
-    
     OwnedArray<Sensel> sensels;
     
     unsigned long stateUpdateCounter = 0;
@@ -60,6 +58,11 @@ private:
     static const unsigned int amountOfSensels = 2;
     
     static const unsigned int numStrings = 2;
+    
+    vector<double> fp {0, 0};
+    vector<double> bpX {0, 0};
+    vector<double> bpY {0, 0};
+    vector<double> cp {0, 0};
     
     array<float, amountOfSensels> force = {0.0};
     array<float, amountOfSensels> xpos = {0.0};

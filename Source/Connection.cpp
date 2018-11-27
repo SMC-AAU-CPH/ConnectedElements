@@ -17,11 +17,12 @@ Connection::Connection()
 Connection::Connection(ViolinString* object1, ViolinString* object2,
                        double cp1, double cp2,
                        double width1, double width2,
-                       double sx, double w0, double w1, double fs) : object1(object1), object2(object2),
-                                                                    width1(width1), width2(width2),
-                                                                    sx(sx), w0(w0), w1(w1), k (1.0 / fs)
+                       double sx, double w0, double w1, double fs) : width1(width1), width2(width2),
+                                                                     sx(sx), w0(w0), w1(w1), k (1.0 / fs)
 {
 
+    objects.push_back(object1);
+    objects.push_back(object2);
     cpIdx.resize(2);
     cpIdx[0] = cp1 * object1->getNumPoints();
     cpIdx[1] = cp2 * object2->getNumPoints();
@@ -39,7 +40,7 @@ Connection::Connection(ViolinString* object1, ViolinString* object2,
 void Connection::calculateCoefs()
 {
     // Relative displacement
-    etaR = hA * object1->getStateAt(cpIdx[0]) - hB * object2->getStateAt(cpIdx[1]);
+    etaR = hA * objects[0]->getStateAt(cpIdx[0]) - hB * objects[1]->getStateAt(cpIdx[1]);
 
     
     rn = (2*sx/k - w0*w0 - pow(w1,4) * etaR*etaR) / (2.0*sx/k + w0*w0 + pow(w1,4) * etaR*etaR);
@@ -48,7 +49,7 @@ void Connection::calculateCoefs()
     
 vector<double> Connection::calculateJFc()
 {
-    bn = hA * object1->getNextStateAt(cpIdx[0]) - hB * object2->getNextStateAt(cpIdx[1]);
+    bn = hA * objects[0]->getNextStateAt(cpIdx[0]) - hB * objects[1]->getNextStateAt(cpIdx[1]);
     an = rn * etaRPrev;
     
     jA = k * k / ((1 + s0A) * k);
