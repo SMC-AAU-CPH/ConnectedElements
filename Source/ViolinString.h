@@ -30,10 +30,8 @@ public:
     void newtonRaphson();
     double getOutput (double ratio);
 
-//    void setFrequency(double freq);
     void setFingerPoint(double val) { fp = floor (val * N); };
     void setFingerForce(double val) { ff = val; };
-    //void setFingerOn (bool val) { fingerOn = val; };
 
     void setBow(bool val) { _isBowing.store(val); };
     void setVb(double val) { _Vb.store(val); }

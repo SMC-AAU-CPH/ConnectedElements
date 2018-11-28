@@ -69,7 +69,7 @@ void MainComponent::hiResTimerCallback()
                 } else
                 {
                     if (sensel->fingers[f].y < 0.1)
-                        cp[index] = sensel->fingers[f].x;
+                        connectionPoint[index] = sensel->fingers[f].x;
                     else
                         fp[index] = sensel->fingers[f].x;
                 }
@@ -80,8 +80,9 @@ void MainComponent::hiResTimerCallback()
             instruments[0]->getObjects()[index]->setFb(Fb[index]);
             instruments[0]->getObjects()[index]->setBowPos(xpos[index], ypos[index]);
             instruments[0]->getObjects()[index]->setFingerPoint(fp[index]);
-            
-//            connections[0].setCP(index, cp[index]);
+            instruments[0]->getObjects()[index]->setConnection(connectionPoint[index]);
+            instruments[0]->getConnections()[0].setCP (index, connectionPoint[index]);
+
         }
     }
 

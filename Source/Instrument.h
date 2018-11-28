@@ -60,6 +60,7 @@ public:
     vector<double> calculateOutput();
     
     OwnedArray<ViolinString>& getObjects() { return objects; };
+    vector<Connection>& getConnections() { return connections; };
     
     void mouseDown(const MouseEvent &e) override;
     void mouseUp(const MouseEvent &e) override;

@@ -48,7 +48,7 @@ void Instrument::paint (Graphics& g)
     
     double y1 = objects[0]->getCy();
     double y2 = objects[1]->getCy();
-    
+  
     Line<float> connectionLine (ceil(connections[0].getCPIdx()[0] * getWidth() / objects[0]->getNumPoints()), y1,
                ceil(connections[0].getCPIdx()[1] * getWidth() / objects[1]->getNumPoints()), getHeight() / 2.0 + y2);
     float dashPattern[2];
