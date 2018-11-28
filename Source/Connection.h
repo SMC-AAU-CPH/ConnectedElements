@@ -14,20 +14,32 @@
 
 using namespace std;
 
-class Connection
+class Connection : public Component
 {
 public:
     Connection();
     Connection(ViolinString* object1, ViolinString* object2,
                double cp1, double cp2,
                double width1, double width2,
-               double sx, double w0, double w1, double k);
+               double sx, double w0, double w1, double fs);
+    
+    void paint(Graphics& g) override;
+    void resized() override;
+    
+    void setCoeffs(ViolinString* object1, ViolinString* object2,
+                   double cp1, double cp2,
+                   double width1, double width2,
+                   double sx, double w0, double w1, double fs);
+    
     vector<double> calculateJFc();
     void calculateCoefs();
     
     vector<int> getCPIdx() { return cpIdx; };
     void setCP (int idx, double ratio) { cpIdx[idx] = floor(ratio * objects[idx]->getNumPoints()); };
-    
+//    void mouseDrag (const MouseEvent& e) override
+//    {
+//        std::cout << "Connection " << e.x << std::endl;
+//    }
 private:
     vector<ViolinString*> objects;
     vector<int> cpIdx;

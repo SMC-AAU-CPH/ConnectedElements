@@ -119,11 +119,11 @@ void ViolinString::paint (Graphics& g)
     g.drawEllipse(floor(_cx.load() - 5), floor(_cy.load() - 5), 10, 10, 2);
     
     g.setColour(Colours::yellow);
-    g.fillEllipse(fpx - 5, height/2.0 - 5, 10, 10);
+    g.fillEllipse(fpx - 5, getHeight() / 2.0 - 5, 10, 10);
     
     // draw bow
     g.setColour (Colours::yellow);
-    double opa = 100.0 / 100.0;
+    double opa = 90.0 / 100.0;
     if (opa >= 1.0)
     {
         g.setOpacity (1.0);
@@ -244,11 +244,11 @@ void ViolinString::timerCallback()
 
 Path ViolinString::generateStringPathAdvanced() 
 {
-    auto stringBounds = height / 2.0;
+    auto stringBounds = getHeight() / 2.0;
     Path stringPath;
     stringPath.startNewSubPath (0, stringBounds);
     
-    auto spacing = width / double(N);
+    auto spacing = getWidth() / double(N);
     auto x = spacing;
     
     for (int y = 0; y < N; y++)
@@ -266,7 +266,7 @@ Path ViolinString::generateStringPathAdvanced()
         }
         x += spacing;
     }
-    stringPath.lineTo(width, stringBounds);
+    stringPath.lineTo(getWidth(), stringBounds);
     
     return stringPath;
 }

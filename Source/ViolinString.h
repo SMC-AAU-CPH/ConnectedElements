@@ -78,8 +78,6 @@ private:
     
     bool fingerOn = false;
     int fpx = 0;
-    int width = 1440;
-    int height = 450;
     
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ViolinString)
 };

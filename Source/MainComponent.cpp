@@ -17,15 +17,16 @@ MainComponent::MainComponent() : minOut(-1.0), maxOut(1.0)
 
     double frequencyInHz[] = {110.0, 110.0 * pow(2, 7.0 / 12.0)};
     
+//    addAndMakeVisible(conn1);
+    
     for (int i = 0; i < numStrings; ++i)
     {
         violinStrings.add (new ViolinString(frequencyInHz[i], 44100));
         addAndMakeVisible (violinStrings[i]);
     }
-    
+
     
     setSize(1440, 900);
-    
     setAudioChannels(0, 2);
 }
 
@@ -45,13 +46,11 @@ void MainComponent::prepareToPlay (int samplesPerBlockExpected, double sampleRat
     for (int i = 0; i < amountOfSensels; i++)
         sensels.add(new Sensel(i)); // chooses the device in the sensel device list
 
-    cp = {0.95, 0.95};
-    Connection conn(violinStrings[0], violinStrings[1],
-                    cp[0], cp[1],
-                    1, 1,
-                    1, 500, 10, fs);
-    conn1 = conn;
-    
+    cp = {0.95, 0.5};
+    conn1.setCoeffs (violinStrings[0], violinStrings[1],
+                     cp[0], cp[1],
+                     1, 1,
+                     1, 500, 10, fs);
     // start the hi-res timer
     startTimer(1000.0 / 150.0);
 }
@@ -136,7 +135,6 @@ void MainComponent::getNextAudioBlock(const AudioSourceChannelInfo &bufferToFill
         }
         channelData1[i] = clip (output[0]);
         channelData2[i] = clip (output[1]);
-
         
     }
 }
@@ -175,6 +173,7 @@ void MainComponent::paint(Graphics &g)
 
 void MainComponent::resized()
 {
+    conn1.setBounds(getLocalBounds());
     violinStrings[0]->setBounds(0, 0, getWidth(), getHeight() / 2.0);
     violinStrings[1]->setBounds(0, getHeight() / 2.0, getWidth(), getHeight() / 2.0);
 }
@@ -197,7 +196,6 @@ void MainComponent::mouseDown(const MouseEvent &e)
 void MainComponent::mouseDrag(const MouseEvent &e)
 {
     double maxVb = 0.2;
-
     int idx;
     if (e.y < getHeight() / 2.0)
     {
