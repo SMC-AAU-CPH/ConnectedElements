@@ -40,16 +40,46 @@ public:
     void hiResTimerCallback() override;
     float clip(float output);
     
+    class Connection {
+    
+    public:
+        Connection(ViolinString* object1, ViolinString* object2,
+                   double cp1, double cp2,
+                   double width1, double width2,
+                   double sx, double w0, double w1);
+        ~Connection();
+        
+        double calculateJFc()[2];
+        void calculateCoefs();
+        
+        vector<int> getCPIdx() { return cpIdx; };
+        void setCP (int idx, double ratio) { cpIdx[idx] = floor(ratio * objects[idx]->getNumPoints()); };
+        
+    private:
+        vector<ViolinString*> objects;
+        
+        vector<int> cpIdx;
+        double width1, width2;  // Width of the connection
+        double sx, w0, w1; // Spring constants: damping, linear spring constant, non-linear spring constant
+        
+        double etaRPrev = 0;
+        double massRatio = 1;
+        double hA, hB, s0A, s0B, Fc;
+        double etaR, rn, pn, an, bn, jA, jB;
+        vector<double> JFc;
+        double k;
+    };
+    
 private:
     //==============================================================================
-    double fs;
+    static double fs;
     double bufferSize;
     
     float minOut;
     float maxOut;
     
     OwnedArray<ViolinString> violinStrings;
-    Connection conn1;
+    vector<Connection> connections;
     
     OwnedArray<Sensel> sensels;
     

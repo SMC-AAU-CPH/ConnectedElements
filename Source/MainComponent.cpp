@@ -44,13 +44,14 @@ void MainComponent::prepareToPlay (int samplesPerBlockExpected, double sampleRat
     bufferSize = samplesPerBlockExpected;
 
     for (int i = 0; i < amountOfSensels; i++)
+    {
         sensels.add(new Sensel(i)); // chooses the device in the sensel device list
-
-    cp = {0.95, 0.5};
-    conn1.setCoeffs (violinStrings[0], violinStrings[1],
-                     cp[0], cp[1],
-                     1, 1,
-                     1, 500, 10, fs);
+    }
+    
+    connections.push_back(Connection(violinStrings[0], violinStrings[1],
+                                     0.95, 0.95,
+                                     1, 1,
+                                     1, 500, 10));
     // start the hi-res timer
     startTimer(1000.0 / 150.0);
 }
@@ -94,11 +95,11 @@ void MainComponent::hiResTimerCallback()
             violinStrings[index]->setBowPos(xpos[index], ypos[index]);
             violinStrings[index]->setFingerPoint(fp[index]);
             
-            conn1.setCP(index, cp[index]);
+            connections[0].setCP(index, cp[index]);
         }
     }
 
-    if (stateUpdateCounter % 10 == 0)
+    if (stateUpdateCounter % 20 == 0)
     {
         for (int s = 0; s < numStrings; s++)
         {
@@ -119,14 +120,24 @@ void MainComponent::getNextAudioBlock(const AudioSourceChannelInfo &bufferToFill
 
     for (int i = 0; i < bufferToFill.buffer->getNumSamples(); i++)
     {
-
-        conn1.calculateCoefs();
+        // calculate coefficients from relative displacements
+        for (int j = 0; j < connections.size(); ++j)
+        {
+            connections[j].calculateCoefs();
+        }
+        
+        // Interact with the components
         for (int j = 0; j < numStrings; ++j)
         {
             violinStrings[j]->bow();
         }
-
-        vector<double> JFc = conn1.calculateJFc();
+        
+        // Calculate the connection forces
+        vector<double[2]> JFc; // All connections have
+        for (int j = 0; j < connections.size(); ++j)
+        {
+            JFc[j] = connections[j].calculateJFc();
+        }
         for (int j = 0; j < numStrings; ++j)
         {
             violinStrings[j]->addJFc(JFc[j], conn1.getCPIdx()[j]);
@@ -236,3 +247,42 @@ void MainComponent::mouseUp(const MouseEvent &e)
         string->setBow(false);
     }
 }
+
+MainComponent::Connection::Connection (ViolinString* object1, ViolinString* object2,
+                                        double cp1, double cp2,
+                                        double width1, double width2,
+                                        double sx, double w0, double w1) : width1(width1), width2(width2), sx(sx), w0(w0), w1(w1)
+{
+    k = 1.0 / fs;
+    
+    objects.push_back(object1);
+    objects.push_back(object2);
+    cpIdx.resize(2);
+    cpIdx[0] = cp1 * object1->getNumPoints();
+    cpIdx[1] = cp2 * object2->getNumPoints();
+    
+    hA = object1->getGridSpacing();
+    hB = object2->getGridSpacing();
+    s0A = object1->getS0();
+    s0B = object2->getS0();
+    
+    JFc.resize(2);
+}
+
+double MainComponent::Connection::calculateJFc()[2]
+{
+    bn = hA * objects[0]->getNextStateAt(cpIdx[0]) - hB * objects[1]->getNextStateAt(cpIdx[1]);
+    an = rn * etaRPrev;
+    
+    jA = k * k / ((1 + s0A) * k);
+    jB = -k * k * massRatio / ((1 + s0B) * k);
+    
+    etaRPrev = etaR;
+    Fc = (an - bn) / ((hA * jA - hB * jB) - pn);
+    
+    JFc[0] = jA * Fc;
+    JFc[1] = jB * Fc;
+    
+    return JFc;
+}
+
