@@ -18,7 +18,8 @@
  */
 
 class MainComponent : public AudioAppComponent,
-                      public HighResolutionTimer
+                      public HighResolutionTimer,
+                      public Timer
 {
 public:
     //==============================================================================
@@ -35,6 +36,8 @@ public:
     void resized() override;
 
     void hiResTimerCallback() override;
+    void timerCallback() override;
+
     float clip(float output);
     
 private:

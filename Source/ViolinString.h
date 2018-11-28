@@ -11,11 +11,13 @@
 #pragma once
 
 #include "../JuceLibraryCode/JuceHeader.h"
+//#include "Object.h"
+
 using namespace std;
 //==============================================================================
 /*
 */
-class ViolinString : public Component, public Timer
+class ViolinString : public Component
 {
 public:
     ViolinString(double freq, double fs);
@@ -23,6 +25,7 @@ public:
     
     void paint(Graphics &) override;
     void resized() override;
+    
     void reset(); 
     void bow();
     void addJFc (double JFc, int index);
@@ -48,7 +51,6 @@ public:
     double getGridSpacing() { return h; };
     double getS0() { return s0; };
     
-    
     void updateUVectors();
     
     void setRaisedCos (double exciterPos, double width);
@@ -58,7 +60,6 @@ public:
     
     void setConnection (double cp) { _cpIdx.store(floor(cp * N)); };
     
-    void timerCallback() override;
     void mouseDrag(const MouseEvent& e) override;
     
     int getCy() { return _cy.load(); };

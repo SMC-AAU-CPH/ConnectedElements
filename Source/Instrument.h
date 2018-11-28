@@ -16,11 +16,16 @@
 //==============================================================================
 /*
 */
+enum ObjectType
+{
+    bowedString,
+    plate,
+};
 
 class Instrument    : public Component
 {
 public:
-    Instrument (vector<String> objectNames, double fs);
+    Instrument (vector<ObjectType> objectTypes, double fs);
     ~Instrument();
 
     void paint (Graphics&) override;

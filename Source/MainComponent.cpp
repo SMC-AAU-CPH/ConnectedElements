@@ -22,7 +22,8 @@ MainComponent::MainComponent() : minOut(-1.0), maxOut(1.0)
 MainComponent::~MainComponent()
 {
     // This shuts down the audio device and clears the audio source.
-    stopTimer();
+    HighResolutionTimer::stopTimer();
+    Timer::stopTimer();
     shutdownAudio();
 }
 
@@ -36,12 +37,13 @@ void MainComponent::prepareToPlay (int samplesPerBlockExpected, double sampleRat
     {
         sensels.add(new Sensel(i)); // chooses the device in the sensel device list
     }
-    vector<String> objects {"string", "string"};
+    vector<ObjectType> objects {bowedString, bowedString, plate};
     instruments.add (new Instrument (objects ,fs));
     addAndMakeVisible(instruments[0]);
     numInstruments = instruments.size();
     // start the hi-res timer
-    startTimer(1000.0 / 150.0);
+    HighResolutionTimer::startTimer(1000.0 / 150.0);
+    Timer::startTimerHz(30);
     setSize(1440, 900);
 }
 
@@ -75,14 +77,16 @@ void MainComponent::hiResTimerCallback()
                 }
             }
 
-            instruments[0]->getObjects()[index]->setBow(state[index]);
-            instruments[0]->getObjects()[index]->setVb(Vb[index]);
-            instruments[0]->getObjects()[index]->setFb(Fb[index]);
-            instruments[0]->getObjects()[index]->setBowPos(xpos[index], ypos[index]);
-            instruments[0]->getObjects()[index]->setFingerPoint(fp[index]);
-            instruments[0]->getObjects()[index]->setConnection(connectionPoint[index]);
-            instruments[0]->getConnections()[0].setCP (index, connectionPoint[index]);
-
+            for (auto instrument : instruments)
+            {
+                instrument->getObjects()[index]->setBow(state[index]);
+                instrument->getObjects()[index]->setVb(Vb[index]);
+                instrument->getObjects()[index]->setFb(Fb[index]);
+                instrument->getObjects()[index]->setBowPos(xpos[index], ypos[index]);
+                instrument->getObjects()[index]->setFingerPoint(fp[index]);
+                instrument->getObjects()[index]->setConnection(connectionPoint[index]);
+                instrument->getConnections()[0].setCP (index, connectionPoint[index]);
+            }
         }
     }
 
@@ -131,13 +135,6 @@ void MainComponent::paint(Graphics &g)
 {
     g.setColour(Colours::lightgrey);
     g.drawLine(0, getHeight() / 2.0, getWidth(), getHeight() / 2.0);
-//    for (int i = 0; i < instruments[0]->getObjects().size(); ++i)
-//    {
-//        g.setColour(Colour::fromRGBA(50 + i * 200.0 / static_cast<double>(instruments[0]->getObjects().size()), 0, 0, 0.2));
-//        g.fillRect(0, 0, getWidth(), getHeight() / 2.0);
-//        g.setColour(Colours::grey);
-//        g.drawRect(0, getHeight() / 2.0, getWidth(), getHeight() / 2.0);
-//    }
 }
 
 void MainComponent::resized()
@@ -157,4 +154,9 @@ float MainComponent::clip(float output)
         return output = minOut;
     }
     return output;
+}
+
+void MainComponent::timerCallback()
+{
+    repaint();
 }
