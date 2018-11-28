@@ -18,19 +18,19 @@
 
 #include <math.h>
 #include <iostream>
+#include "../JuceLibraryCode/JuceHeader.h"
 
 using namespace std;
 
-class Plate
+class Plate : public Component
 {
 public:
   Plate()
   {
     //setSampleRate(1.0f / sample_duration);
-      sigma0 = 0.1;
-      sigma1 = 0.005;
+    sigma0 = 0.1;
+    sigma1 = 0.005;
   }
-  
 
   void setSampleRate(double sampleRate)
   {
@@ -140,6 +140,16 @@ public:
       return in;
   }
 
+  void paint(Graphics &g)
+  {
+    //    std::cout << "painting" << std::endl;
+  }
+
+  void resized()
+  {
+    //std::cout << "resized" << std::endl;
+  }
+
 private:
   float frequency = 220;
   double k = 1.0f / 48000.0f;
@@ -165,65 +175,65 @@ private:
 class PlateExciter
 {
 public:
-    PlateExciter()
-    {
-        Fe.resize(maxLength);
-        
-        for (int i = 0; i < exciterLength; i++)
-            Fe[i] = Fmax / 2.0f * (1 - cos(2 * M_PI * i / exciterLength));
-        
-        /*for (int i = 0; i < exciterLength; i++)
+  PlateExciter()
+  {
+    Fe.resize(maxLength);
+
+    for (int i = 0; i < exciterLength; i++)
+      Fe[i] = Fmax / 2.0f * (1 - cos(2 * M_PI * i / exciterLength));
+
+    /*for (int i = 0; i < exciterLength; i++)
          std::cout << "exciter: " << Fe[i] << "\n";*/
-    }
-    
-    void excite()
+  }
+
+  void excite()
+  {
+    play = true;
+  }
+  void setLength(int L)
+  {
+    if (L > maxLength)
+      L = maxLength;
+
+    exciterLength = L;
+
+    for (int i = 0; i < exciterLength; i++)
+      Fe[i] = Fmax * 0.5f * (1.0f - cos(q * M_PI * i / exciterLength));
+  }
+
+  void setLevel(double level)
+  {
+    //Fmax = level * 1e8;
+
+    for (int i = 0; i < exciterLength; i++)
+      Fe[i] = Fmax * 0.5f * (1.0f - cos(q * M_PI * i / exciterLength));
+  }
+
+  double getOutput()
+  {
+    double output = 0.0f;
+
+    if (play)
     {
-        play = true;
+      output = Fe[pos];
+      //std::cout << "exciter: " << Fe[pos] << "\n";
+      pos++;
     }
-    void setLength(int L)
+
+    if (pos >= exciterLength)
     {
-        if (L > maxLength)
-            L = maxLength;
-        
-        exciterLength = L;
-        
-        for (int i = 0; i < exciterLength; i++)
-            Fe[i] = Fmax * 0.5f * (1.0f - cos(q * M_PI * i / exciterLength));
+      pos = 0;
+      play = false;
     }
-    
-    void setLevel(double level)
-    {
-        //Fmax = level * 1e8;
-        
-        for (int i = 0; i < exciterLength; i++)
-            Fe[i] = Fmax * 0.5f * (1.0f - cos(q * M_PI * i / exciterLength));
-    }
-    
-    double getOutput()
-    {
-        double output = 0.0f;
-        
-        if (play)
-        {
-            output = Fe[pos];
-            //std::cout << "exciter: " << Fe[pos] << "\n";
-            pos++;
-        }
-        
-        if (pos >= exciterLength)
-        {
-            pos = 0;
-            play = false;
-        }
-        return output;
-    }
-    
-    bool play = false;
-    int pos = 0;
-    float q = 1;
-    int exciterLength = 10;
-    int maxLength = 2000;
-    double Fmax = 1.0f;
-    
-    vector<double> Fe;
+    return output;
+  }
+
+  bool play = false;
+  int pos = 0;
+  float q = 1;
+  int exciterLength = 10;
+  int maxLength = 2000;
+  double Fmax = 1.0f;
+
+  vector<double> Fe;
 };

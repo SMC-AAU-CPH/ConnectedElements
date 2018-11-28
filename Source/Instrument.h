@@ -12,6 +12,7 @@
 
 #include "../JuceLibraryCode/JuceHeader.h"
 #include "ViolinString.h"
+#include "Plate.h"
 
 //==============================================================================
 /*

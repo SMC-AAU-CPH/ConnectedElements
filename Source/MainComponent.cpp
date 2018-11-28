@@ -23,6 +23,16 @@ MainComponent::~MainComponent()
 {
     // This shuts down the audio device and clears the audio source.
     stopTimer();
+    
+     for (auto sensel : sensels)
+     {
+         if (sensel->senselDetected)
+         {
+             sensel->shutDown();
+         }
+     }
+    
+        
     shutdownAudio();
 }
 
