@@ -10,7 +10,7 @@
 
 #include "../JuceLibraryCode/JuceHeader.h"
 #include "ViolinString.h"
-#include "Connection.h"
+//#include "Connection.h"
 #include "../SenselWrapper/SenselWrapper.h"
 //==============================================================================
 /*
@@ -46,10 +46,9 @@ public:
         Connection(ViolinString* object1, ViolinString* object2,
                    double cp1, double cp2,
                    double width1, double width2,
-                   double sx, double w0, double w1);
-        ~Connection();
+                   double sx, double w0, double w1, double fs);
         
-        double calculateJFc()[2];
+        vector<double> calculateJFc();
         void calculateCoefs();
         
         vector<int> getCPIdx() { return cpIdx; };
@@ -72,7 +71,7 @@ public:
     
 private:
     //==============================================================================
-    static double fs;
+    double fs;
     double bufferSize;
     
     float minOut;
@@ -80,6 +79,7 @@ private:
     
     OwnedArray<ViolinString> violinStrings;
     vector<Connection> connections;
+    vector<vector<double>> JFc; // All connections have a force on 2 components
     
     OwnedArray<Sensel> sensels;
     

@@ -51,7 +51,8 @@ void MainComponent::prepareToPlay (int samplesPerBlockExpected, double sampleRat
     connections.push_back(Connection(violinStrings[0], violinStrings[1],
                                      0.95, 0.95,
                                      1, 1,
-                                     1, 500, 10));
+                                     1, 500, 10, fs));
+    JFc.resize(connections.size());
     // start the hi-res timer
     startTimer(1000.0 / 150.0);
 }
@@ -133,14 +134,13 @@ void MainComponent::getNextAudioBlock(const AudioSourceChannelInfo &bufferToFill
         }
         
         // Calculate the connection forces
-        vector<double[2]> JFc; // All connections have
         for (int j = 0; j < connections.size(); ++j)
         {
             JFc[j] = connections[j].calculateJFc();
         }
         for (int j = 0; j < numStrings; ++j)
         {
-            violinStrings[j]->addJFc(JFc[j], conn1.getCPIdx()[j]);
+            violinStrings[j]->addJFc(JFc[0][j], connections[0].getCPIdx()[j]);
             violinStrings[j]->updateUVectors();
             output[j] = violinStrings[j]->getOutput(0.75) * 600;
         }
@@ -184,7 +184,6 @@ void MainComponent::paint(Graphics &g)
 
 void MainComponent::resized()
 {
-    conn1.setBounds(getLocalBounds());
     violinStrings[0]->setBounds(0, 0, getWidth(), getHeight() / 2.0);
     violinStrings[1]->setBounds(0, getHeight() / 2.0, getWidth(), getHeight() / 2.0);
 }
@@ -217,7 +216,7 @@ void MainComponent::mouseDrag(const MouseEvent &e)
     if (ModifierKeys::getCurrentModifiers() == ModifierKeys::altModifier + ModifierKeys::leftButtonModifier)
     {
         cp[idx] = e.x <= 0 ? 0 : (e.x < getWidth() ? e.x / static_cast<double>(getWidth()) : 1);
-        conn1.setCP(idx, cp[idx]);
+        connections[0].setCP(idx, cp[idx]);
         violinStrings[idx]->setConnection (cp[idx]);
     }
     else if (ModifierKeys::getCurrentModifiers() == ModifierKeys::ctrlModifier + ModifierKeys::leftButtonModifier)
@@ -251,9 +250,8 @@ void MainComponent::mouseUp(const MouseEvent &e)
 MainComponent::Connection::Connection (ViolinString* object1, ViolinString* object2,
                                         double cp1, double cp2,
                                         double width1, double width2,
-                                        double sx, double w0, double w1) : width1(width1), width2(width2), sx(sx), w0(w0), w1(w1)
+                                        double sx, double w0, double w1, double fs) : width1(width1), width2(width2), sx(sx), w0(w0), w1(w1), k (1.0 / fs)
 {
-    k = 1.0 / fs;
     
     objects.push_back(object1);
     objects.push_back(object2);
@@ -267,15 +265,24 @@ MainComponent::Connection::Connection (ViolinString* object1, ViolinString* obje
     s0B = object2->getS0();
     
     JFc.resize(2);
-}
-
-double MainComponent::Connection::calculateJFc()[2]
-{
-    bn = hA * objects[0]->getNextStateAt(cpIdx[0]) - hB * objects[1]->getNextStateAt(cpIdx[1]);
-    an = rn * etaRPrev;
     
     jA = k * k / ((1 + s0A) * k);
     jB = -k * k * massRatio / ((1 + s0B) * k);
+}
+
+void MainComponent::Connection::calculateCoefs()
+{
+    // Relative displacement
+    etaR = hA * objects[0]->getStateAt(cpIdx[0]) - hB * objects[1]->getStateAt(cpIdx[1]);
+    
+    rn = (2*sx/k - w0*w0 - pow(w1,4) * etaR*etaR) / (2.0*sx/k + w0*w0 + pow(w1,4) * etaR*etaR);
+    pn = -2.0/(2.0*sx/k + w0*w0 + pow(w1,4)*etaR*etaR);
+}
+
+vector<double> MainComponent::Connection::calculateJFc()
+{
+    bn = hA * objects[0]->getNextStateAt(cpIdx[0]) - hB * objects[1]->getNextStateAt(cpIdx[1]);
+    an = rn * etaRPrev;
     
     etaRPrev = etaR;
     Fc = (an - bn) / ((hA * jA - hB * jB) - pn);
