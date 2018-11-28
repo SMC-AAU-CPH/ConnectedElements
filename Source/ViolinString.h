@@ -63,6 +63,8 @@ public:
     void timerCallback() override;
     void mouseDrag(const MouseEvent& e) override;
     
+    int getCy() { return _cy.load(); };
+    
 private:
     double fs, freq, gamma, k, s0, s1, B, kappa, h, N, lambdaSq, muSq, kOh, gOh, a, BM, tol, q, qPrev, b, eps, fp;
     double ff = 0.7;
