@@ -39,17 +39,24 @@ public:
                    double cp1, double cp2,
                    double width1, double width2,
                    double sx, double w0, double w1, double fs);
+
+        Connection(ViolinString* object1, Plate* object2,
+                   double cp1, double cp2x, double cp2y,
+                   double width1, double width2,
+                   double sx, double w0, double w1, double fs);
         
         vector<double> calculateJFc();
         void calculateCoefs();
         
         vector<int> getCPIdx() { return cpIdx; };
-        void setCP (int idx, double ratio) { cpIdx[idx] = floor(ratio * objects[idx]->getNumPoints()); };
+        void setCP (int idx, double ratio) { cpIdx[idx] = floor(ratio * violinStrings[idx]->getNumPoints()); };
+//        void setCPPlate (int idx, double ratioX, double ratioY) { cpIdx[idx] = floor(ratio * violinStrings[idx]->getNumPoints()); };
         
         vector<double> getJFc() { return JFc; };
         
     private:
-        vector<ViolinString*> objects;
+        vector<ViolinString*> violinStrings;
+        vector<Plate*> plates;
         
         vector<int> cpIdx;
         double width1, width2;  // Width of the connection
@@ -65,18 +72,25 @@ public:
     
     vector<double> calculateOutput();
     
-    OwnedArray<ViolinString>& getObjects() { return objects; };
+    OwnedArray<ViolinString>& getStrings() { return violinStrings; };
+    OwnedArray<Plate>& getPlates() { return plates; };
+    
     vector<Connection>& getConnections() { return connections; };
     
     void mouseDown(const MouseEvent &e) override;
     void mouseUp(const MouseEvent &e) override;
     void mouseDrag(const MouseEvent &e) override;
     
+    int getNumStrings() { return numStrings; };
+    int getNumPlates() { return numPlates; };
+    
 private:
-    OwnedArray<ViolinString> objects;
+    OwnedArray<ViolinString> violinStrings;
+    OwnedArray<Plate> plates;
     vector<Connection> connections;
     double fs;
-    unsigned int numStrings = 2;
+    unsigned int numStrings;
+    unsigned int numPlates;
     
     vector<double> fp {0, 0};
     vector<double> bpX {0, 0};

@@ -46,9 +46,11 @@ void MainComponent::prepareToPlay(int samplesPerBlockExpected, double sampleRate
     {
         sensels.add(new Sensel(i)); // chooses the device in the sensel device list
     }
-    vector<ObjectType> objects{bowedString, bowedString, plate};
+    vector<ObjectType> objects{bowedString, plate};
+    
     instruments.add(new Instrument(objects, fs));
     addAndMakeVisible(instruments[0]);
+    
     numInstruments = instruments.size();
     // start the hi-res timer
     HighResolutionTimer::startTimer(1000.0 / 150.0);
@@ -89,13 +91,20 @@ void MainComponent::hiResTimerCallback()
 
             for (auto instrument : instruments)
             {
-                instrument->getObjects()[index]->setBow(state[index]);
-                instrument->getObjects()[index]->setVb(Vb[index]);
-                instrument->getObjects()[index]->setFb(Fb[index]);
-                instrument->getObjects()[index]->setBowPos(xpos[index], ypos[index]);
-                instrument->getObjects()[index]->setFingerPoint(fp[index]);
-                instrument->getObjects()[index]->setConnection(connectionPoint[index]);
-                instrument->getConnections()[0].setCP(index, connectionPoint[index]);
+                if (index == 0)
+                {
+                    instrument->getStrings()[index]->setBow(state[index]);
+                    instrument->getStrings()[index]->setVb(Vb[index]);
+                    instrument->getStrings()[index]->setFb(Fb[index]);
+                    instrument->getStrings()[index]->setBowPos(xpos[index], ypos[index]);
+                    instrument->getStrings()[index]->setFingerPoint(fp[index]);
+                    instrument->getStrings()[index]->setConnection(connectionPoint[index]);
+                }
+                else if (index == 1)
+                {
+                    //platestuff
+                }
+//                instrument->getConnections()[0].setCP(index, connectionPoint[index]);
             }
         }
     }

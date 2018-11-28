@@ -30,8 +30,6 @@
     </GROUP>
     <GROUP id="{C397437D-6387-2E58-15AE-F03A3C683002}" name="Source">
       <FILE id="UWOPTp" name="Plate.h" compile="0" resource="0" file="Source/Plate.h"/>
-      <FILE id="NqzLol" name="Connection.cpp" compile="1" resource="0" file="Source/Connection.cpp"/>
-      <FILE id="D0EyA8" name="Connection.h" compile="0" resource="0" file="Source/Connection.h"/>
       <FILE id="hSG1t0" name="ViolinString.cpp" compile="1" resource="0"
             file="Source/ViolinString.cpp"/>
       <FILE id="w17sDf" name="ViolinString.h" compile="0" resource="0" file="Source/ViolinString.h"/>
