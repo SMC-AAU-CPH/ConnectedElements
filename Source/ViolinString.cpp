@@ -61,8 +61,6 @@ ViolinString::ViolinString (double freq, double fs) : fs (fs), freq (freq)
     // Initialise variables for Newton Raphson
     tol = 1e-4;
     qPrev = 0;
-    
-    startTimerHz (30);
 }
 
 void ViolinString::reset()
@@ -232,10 +230,10 @@ void ViolinString::setRaisedCosSinglePoint (double exciterPos)
     uPrev = u;
 }
 
-void ViolinString::timerCallback()
-{
-    repaint();
-}
+//void ViolinString::timerCallback()
+//{
+//    repaint();
+//}
 
 Path ViolinString::generateStringPathAdvanced() 
 {

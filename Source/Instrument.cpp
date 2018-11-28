@@ -12,18 +12,18 @@
 #include "Instrument.h"
 
 //==============================================================================
-Instrument::Instrument (vector<String> objectNames, double fs) : fs (fs)
+Instrument::Instrument (vector<ObjectType> objectTypes, double fs) : fs (fs)
 {
     
     double frequencyInHz[] = {110.0, 110.0 * pow(2, 7.0 / 12.0)};
-    for (int i = 0; i < objectNames.size(); ++i)
+    for (int i = 0; i < objectTypes.size(); ++i)
     {
-        if (objectNames[i] == "string")
+        if (objectTypes[i] == bowedString)
         {
             objects.add (new ViolinString(frequencyInHz[i], fs));
             addAndMakeVisible (objects[i]);
         }
-        else if (objectNames[i] == "plate")
+        else if (objectTypes[i] == plate)
         {
             // plates.add (new Plate(...))
             // addAndMakeVisible (plates[i]);
