@@ -62,10 +62,7 @@ ViolinString::ViolinString (double freq, double fs) : fs (fs), freq (freq)
     tol = 1e-4;
     qPrev = 0;
     
-    
-
-    
-    startTimerHz (60);
+    startTimerHz (30);
 }
 
 void ViolinString::reset()
@@ -113,10 +110,8 @@ void ViolinString::paint (Graphics& g)
 
     g.setColour (Colours::cyan);
     g.strokePath (generateStringPathAdvanced(), PathStrokeType (2.0f));
-    //double y = states[conn1] * 50000 + height / 2.0;
-    //g.drawEllipse(conn1, y, 10, 10, 1);
     g.setColour(Colours::orange);
-    g.drawEllipse(floor(_cx.load() - 5), floor(_cy.load() - 5), 10, 10, 2);
+    g.drawEllipse(floor(_cx.load() - 20), floor(_cy.load() - 5), 10, 10, 2);
     
     g.setColour(Colours::yellow);
     g.fillEllipse(fpx - 5, getHeight() / 2.0 - 5, 10, 10);
@@ -273,5 +268,4 @@ Path ViolinString::generateStringPathAdvanced()
 
 void ViolinString::mouseDrag(const MouseEvent &e)
 {
-    std::cout << e.y << std::endl;
 }
