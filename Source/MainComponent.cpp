@@ -70,7 +70,7 @@ void MainComponent::hiResTimerCallback()
             int index = sensel->senselIndex;
             for (int f = 0; f < fingerCount; f++)
             {
-                if (f == 0)
+                if (sensel->fingers[f].x >= 0.7)
                 {
                     state[index] = sensel->fingers[f].state;
                     xpos[index] = sensel->fingers[f].x;
@@ -78,15 +78,12 @@ void MainComponent::hiResTimerCallback()
                     ypos[index] = sensel->fingers[f].y;
                     Vb[index] = sensel->fingers[f].delta_y * maxVb;
                     Fb[index] = sensel->fingers[f].force * 1000;
-                }
-
-                if (f == 1)
+                } else
                 {
                     if (sensel->fingers[f].y < 0.1)
                         cp[index] = sensel->fingers[f].x;
                     else
                         fp[index] = sensel->fingers[f].x;
-                
                 }
             }
 
