@@ -69,55 +69,41 @@ void MainComponent::hiResTimerCallback()
 
             unsigned int fingerCount = sensel->contactAmount;
             int index = sensel->senselIndex;
-            for (int f = 0; f < fingerCount; f++)
+            if (index == 0)
             {
-                if (sensel->fingers[f].x >= 0.7)
+                for (int f = 0; f < fingerCount; f++)
                 {
-                    state[index] = sensel->fingers[f].state;
-                    xpos[index] = sensel->fingers[f].x;
+                    if (sensel->fingers[f].x >= 0.7)
+                    {
+                        state[index] = sensel->fingers[f].state;
+                        xpos[index] = sensel->fingers[f].x;
 
-                    ypos[index] = sensel->fingers[f].y;
-                    Vb[index] = sensel->fingers[f].delta_y * maxVb;
-                    Fb[index] = sensel->fingers[f].force * 1000;
-                }
-                else
-                {
-                    if (sensel->fingers[f].y < 0.1)
-                        connectionPoint[index] = sensel->fingers[f].x;
+                        ypos[index] = sensel->fingers[f].y;
+                        Vb[index] = sensel->fingers[f].delta_y * maxVb;
+                        Fb[index] = sensel->fingers[f].force * 1000;
+                    }
                     else
-                        fp[index] = sensel->fingers[f].x;
+                    {
+                        if (sensel->fingers[f].y < 0.1)
+                            connectionPoint[index] = sensel->fingers[f].x;
+                        else
+                            fp[index] = sensel->fingers[f].x;
+                    }
                 }
-            }
-
-            for (auto instrument : instruments)
+                instruments[0]->getStrings()[index]->setBow(state[index]);
+                instruments[0]->getStrings()[index]->setVb(Vb[index]);
+                instruments[0]->getStrings()[index]->setFb(Fb[index]);
+                instruments[0]->getStrings()[index]->setBowPos(xpos[index], ypos[index]);
+                instruments[0]->getStrings()[index]->setFingerPoint(fp[index]);
+                instruments[0]->getStrings()[index]->setConnection(connectionPoint[index]);
+            } else if (index == 1)
             {
-                if (index == 0)
-                {
-                    instrument->getStrings()[index]->setBow(state[index]);
-                    instrument->getStrings()[index]->setVb(Vb[index]);
-                    instrument->getStrings()[index]->setFb(Fb[index]);
-                    instrument->getStrings()[index]->setBowPos(xpos[index], ypos[index]);
-                    instrument->getStrings()[index]->setFingerPoint(fp[index]);
-                    instrument->getStrings()[index]->setConnection(connectionPoint[index]);
-                }
-                else if (index == 1)
-                {
-                    //platestuff
-                }
-//                instrument->getConnections()[0].setCP(index, connectionPoint[index]);
+                instruments[0]->getPlates()[0]->setImpactPosition (sensel->fingers[0].x, sensel->fingers[0].y);
+                instruments[0]->getPlates()[0]->setInput (sensel->fingers[0].force * 1000);
             }
+//                instrument->getConnections()[0].setCP(index, connectionPoint[index]);
         }
     }
-
-    if (stateUpdateCounter % 20 == 0)
-    {
-        for (int s = 0; s < numInstruments; s++)
-        {
-            //            violinStrings[s]->setConnection (cp[s]);
-            // updateInstrument();
-        }
-    }
-    stateUpdateCounter++;
 }
 
 void MainComponent::getNextAudioBlock(const AudioSourceChannelInfo &bufferToFill)

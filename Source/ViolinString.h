@@ -68,7 +68,7 @@ private:
     double fs, freq, gamma, k, s0, s1, B, kappa, h, N, lambdaSq, muSq, kOh, gOh, a, BM, tol, q, qPrev, b, eps, fp;
     double ff = 0.7;
     atomic<double> _Vb, _Fb, _bpX, _bpY;
-    atomic<int> _cx, _cy, _cpIdx;
+    atomic<int> _cx{0}, _cy{0}, _cpIdx{0};
     atomic<bool> _isBowing{false};
 
     vector<double> u, uPrev, uNext;

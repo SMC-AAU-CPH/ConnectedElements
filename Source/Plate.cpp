@@ -40,42 +40,40 @@ void Plate::setSampleRate (double sampleRate)
     setFrequency(220);
 }
 
-float Plate::getOutput (double input)
+void Plate::excite ()
 {
-    int l, m;
+    double excitation = input * 10;
     
-    double excitation = input * 1e7;
-    
-    for (l = 2; l < Nx - 2; l++)
+    for (int l = 2; l < Nx - 2; l++)
     {
-        for (m = 2; m < Ny - 2; m++)
+        for (int m = 2; m < Ny - 2; m++)
         {
-            //cout << "l: " << l << " m: " << m << "\n";
             u[l][m] =
-            B1 * (un[l][m + 2] + un[l][m - 2] + un[l + 2][m] + un[l - 2][m]) + B2 * (un[l + 1][m + 1] + un[l - 1][m + 1] + un[l + 1][m - 1] + un[l - 1][m - 1]) + B3 * (un[l][m + 1] + un[l][m - 1] + un[l + 1][m] + un[l - 1][m]) + C1 * un[l][m] + C2 * un1[l][m] + C3 * (un[l][m + 1] + un[l][m - 1] + un[l + 1][m] + un[l - 1][m] - un1[l][m + 1] - un1[l][m - 1] - un1[l + 1][m] - un1[l - 1][m]) + C4 * excitationArea[l][m] * excitation;
+            B1 * (un[l][m + 2] + un[l][m - 2] + un[l + 2][m] + un[l - 2][m])
+            + B2 * (un[l + 1][m + 1] + un[l - 1][m + 1] + un[l + 1][m - 1] + un[l - 1][m - 1])
+            + B3 * (un[l][m + 1] + un[l][m - 1] + un[l + 1][m] + un[l - 1][m]) + C1 * un[l][m]
+            + C2 * un1[l][m]
+            + C3 * (un[l][m + 1] + un[l][m - 1] + un[l + 1][m] + un[l - 1][m] - un1[l][m + 1] - un1[l][m - 1] - un1[l + 1][m] - un1[l - 1][m])
+            + C4 * excitationArea[l][m] * excitation;
         }
     }
-    
-    for (l = 0; l < Nx; l++)
-    {
-        for (m = 0; m < Ny; m++)
-        {
-            un1[l][m] = un[l][m];
-            un[l][m] = u[l][m];
-            //cout << "l: " << x << " m: " << y << "\n";
-            //cout << "u[" << x << "]" << "[" << y << "]: " << u[x][y] << "\n";
-        }
-    }
-    
-    return clamp(u[outputPositionX][outputPositionY], -1.0, 1.0);
+//    input = 0.0;
 }
 
-void Plate::setImpactPosition (float xPos, float yPos)
+float Plate::getOutput (float ratioX, float ratioY)
+{
+    int x = clamp(floor(ratioX * Nx), 2, Nx - 2);
+    int y = clamp(floor(ratioY * Ny), 2, Ny - 2);
+    return clamp(u[x][y]*1000, -1.0, 1.0);
+}
+
+void Plate::
+setImpactPosition (float xPos, float yPos)
 {
     auto pointX = xPos * Nx;
     auto pointY = yPos * Ny;
-    strikePositionX = clamp(pointX, 2, 7); // clamp position between 2 -> 7
-    strikePositionY = clamp(pointY, 2, 7); // clamp position between 2 -> 7
+    strikePositionX = clamp(pointX, 2, Nx - 2); // clamp position between 2 -> 7
+    strikePositionY = clamp(pointY, 2, Ny - 2); // clamp position between 2 -> 7
     
     for (int x = 0; x < Nx; x++)
     {
@@ -97,8 +95,6 @@ void Plate::setFrequency (float f)
     
     kappa = double(frequency * (27.15 / 110) * 4); // Stiffness of plate
     
-    // h = double(1.0f / Nx);
-    
     d = 1.0f / (1.0f + sigma0 * k);
     B1 = -(kappa * (k * k)) / (h * h * h * h) * d;
     B2 = B1 * 2.0f;
@@ -116,6 +112,23 @@ void Plate::setDamping (float frequencyDependent, float frequencyIndependent)
     sigma0 = clamp(frequencyIndependent, 0.0001, 10.0); // Frequency independent damping
 }
 
+void Plate::updateUVectors()
+{
+    for (int l = 0; l < Nx; l++)
+    {
+        for (int m = 0; m < Ny; m++)
+        {
+            un1[l][m] = un[l][m];
+            un[l][m] = u[l][m];
+        }
+    }
+}
+
+void Plate::addJFc(double JFc, int idX, int idY)
+{
+    u[idX][idY] = u[idX][idY] + JFc;
+}
+
 double Plate::clamp (double input, double min, double max)
 {
     if (input > max)
@@ -131,13 +144,20 @@ void Plate::paint (Graphics& g)
 //    g.fillAll(Colours::grey);
     int stateWidth = getWidth() / static_cast<double> (Nx);
     int stateHeight = getHeight() / static_cast<double> (Ny);
-
+    int scaling = 10000;
     for (int x = 0; x < Nx; ++x)
     {
         for (int y = 0; y < Ny; ++y)
         {
-            g.setColour(Colour::fromRGB(255 * 0.5 * (u[x][y] + 1), 255 * 0.5 * (u[x][y] + 1), 255 * 0.5 * (u[x][y] + 1)));
-            g.drawRect(x * stateWidth, y * stateHeight, stateWidth, stateHeight);
+            int cVal = clamp (255 * 0.5 * (u[x][y] * scaling + 1), 0, 255);
+            g.setColour(Colour::fromRGB(cVal, cVal, cVal));
+            g.fillRect(x * stateWidth, y * stateHeight, stateWidth, stateHeight);
+            if (x == _cpIdx[0] && y == _cpIdx[1])
+            {
+                g.setColour(Colours::orange);
+                g.drawRect(x * stateWidth, y * stateHeight, stateWidth, stateHeight);
+            }
+                
         }
     }
 }

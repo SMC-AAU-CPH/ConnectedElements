@@ -34,12 +34,12 @@ Instrument::Instrument (vector<ObjectType> objectTypes, double fs) : fs (fs)
     numStrings = violinStrings.size();
     numPlates = plates.size();
     
-//    connections.push_back(Connection (violinStrings[0], plates[0],
-//                                      0.95, {0.95, 0.95},
-//                                      1, 1,
-//                                      1, 500, 10, fs));
-//    violinStrings[0]->setConnection(0.95);
-//    plates[0]->setConnection({0.95, 0.95});
+    connections.push_back(Connection (violinStrings[0], plates[0],
+                                      0.95, 0.5, 0.6,
+                                      1, 1,
+                                      1, 50000, 100000, fs));
+    violinStrings[0]->setConnection(0.95);
+    plates[0]->setConnection({0.5, 0.6});
 }
 
 Instrument::~Instrument()
@@ -96,7 +96,7 @@ Instrument::Connection::Connection (ViolinString* object1, Plate* object2,
 {
     violinStrings.push_back(object1);
     plates.push_back(object2);
-    cpIdx.resize(2);
+    cpIdx.resize(3);
     cpIdx[0] = cp1 * object1->getNumPoints();
     cpIdx[1] = cp2x * object2->getNumXPoints();
     cpIdx[2] = cp2y * object2->getNumYPoints();
@@ -123,30 +123,28 @@ vector<double> Instrument::calculateOutput()
     }
     
     // Interact with the components
-    for (int j = 0; j < numStrings; ++j)
-    {
-        violinStrings[j]->bow();
-    }
+    violinStrings[0]->bow();
+    plates[0]->excite ();
     
     // Calculate the connection forces
-//    for (int j = 0; j < connections.size(); ++j)
-//    {
-//        connections[j].calculateJFc();
-//    }
-    for (int j = 0; j < numStrings; ++j)
+    for (int j = 0; j < connections.size(); ++j)
     {
-//        violinStrings[j]->addJFc(connections[0].getJFc()[j], connections[0].getCPIdx()[j]);
-        violinStrings[j]->updateUVectors();
-        output[j] = violinStrings[j]->getOutput(0.75) * 600;
-        output[j] = plates[j]->getOutput(output[j]);
+        connections[j].calculateJFc();
     }
+    
+    violinStrings[0]->addJFc(connections[0].getJFc()[0], connections[0].getCPIdx()[0]);
+    violinStrings[0]->updateUVectors();
+    plates[0]->addJFc (connections[0].getJFc()[1], connections[0].getCPIdx()[1], connections[0].getCPIdx()[2]);
+    plates[0]->updateUVectors();
+    output[0] = violinStrings[0]->getOutput(0.75) * 600;
+    output[1] = plates[0]->getOutput(0.3, 0.6) * 3;
     return output;
 }
 
 void Instrument::Connection::calculateCoefs()
 {
     // Relative displacement
-//    etaR = hA * violinStrings[0]->getStateAt(cpIdx[0]) - hB * plates[0]->getStateAt(cpIdx[1]);
+    etaR = hA * violinStrings[0]->getStateAt(cpIdx[0]) - hB * plates[0]->getStateAt(cpIdx[1], cpIdx[2]);
     
     rn = (2*sx/k - w0*w0 - pow(w1,4) * etaR*etaR) / (2.0*sx/k + w0*w0 + pow(w1,4) * etaR*etaR);
     pn = -2.0/(2.0*sx/k + w0*w0 + pow(w1,4)*etaR*etaR);
@@ -154,7 +152,7 @@ void Instrument::Connection::calculateCoefs()
 
 vector<double> Instrument::Connection::calculateJFc()
 {
-//    bn = hA * violinStrings[0]->getNextStateAt(cpIdx[0]) - hB * plates[0]->getNextStateAt(cpIdx[1]);
+    bn = hA * violinStrings[0]->getNextStateAt(cpIdx[0]) - hB * plates[0]->getNextStateAt(cpIdx[1], cpIdx[2]);
     an = rn * etaRPrev;
     
     etaRPrev = etaR;
