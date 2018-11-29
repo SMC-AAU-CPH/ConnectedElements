@@ -109,7 +109,10 @@ void ViolinString::paint (Graphics& g)
     g.setColour (Colours::cyan);
     g.strokePath (generateStringPathAdvanced(), PathStrokeType (2.0f));
     g.setColour(Colours::orange);
-    g.drawEllipse(floor(_cx.load() - 20), floor(_cy.load() - 5), 10, 10, 2);
+    for (int c = 0; c < cpIdx.size(); ++c)
+    {
+        g.drawEllipse(floor(cx[c] - 20), floor(cy[c] - 5), 10, 10, 2);
+    }
     
     g.setColour(Colours::yellow);
     g.fillEllipse(fpx - 5, getHeight() / 2.0 - 5, 10, 10);
@@ -243,10 +246,13 @@ Path ViolinString::generateStringPathAdvanced()
     {
         const float newY = uNext[y] * 50000 + stringBounds;
         stringPath.lineTo(x, newY);
-        if (y == _cpIdx.load())
+        for (int c = 0; c < cpIdx.size(); ++c)
         {
-            _cx.store(x);
-            _cy.store(newY);
+            if (y == cpIdx[c])
+            {
+                cx[c] = x;
+                cy[c] = newY;
+            }
         }
         if (y == fp)
         {
@@ -259,6 +265,20 @@ Path ViolinString::generateStringPathAdvanced()
     return stringPath;
 }
 
-void ViolinString::mouseDrag(const MouseEvent &e)
+int ViolinString::addConnection (double cp)
 {
+    cpIdx.push_back (clamp(floor(cp * N), 2, N-2));
+    cx.push_back(0);
+    cy.push_back(0);
+    return static_cast<int>(cpIdx.size()) - 1;
+}
+
+double ViolinString::clamp (double input, double min, double max)
+{
+    if (input > max)
+        return max;
+    else if (input < min)
+        return min;
+    else
+        return input;
 }

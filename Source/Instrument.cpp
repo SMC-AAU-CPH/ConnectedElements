@@ -15,7 +15,7 @@
 Instrument::Instrument (vector<ObjectType> objectTypes, double fs) : fs (fs)
 {
     
-    double frequencyInHz[] = {110.0, 110.0 * pow(2, 7.0 / 12.0)};
+    double frequencyInHz[] = {110.0, 110.0 * pow(2, 7.0 / 12.0), 110.0 * pow(2, 12.0 / 12.0), 110.0 * pow(2, (12.0 + 7.0) / 12.0), 115.0};
     // TODO counter for individual objecttypes
     for (int i = 0; i < objectTypes.size(); ++i)
     {
@@ -27,7 +27,6 @@ Instrument::Instrument (vector<ObjectType> objectTypes, double fs) : fs (fs)
         else if (objectTypes[i] == plate)
         {
             plates.add (new Plate(fs));
-            // plates.add (new Plate(...))
             addAndMakeVisible (plates[0]);
         }
     }
@@ -35,11 +34,34 @@ Instrument::Instrument (vector<ObjectType> objectTypes, double fs) : fs (fs)
     numPlates = plates.size();
     
     connections.push_back(Connection (violinStrings[0], plates[0],
-                                      0.95, 0.5, 0.6,
+                                      0.5, 0.6, 0.6,
                                       1, 1,
-                                      1, 50000, 100000, fs));
-    violinStrings[0]->setConnection(0.95);
-    plates[0]->setConnection({0.5, 0.6});
+                                      1, 10000, 10000, fs));
+    
+    connections.push_back(Connection (violinStrings[0], violinStrings[1],
+                                      0.1, 0.3,
+                                      1, 1,
+                                      1, 50000, 10000, fs));
+    connections.push_back(Connection (violinStrings[1], violinStrings[2],
+                                      0.1, 0.3,
+                                      1, 1,
+                                      1, 50000, 10000, fs));
+    
+    connections.push_back(Connection (violinStrings[2], violinStrings[3],
+                                      0.1, 0.3,
+                                      1, 1,
+                                      1, 50000, 10000, fs));
+    
+    connections.push_back(Connection (violinStrings[3], violinStrings[4],
+                                      0.1, 0.3,
+                                      1, 1,
+                                      1, 50000, 10000, fs));
+    
+    connections.push_back(Connection (violinStrings[violinStrings.size()-1], plates[0],
+                                      0.5, 0.3, 0.3,
+                                      1, 1,
+                                      1, 10000, 10000, fs));
+    
 }
 
 Instrument::~Instrument()
@@ -49,21 +71,38 @@ Instrument::~Instrument()
 void Instrument::paint (Graphics& g)
 {
     g.setColour(Colours::orange);
+//    double y1;
+//    double y2;
+//    int cpX1;
+//    int cpX2;
+//    
+//    int stringIdx = 0;
+//    for (int i = 0; i < connections.size(); ++i)
+//    {
+//        if (connections[i].connectionType == stringString)
+//        {
 //
-//    double y1 = violinStrings[0]->getCy();
-//    double y2 = plates[1]->getCy();
-//
-//    Line<float> connectionLine (ceil(connections[0].getCPIdx()[0] * getWidth() / objects[0]->getNumPoints()), y1,
-//               ceil(connections[0].getCPIdx()[1] * getWidth() / objects[1]->getNumPoints()), getHeight() / 2.0 + y2);
-//    float dashPattern[2];
-//    dashPattern[0] = 3.0;
-//    dashPattern[1] = 5.0;
-//    g.drawDashedLine(connectionLine, dashPattern, 2, dashPattern[0], 0);
+//            cpX1 = connections[i].violinStrings[0]->getCP(connections[i].connID[0]);
+//            cpX2 = connections[i].violinStrings[1]->getCP(connections[i].connID[1]);
+//            y1 = connections[i].violinStrings[0]->getCy(cpX1);
+//            y2 = connections[i].violinStrings[1]->getCy(cpX2);
+//            Line<float> connectionLine (ceil(cpX1 * getWidth() / connections[i].violinStrings[0]->getNumPoints()), y1,
+//                                        ceil(cpX2 * getWidth() / connections[i].violinStrings[1]->getNumPoints()), stringIdx * getHeight() / static_cast<double>(numStrings) + y2);
+//            ++stringIdx;
+//            float dashPattern[2];
+//            dashPattern[0] = 3.0;
+//            dashPattern[1] = 5.0;
+//            g.drawDashedLine(connectionLine, dashPattern, 2, dashPattern[0], 0);
+//        }
+//    }
 }
 
 void Instrument::resized()
 {
-    violinStrings[0]->setBounds(0, 0, getWidth(), getHeight() / 2.0);
+    for (int i = 0; i < numStrings; ++i)
+    {
+        violinStrings[i]->setBounds(0 , i * ((getHeight() / 2.0) / static_cast<double>(numStrings)), getWidth(), (getHeight() / 2.0) / static_cast<double>(numStrings));
+    }
     plates[0]->setBounds(0, getHeight() / 2.0, getWidth(), getHeight() / 2.0);
 }
 
@@ -74,10 +113,11 @@ Instrument::Connection::Connection (ViolinString* object1, ViolinString* object2
 {
     violinStrings.push_back(object1);
     violinStrings.push_back(object2);
-    cpIdx.resize(2);
-    cpIdx[0] = cp1 * object1->getNumPoints();
-    cpIdx[1] = cp2 * object2->getNumPoints();
     
+    // Both adding a connection as well as retrieving its index (how manyth connection on that object)
+    connID.push_back(object1->addConnection (cp1));
+    connID.push_back(object2->addConnection (cp2));
+
     hA = object1->getGridSpacing();
     hB = object2->getGridSpacing();
     s0A = object1->getS0();
@@ -87,6 +127,8 @@ Instrument::Connection::Connection (ViolinString* object1, ViolinString* object2
     
     jA = k * k / ((1 + s0A) * k);
     jB = -k * k * massRatio / ((1 + s0B) * k);
+    
+    connectionType = stringString;
 }
 
 Instrument::Connection::Connection (ViolinString* object1, Plate* object2,
@@ -96,10 +138,9 @@ Instrument::Connection::Connection (ViolinString* object1, Plate* object2,
 {
     violinStrings.push_back(object1);
     plates.push_back(object2);
-    cpIdx.resize(3);
-    cpIdx[0] = cp1 * object1->getNumPoints();
-    cpIdx[1] = cp2x * object2->getNumXPoints();
-    cpIdx[2] = cp2y * object2->getNumYPoints();
+    
+    connID.push_back(object1->addConnection (cp1));
+    connID.push_back(object2->addConnection (make_tuple(cp2x, cp2y)));
     
     hA = object1->getGridSpacing();
     hB = object2->getGridSpacing();
@@ -110,6 +151,8 @@ Instrument::Connection::Connection (ViolinString* object1, Plate* object2,
     
     jA = k * k / ((1 + s0A) * k);
     jB = -k * k * massRatio / ((1 + s0B) * k);
+    
+    connectionType = stringPlate;
 }
 
 vector<double> Instrument::calculateOutput()
@@ -117,34 +160,58 @@ vector<double> Instrument::calculateOutput()
     vector<double> output = {0.0, 0.0};
     
     // calculate coefficients from relative displacements
-    for (int j = 0; j < connections.size(); ++j)
+    for (int c = 0; c < connections.size(); ++c)
     {
-        connections[j].calculateCoefs();
+        connections[c].calculateCoefs();
     }
     
     // Interact with the components
-    violinStrings[0]->bow();
-    plates[0]->excite ();
+    for (auto violinString : violinStrings)
+        violinString->bow();
+    
+    for (auto plate : plates)
+        plate->excite();
     
     // Calculate the connection forces
-    for (int j = 0; j < connections.size(); ++j)
+    for (int c = 0; c < connections.size(); ++c)
     {
-        connections[j].calculateJFc();
+        connections[c].calculateJFc();
+        if (connections[c].connectionType == stringString)
+        {
+            connections[c].violinStrings[0]->addJFc(connections[c].getJFc()[0], connections[c].violinStrings[0]->getCP(connections[c].connID[0]));
+            connections[c].violinStrings[1]->addJFc(connections[c].getJFc()[1], connections[c].violinStrings[1]->getCP(connections[c].connID[1]));
+        } else if (connections[c].connectionType == stringPlate)
+        {
+            connections[c].violinStrings[0]->addJFc(connections[c].getJFc()[0], connections[c].violinStrings[0]->getCP(connections[c].connID[0]));
+            connections[c].plates[0]->addJFc (connections[c].getJFc()[1], connections[c].plates[0]->getCP(connections[c].connID[1]));
+        }
     }
     
-    violinStrings[0]->addJFc(connections[0].getJFc()[0], connections[0].getCPIdx()[0]);
-    violinStrings[0]->updateUVectors();
-    plates[0]->addJFc (connections[0].getJFc()[1], connections[0].getCPIdx()[1], connections[0].getCPIdx()[2]);
-    plates[0]->updateUVectors();
-    output[0] = violinStrings[0]->getOutput(0.75) * 600;
-    output[1] = plates[0]->getOutput(0.3, 0.6) * 3;
+    for (auto violinString : violinStrings)
+        violinString->updateUVectors();
+    
+    for (auto plate : plates)
+        plate->updateUVectors();
+    
+    output[0] = violinStrings[2]->getOutput(0.75) * 600 + 0.1 * plates[0]->getOutput(0.3, 0.4) * 3;
+    output[1] = violinStrings[3]->getOutput(0.75) * 600 + 0.1 * plates[0]->getOutput(0.7, 0.4) * 3;
+    
     return output;
 }
 
 void Instrument::Connection::calculateCoefs()
 {
     // Relative displacement
-    etaR = hA * violinStrings[0]->getStateAt(cpIdx[0]) - hB * plates[0]->getStateAt(cpIdx[1], cpIdx[2]);
+    int cp1 = violinStrings[0]->getCP (connID[0]);
+    if (connectionType == stringString)
+    {
+        int cp2 = violinStrings[1]->getCP (connID[1]);
+        etaR = hA * violinStrings[0]->getStateAt(cp1) - hB * violinStrings[1]->getStateAt(cp2);
+    } else if (connectionType == stringPlate)
+    {
+        auto cp2 = plates[0]->getCP (connID[1]);
+        etaR = hA * violinStrings[0]->getStateAt(cp1) - hB * plates[0]->getStateAt(cp2);
+    }
     
     rn = (2*sx/k - w0*w0 - pow(w1,4) * etaR*etaR) / (2.0*sx/k + w0*w0 + pow(w1,4) * etaR*etaR);
     pn = -2.0/(2.0*sx/k + w0*w0 + pow(w1,4)*etaR*etaR);
@@ -152,7 +219,13 @@ void Instrument::Connection::calculateCoefs()
 
 vector<double> Instrument::Connection::calculateJFc()
 {
-    bn = hA * violinStrings[0]->getNextStateAt(cpIdx[0]) - hB * plates[0]->getNextStateAt(cpIdx[1], cpIdx[2]);
+    if(connectionType == stringString)
+    {
+        bn = hA * violinStrings[0]->getNextStateAt(violinStrings[0]->getCP(connID[0])) - hB * violinStrings[1]->getNextStateAt(violinStrings[1]->getCP(connID[1]));
+    } else if (connectionType == stringPlate)
+    {
+        bn = hA * violinStrings[0]->getNextStateAt(violinStrings[0]->getCP(connID[0])) - hB * plates[0]->getNextStateAt(plates[0]->getCP(connID[1]));
+    }
     an = rn * etaRPrev;
     
     etaRPrev = etaR;
@@ -168,46 +241,47 @@ void Instrument::mouseDown(const MouseEvent &e)
 {
     if (ModifierKeys::getCurrentModifiers() == ModifierKeys::leftButtonModifier)
     {
-        if (e.y < getHeight() / 2.0)
+        for (int i = 0; i < numStrings; ++i)
         {
-            violinStrings[0]->setBow(true);
+            if (e.y >= i * (getHeight() / 2.0) / static_cast<double>(numStrings) && e.y < (i + 1) * (getHeight() / 2.0) / static_cast<double>(numStrings))
+            {
+                violinStrings[i]->setBow(true);
+            }
         }
-//        else
-//        {
-//            objects[1]->setBow(true);
-//        }
     }
 }
 
 void Instrument::mouseDrag(const MouseEvent &e)
 {
     double maxVb = 0.2;
-    int idx = 0;
-    if (e.y < getHeight() / 2.0)
+    for (int i = 0; i < numStrings; ++i)
     {
-        if (ModifierKeys::getCurrentModifiers() == ModifierKeys::altModifier + ModifierKeys::leftButtonModifier)
+        if (e.y >= i * (getHeight() / 2.0) / static_cast<double>(numStrings) && e.y < (i + 1) * (getHeight() / 2.0) / static_cast<double>(numStrings))
         {
-            cp[idx] = e.x <= 0 ? 0 : (e.x < getWidth() ? e.x / static_cast<double>(getWidth()) : 1);
-            connections[0].setCP(idx, cp[idx]);
-            violinStrings[idx]->setConnection (cp[idx]);
-        }
-        else if (ModifierKeys::getCurrentModifiers() == ModifierKeys::ctrlModifier + ModifierKeys::leftButtonModifier)
-        {
-            fp[idx] = e.x <= 0 ? 0 : (e.x < getWidth() ? e.x / static_cast<double>(getWidth()) : 1);
-            violinStrings[idx]->setFingerPoint(fp[idx]);
-        }
-        else
-        {
-            double Vb = (e.y - getHeight() * (idx == 0 ? 0.25 : 0.75)) / (static_cast<double>(getHeight() * 0.25)) * maxVb;
-            violinStrings[idx]->setVb(Vb);
-            bpX[idx] = e.x <= 0 ? 0 : (e.x < getWidth() ? e.x / static_cast<double>(getWidth()) : 1);
-            if (idx == 0)
+    //        if (ModifierKeys::getCurrentModifiers() == ModifierKeys::altModifier + ModifierKeys::leftButtonModifier)
+    //        {
+    //            cp[idx] = e.x <= 0 ? 0 : (e.x < getWidth() ? e.x / static_cast<double>(getWidth()) : 1);
+    ////            connections[0].setCP(idx, cp[idx]);
+    ////            violinStrings[idx]->setConnection (cp[idx]);
+    //        }
+    //        else if (ModifierKeys::getCurrentModifiers() == ModifierKeys::ctrlModifier + ModifierKeys::leftButtonModifier)
+    //        {
+    //            fp[idx] = e.x <= 0 ? 0 : (e.x < getWidth() ? e.x / static_cast<double>(getWidth()) : 1);
+    //            violinStrings[idx]->setFingerPoint(fp[idx]);
+    //        }
+    //        else
+    //        {
+    //        double Vb = (e.y - getHeight() * (idx == 0 ? 0.25 : 0.75)) / (static_cast<double>(getHeight() * 0.25)) * maxVb;
+            double Vb = maxVb;
+            violinStrings[i]->setVb(Vb);
+            bpX[i] = e.x <= 0 ? 0 : (e.x < getWidth() ? e.x / static_cast<double>(getWidth()) : 1);
+            if (i == 0)
             {
-                bpY[idx] = e.y <= 0 ? 0 : (e.y < getHeight() / 2.0 ? e.y / static_cast<double>(getHeight() / 2.0) : 1);
+                bpY[i] = e.y <= 0 ? 0 : (e.y < getHeight() / 4.0 ? e.y / static_cast<double>(getHeight() / 4.0) : 1);
             } else {
-                bpY[idx] = e.y <= getHeight() / 2.0 ? 0 : (e.y < getHeight() ? (e.y - (getHeight() / 2.0)) / static_cast<double>(getHeight() / 2.0) : 1);
+                bpY[i] = e.y <= getHeight() / 4.0 ? 0 : (e.y < getHeight() ? (e.y - (getHeight() / 4.0)) / static_cast<double>(getHeight() / 4.0) : 1);
             }
-            violinStrings[idx]->setBowPos(bpX[idx], bpY[idx]);
+            violinStrings[i]->setBowPos(bpX[i], bpY[i]);
         }
     }
 }

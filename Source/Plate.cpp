@@ -11,8 +11,6 @@
 #include "Plate.h"
 Plate::Plate (double fs)
 {
-    _cpIdx.resize(2);
-    fill(_cpIdx.begin(), _cpIdx.end(), 5);
     sigma0 = 0.1;
     sigma1 = 0.005;
     setSampleRate(fs);
@@ -67,8 +65,7 @@ float Plate::getOutput (float ratioX, float ratioY)
     return clamp(u[x][y]*1000, -1.0, 1.0);
 }
 
-void Plate::
-setImpactPosition (float xPos, float yPos)
+void Plate::setImpactPosition (float xPos, float yPos)
 {
     auto pointX = xPos * Nx;
     auto pointY = yPos * Ny;
@@ -106,6 +103,13 @@ void Plate::setFrequency (float f)
     C4 = (k * k) * d;
 }
 
+int Plate::addConnection (tuple<double, double> cp)
+{
+    auto [x, y] = cp;
+    cpIdx.push_back(make_tuple(floor(x * Nx), floor(y * Ny)));
+    return cpIdx.size()-1;
+}
+
 void Plate::setDamping (float frequencyDependent, float frequencyIndependent)
 {
     sigma1 = clamp(frequencyDependent, 0.0001, 0.5);    // Frequency dependent damping
@@ -124,9 +128,10 @@ void Plate::updateUVectors()
     }
 }
 
-void Plate::addJFc(double JFc, int idX, int idY)
+void Plate::addJFc(double JFc, tuple<int, int> cpIdx)
 {
-    u[idX][idY] = u[idX][idY] + JFc;
+    auto [x, y] = cpIdx;
+    u[x][y] = u[x][y] + JFc;
 }
 
 double Plate::clamp (double input, double min, double max)
@@ -142,20 +147,26 @@ double Plate::clamp (double input, double min, double max)
 void Plate::paint (Graphics& g)
 {
 //    g.fillAll(Colours::grey);
-    int stateWidth = getWidth() / static_cast<double> (Nx);
-    int stateHeight = getHeight() / static_cast<double> (Ny);
+    int stateWidth = getWidth() / static_cast<double> (Nx - 4);
+    int stateHeight = getHeight() / static_cast<double> (Ny - 4);
     int scaling = 10000;
-    for (int x = 0; x < Nx; ++x)
+    
+    
+    for (int x = 2; x < Nx - 2; ++x)
     {
-        for (int y = 0; y < Ny; ++y)
+        for (int y = 2; y < Ny - 2; ++y)
         {
             int cVal = clamp (255 * 0.5 * (u[x][y] * scaling + 1), 0, 255);
             g.setColour(Colour::fromRGB(cVal, cVal, cVal));
-            g.fillRect(x * stateWidth, y * stateHeight, stateWidth, stateHeight);
-            if (x == _cpIdx[0] && y == _cpIdx[1])
+            g.fillRect((x - 2) * stateWidth, (y - 2) * stateHeight, stateWidth, stateHeight);
+            for (int c = 0; c < cpIdx.size(); ++c)
             {
-                g.setColour(Colours::orange);
-                g.drawRect(x * stateWidth, y * stateHeight, stateWidth, stateHeight);
+                auto [cpX, cpY] = cpIdx[c];
+                if (x == cpX && y == cpY)
+                {
+                    g.setColour(Colours::orange);
+                    g.drawRect((x - 2) * stateWidth, (y - 2) * stateHeight, stateWidth, stateHeight);
+                }
             }
                 
         }

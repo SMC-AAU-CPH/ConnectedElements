@@ -46,7 +46,7 @@ void MainComponent::prepareToPlay(int samplesPerBlockExpected, double sampleRate
     {
         sensels.add(new Sensel(i)); // chooses the device in the sensel device list
     }
-    vector<ObjectType> objects{bowedString, plate};
+    vector<ObjectType> objects{bowedString, bowedString, bowedString, bowedString, bowedString, plate};
     
     instruments.add(new Instrument(objects, fs));
     addAndMakeVisible(instruments[0]);
@@ -54,7 +54,7 @@ void MainComponent::prepareToPlay(int samplesPerBlockExpected, double sampleRate
     numInstruments = instruments.size();
     // start the hi-res timer
     HighResolutionTimer::startTimer(1000.0 / 150.0);
-    Timer::startTimerHz(30);
+    Timer::startTimerHz(15);
     setSize(1440, 900);
 }
 
@@ -95,7 +95,7 @@ void MainComponent::hiResTimerCallback()
                 instruments[0]->getStrings()[index]->setFb(Fb[index]);
                 instruments[0]->getStrings()[index]->setBowPos(xpos[index], ypos[index]);
                 instruments[0]->getStrings()[index]->setFingerPoint(fp[index]);
-                instruments[0]->getStrings()[index]->setConnection(connectionPoint[index]);
+                instruments[0]->getStrings()[index]->setConnection(0, connectionPoint[index]);
             } else if (index == 1)
             {
                 instruments[0]->getPlates()[0]->setImpactPosition (sensel->fingers[0].x, sensel->fingers[0].y);

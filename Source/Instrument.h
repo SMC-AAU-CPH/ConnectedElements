@@ -23,6 +23,13 @@ enum ObjectType
     plate,
 };
 
+enum ConnectionType
+{
+    stringString,
+    stringPlate,
+    platePlate
+};
+
 class Instrument    : public Component
 {
 public:
@@ -45,20 +52,25 @@ public:
                    double width1, double width2,
                    double sx, double w0, double w1, double fs);
         
-        vector<double> calculateJFc();
         void calculateCoefs();
+        vector<double> calculateJFc();
         
-        vector<int> getCPIdx() { return cpIdx; };
-        void setCP (int idx, double ratio) { cpIdx[idx] = floor(ratio * violinStrings[idx]->getNumPoints()); };
-//        void setCPPlate (int idx, double ratioX, double ratioY) { cpIdx[idx] = floor(ratio * violinStrings[idx]->getNumPoints()); };
+//        void setCP (int idx, double ratio) { cpIdx[idx] = floor(ratio * violinStrings[idx]->getNumPoints()); };
+//        void setCPPlate (int idx, double ratioX, double ratioY) { cpIdx[idx] = floor(ratioX * violinStrings[idx]->getNumPoints()); };
         
         vector<double> getJFc() { return JFc; };
         
-    private:
+        vector<int> connID;
+        
         vector<ViolinString*> violinStrings;
         vector<Plate*> plates;
         
-        vector<int> cpIdx;
+        ConnectionType connectionType;
+        
+    private:
+        
+        
+        
         double width1, width2;  // Width of the connection
         double sx, w0, w1; // Spring constants: damping, linear spring constant, non-linear spring constant
         

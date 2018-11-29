@@ -35,9 +35,11 @@ public:
     void setInput(float in) {input = in;};
     void setDamping(float frequencyDependent, float frequencyIndependent);
     
-    void setConnection (vector<double> cp) { _cpIdx[0] = (floor(cp[0] * Nx)); _cpIdx[1] = (floor(cp[1] * Ny)); };
+    tuple<int, int> getCP(int idx) { return cpIdx[idx]; };
+    void setConnection (int idx, tuple<double, double> cp) {auto [x, y] = cp; cpIdx[idx] = make_tuple(floor(x * Nx), floor(y * Ny)); };
+    int addConnection (tuple<double, double> cp);
     
-    void addJFc (double JFc, int idX, int idY);
+    void addJFc (double JFc, tuple<int, int> cpIdx);
     
     int getNumXPoints() { return Nx; };
     int getNumYPoints() { return Ny; };
@@ -46,9 +48,9 @@ public:
     
     double getGridSpacing() { return sqrt(Nx / static_cast<double>(Ny)) / static_cast<double>(Nx); };
     
-    double getPrevStateAt (int idX, int idY) { return un1[idX][idY]; };
-    double getStateAt (int idX, int idY) { return un[idX][idY]; };
-    double getNextStateAt (int idX, int idY) { return u[idX][idY]; };
+    double getPrevStateAt (tuple<int, int> cpIdx) {auto [x, y] = cpIdx; return un1[x][y]; };
+    double getStateAt (tuple<int, int> cpIdx) {auto [x, y] = cpIdx; return un[x][y]; };
+    double getNextStateAt (tuple<int, int> cpIdx) {auto [x, y] = cpIdx; return u[x][y]; };
     
     void updateUVectors();
     
@@ -60,11 +62,11 @@ public:
     
 private:
     float frequency = 220;
-    double k = 1.0f / 48000.0f;
-    double fs = 48000.0f;
+    double k;;
+    double fs;
     const static int Nx = 20; // Number of spatial points
-    const static int Ny = 20;
-    const double h = double(1.0f / Nx);
+    const static int Ny = 10;
+    const double h = getGridSpacing();
     
     double d, B1, B2, B3, C, C1, C2, C3, C4;
     double kappa, sigma0, sigma1;
@@ -81,7 +83,7 @@ private:
     int outputPositionX = 2;
     int outputPositionY = 3;
     
-    vector<int> _cpIdx;
+    vector<tuple<int, int>> cpIdx;
 };
 
 

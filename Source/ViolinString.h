@@ -58,17 +58,23 @@ public:
     
     Path generateStringPathAdvanced();
     
-    void setConnection (double cp) { _cpIdx.store(floor(cp * N)); };
+    void setConnection (int idx, double cp) {
+        if(cpIdx.size())
+            cpIdx[idx] = clamp(floor(cp * N), 2, N-2);
+    }
+    int addConnection (double cp);
     
-    void mouseDrag(const MouseEvent& e) override;
+    int getCP(int idx) { return cpIdx[idx]; };
+    int getCy(int idx) { return cy[idx]; };
     
-    int getCy() { return _cy.load(); };
+    double clamp (double input, double min, double max);
     
 private:
     double fs, freq, gamma, k, s0, s1, B, kappa, h, N, lambdaSq, muSq, kOh, gOh, a, BM, tol, q, qPrev, b, eps, fp;
     double ff = 0.7;
     atomic<double> _Vb, _Fb, _bpX, _bpY;
-    atomic<int> _cx{0}, _cy{0}, _cpIdx{0};
+    
+    vector<int> cx, cy, cpIdx;
     atomic<bool> _isBowing{false};
 
     vector<double> u, uPrev, uNext;

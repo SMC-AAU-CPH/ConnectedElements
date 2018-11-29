@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<JUCERPROJECT id="ILvBqS" name="ConnectedElements" projectType="guiapp" jucerVersion="5.4.1">
+<JUCERPROJECT id="ILvBqS" name="ConnectedElements" projectType="guiapp" jucerVersion="5.4.1"
+              cppLanguageStandard="17">
   <MAINGROUP id="qV0zWR" name="ConnectedElements">
     <GROUP id="{E399A643-3511-66C1-BAF8-F737D4AD2BA0}" name="SenselWrapper">
       <GROUP id="{65767978-087E-4F37-B2D1-31CADB56B208}" name="lib">
