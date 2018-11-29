@@ -157,7 +157,7 @@ void Plate::paint (Graphics& g)
         for (int y = 2; y < Ny - 2; ++y)
         {
             int cVal = clamp (255 * 0.5 * (u[x][y] * scaling + 1), 0, 255);
-            g.setColour(Colour::fromRGB(cVal, cVal, cVal));
+            g.setColour(Colour::fromRGBA (cVal, cVal, cVal, 127));
             g.fillRect((x - 2) * stateWidth, (y - 2) * stateHeight, stateWidth, stateHeight);
             for (int c = 0; c < cpIdx.size(); ++c)
             {

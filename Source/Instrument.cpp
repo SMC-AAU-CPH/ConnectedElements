@@ -70,31 +70,43 @@ Instrument::~Instrument()
 
 void Instrument::paint (Graphics& g)
 {
-    g.setColour(Colours::orange);
-//    double y1;
-//    double y2;
-//    int cpX1;
-//    int cpX2;
-//    
-//    int stringIdx = 0;
-//    for (int i = 0; i < connections.size(); ++i)
+//    if (paintYes)
 //    {
-//        if (connections[i].connectionType == stringString)
-//        {
-//
-//            cpX1 = connections[i].violinStrings[0]->getCP(connections[i].connID[0]);
-//            cpX2 = connections[i].violinStrings[1]->getCP(connections[i].connID[1]);
-//            y1 = connections[i].violinStrings[0]->getCy(cpX1);
-//            y2 = connections[i].violinStrings[1]->getCy(cpX2);
-//            Line<float> connectionLine (ceil(cpX1 * getWidth() / connections[i].violinStrings[0]->getNumPoints()), y1,
-//                                        ceil(cpX2 * getWidth() / connections[i].violinStrings[1]->getNumPoints()), stringIdx * getHeight() / static_cast<double>(numStrings) + y2);
-//            ++stringIdx;
-//            float dashPattern[2];
-//            dashPattern[0] = 3.0;
-//            dashPattern[1] = 5.0;
-//            g.drawDashedLine(connectionLine, dashPattern, 2, dashPattern[0], 0);
-//        }
-//    }
+    float dashPattern[2];
+    dashPattern[0] = 3.0;
+    dashPattern[1] = 5.0;
+    
+    g.setColour(Colours::orange);
+
+    int stringIdx = 0;
+    for (int i = 0; i < connections.size(); ++i)
+    {
+        if (connections[i].connectionType == stringString)
+        {
+            int cpX1 = connections[i].violinStrings[0]->getCP(connections[i].connID[0]);
+            int cpX2 = connections[i].violinStrings[1]->getCP(connections[i].connID[1]);
+            int y1 = connections[i].violinStrings[0]->getCy(connections[i].connID[0]);
+            int y2 = connections[i].violinStrings[1]->getCy(connections[i].connID[1]);
+            
+            Line<float> connectionLine (ceil(cpX1 * getWidth() / connections[i].violinStrings[0]->getNumPoints()), stringIdx * (getHeight() / 2.0) / static_cast<double>(numStrings) + y1,
+                                        ceil(cpX2 * getWidth() / connections[i].violinStrings[1]->getNumPoints()), (stringIdx + 1) * (getHeight() / 2.0) / static_cast<double>(numStrings) + y2);
+            ++stringIdx;
+            g.drawDashedLine(connectionLine, dashPattern, 2, dashPattern[0], 0);
+        } else if (connections[i].connectionType == stringPlate)
+        {
+            int cpX1 = connections[i].violinStrings[0]->getCP(connections[i].connID[0]);
+            int y1 = connections[i].violinStrings[0]->getCy(connections[i].connID[0]);
+            auto [cpX2, cpY2] = connections[i].plates[0]->getCP(connections[i].connID[1]);
+            
+            double halfHeight = getHeight() / 2.0;
+            int stateWidth = getWidth() / static_cast<double> (connections[i].plates[0]->getNumXPoints() - 4);
+            int stateHeight = halfHeight / static_cast<double> (connections[i].plates[0]->getNumYPoints() - 4);
+           
+            Line<float> connectionLine (ceil(cpX1 * getWidth() / connections[i].violinStrings[0]->getNumPoints()), stringIdx * (halfHeight) / static_cast<double>(numStrings) + y1,
+                                        (cpX2 - 1.5) * stateWidth, halfHeight + (cpY2 - 1.5) * stateHeight);
+            g.drawDashedLine(connectionLine, dashPattern, 2, dashPattern[0], 0);
+        }
+    }
 }
 
 void Instrument::resized()
