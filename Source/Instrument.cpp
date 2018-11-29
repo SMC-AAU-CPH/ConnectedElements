@@ -15,7 +15,8 @@
 Instrument::Instrument (vector<ObjectType> objectTypes, double fs) : fs (fs)
 {
     
-    double frequencyInHz[] = {110.0, 110.0 * pow(2, 7.0 / 12.0), 110.0 * pow(2, 12.0 / 12.0), 110.0 * pow(2, (12.0 + 7.0) / 12.0), 115.0};
+    double frequencyInHz[] = {110.0, 110.0 * pow(2, 12.0 / 12.0), 110.0 * pow(2, (12.0 + 7.0) / 12.0), 115.0 * pow(2, 12.0 / 12.0), 115 * pow(2, (12.0 + 7.0) / 12.0)};
+    
     // TODO counter for individual objecttypes
     for (int i = 0; i < objectTypes.size(); ++i)
     {
@@ -32,35 +33,37 @@ Instrument::Instrument (vector<ObjectType> objectTypes, double fs) : fs (fs)
     }
     numStrings = violinStrings.size();
     numPlates = plates.size();
-    
+  /*
     connections.push_back(Connection (violinStrings[0], plates[0],
-                                      0.5, 0.6, 0.6,
+                                      0.5, 0.7, 0.7,
                                       1, 1,
-                                      1, 10000, 10000, fs));
+                                      1, 1000, 100, fs));*/
     
     connections.push_back(Connection (violinStrings[0], violinStrings[1],
-                                      0.1, 0.3,
+                                      0.5, 0.5,
                                       1, 1,
-                                      1, 50000, 10000, fs));
+                                      1, 1000, 100, fs));
     connections.push_back(Connection (violinStrings[1], violinStrings[2],
-                                      0.1, 0.3,
+                                      0.1, 0.5,
                                       1, 1,
-                                      1, 50000, 10000, fs));
+                                      1, 1000, 100, fs));
     
     connections.push_back(Connection (violinStrings[2], violinStrings[3],
-                                      0.1, 0.3,
+                                      0.1, 0.5,
                                       1, 1,
-                                      1, 50000, 10000, fs));
+                                      1, 1000, 100, fs));
     
     connections.push_back(Connection (violinStrings[3], violinStrings[4],
-                                      0.1, 0.3,
+                                      0.1, 0.5,
                                       1, 1,
-                                      1, 50000, 10000, fs));
+                                      1, 10000, 100, fs));
     
-    connections.push_back(Connection (violinStrings[violinStrings.size()-1], plates[0],
-                                      0.5, 0.3, 0.3,
+    /*
+    connections.push_back(Connection (violinStrings[numStrings-1], plates[0],
+                                      0.1, 0.3, 0.3,
                                       1, 1,
-                                      1, 10000, 10000, fs));
+                                      1, 10000, 4000, fs));
+     */
     
 }
 
@@ -193,8 +196,19 @@ vector<double> Instrument::calculateOutput()
     for (auto plate : plates)
         plate->updateUVectors();
     
-    output[0] = violinStrings[2]->getOutput(0.75) * 600 + 0.1 * plates[0]->getOutput(0.3, 0.4) * 3;
-    output[1] = violinStrings[3]->getOutput(0.75) * 600 + 0.1 * plates[0]->getOutput(0.7, 0.4) * 3;
+    
+    for (int i = 0; i < violinStrings.size(); i++)
+    {
+        float volume = 1;
+        //volume *= 5;
+        output[0] +=  violinStrings[i]->getOutput(0.5) * 600 * volume;
+    }
+    
+    //output[0] += 0.1 * plates[0]->getOutput(0.3, 0.4) * 3;
+    output[1] = output[0];
+    
+    //output[0] = violinStrings[2]->getOutput(0.75) * 600 + 0.1 * plates[0]->getOutput(0.3, 0.4) * 3;
+    //output[1] = violinStrings[3]->getOutput(0.75) * 600 + 0.1 * plates[0]->getOutput(0.7, 0.4) * 3;
     
     return output;
 }
