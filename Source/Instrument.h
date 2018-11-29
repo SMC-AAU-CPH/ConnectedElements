@@ -104,10 +104,10 @@ private:
     unsigned int numStrings;
     unsigned int numPlates;
     
-    vector<double> fp {0, 0};
-    vector<double> bpX {0, 0};
-    vector<double> bpY {0, 0};
-    vector<double> cp {0, 0};
+    vector<double> fp {0, 0, 0, 0, 0};
+    vector<double> bpX {0, 0, 0, 0, 0};
+    vector<double> bpY {0, 0, 0, 0, 0};
+    vector<double> cp {0, 0, 0, 0, 0};
     
     bool paintYes = true;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Instrument)
