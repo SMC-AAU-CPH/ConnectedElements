@@ -230,11 +230,6 @@ void ViolinString::setRaisedCosSinglePoint (double exciterPos)
     uPrev = u;
 }
 
-//void ViolinString::timerCallback()
-//{
-//    repaint();
-//}
-
 Path ViolinString::generateStringPathAdvanced() 
 {
     auto stringBounds = getHeight() / 2.0;

@@ -16,6 +16,7 @@ Instrument::Instrument (vector<ObjectType> objectTypes, double fs) : fs (fs)
 {
     
     double frequencyInHz[] = {110.0, 110.0 * pow(2, 7.0 / 12.0)};
+    // TODO counter for individual objecttypes
     for (int i = 0; i < objectTypes.size(); ++i)
     {
         if (objectTypes[i] == bowedString)
@@ -27,7 +28,7 @@ Instrument::Instrument (vector<ObjectType> objectTypes, double fs) : fs (fs)
         {
             plates.add (new Plate(fs));
             // plates.add (new Plate(...))
-            addAndMakeVisible (plates[i]);
+            addAndMakeVisible (plates[0]);
         }
     }
     numStrings = violinStrings.size();
