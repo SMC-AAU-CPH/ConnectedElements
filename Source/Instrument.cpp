@@ -44,31 +44,31 @@ Instrument::Instrument (vector<ObjectType> objectTypes, double fs) : fs (fs)
                                       0.5, 0.5,
                                       1, 1,
                                       1, 1000, 100,
-                                      4, fs));
+                                      1, fs));
     
     connections.push_back(Connection (violinStrings[1], violinStrings[2],
                                       0.1, 0.5,
                                       1, 1,
                                       1, 1000, 100,
-                                      4, fs));
+                                      1, fs));
     
     connections.push_back(Connection (violinStrings[2], violinStrings[3],
                                       0.1, 0.5,
                                       1, 1,
                                       1, 1000, 100,
-                                      4, fs));
+                                      1, fs));
     
     connections.push_back(Connection (violinStrings[3], violinStrings[4],
                                       0.1, 0.5,
                                       1, 1,
                                       1, 10000, 100,
-                                      4, fs));
+                                      1, fs));
     
     connections.push_back(Connection (violinStrings[numStrings-1], plates[0],
                                       0.1, 0.3, 0.3,
                                       1, 1,
                                       1, 10000, 4000,
-                                      1.0 / pow(4.0, 5.0), fs));
+                                      0.25, fs));
     
 }
 
