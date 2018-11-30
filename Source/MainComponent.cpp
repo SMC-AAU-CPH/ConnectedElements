@@ -55,7 +55,7 @@ void MainComponent::prepareToPlay(int samplesPerBlockExpected, double sampleRate
     // start the hi-res timer
     HighResolutionTimer::startTimer(1000.0 / 150.0);
     Timer::startTimerHz(15);
-    setSize(1440, 900);
+    setSize(1440, 800);
 }
 
 void MainComponent::hiResTimerCallback()
@@ -96,7 +96,8 @@ void MainComponent::hiResTimerCallback()
                 instruments[0]->getStrings()[index]->setBowPos(xpos[index], ypos[index]);
                 instruments[0]->getStrings()[index]->setFingerPoint(fp[index]);
                 instruments[0]->getStrings()[index]->setConnection(0, connectionPoint[index]);
-            } else if (index == 1)
+            }
+            else if (index == 1)
             {
                 instruments[0]->getPlates()[0]->setImpactPosition (sensel->fingers[0].x, sensel->fingers[0].y);
                 instruments[0]->getPlates()[0]->setInput (sensel->fingers[0].force * 1000);
@@ -136,8 +137,6 @@ void MainComponent::releaseResources()
 //==============================================================================
 void MainComponent::paint(Graphics &g)
 {
-    g.setColour(Colours::lightgrey);
-    g.drawLine(0, getHeight() / 2.0, getWidth(), getHeight() / 2.0);
 }
 
 void MainComponent::resized()

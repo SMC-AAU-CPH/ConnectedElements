@@ -109,6 +109,5 @@ private:
     vector<double> bpY {0, 0, 0, 0, 0};
     vector<double> cp {0, 0, 0, 0, 0};
     
-    bool paintYes = true;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Instrument)
 };

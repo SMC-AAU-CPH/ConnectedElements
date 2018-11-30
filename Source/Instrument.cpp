@@ -71,8 +71,6 @@ Instrument::~Instrument()
 
 void Instrument::paint (Graphics& g)
 {
-//    if (paintYes)
-//    {
     float dashPattern[2];
     dashPattern[0] = 3.0;
     dashPattern[1] = 5.0;
@@ -93,7 +91,8 @@ void Instrument::paint (Graphics& g)
                                         ceil(cpX2 * getWidth() / connections[i].violinStrings[1]->getNumPoints()), (stringIdx + 1) * (getHeight() / 2.0) / static_cast<double>(numStrings) + y2);
             ++stringIdx;
             g.drawDashedLine(connectionLine, dashPattern, 2, dashPattern[0], 0);
-        } else if (connections[i].connectionType == stringPlate)
+        }
+        else if (connections[i].connectionType == stringPlate)
         {
             int cpX1 = connections[i].violinStrings[0]->getCP(connections[i].connID[0]);
             int y1 = connections[i].violinStrings[0]->getCy(connections[i].connID[0]);
@@ -108,6 +107,9 @@ void Instrument::paint (Graphics& g)
             g.drawDashedLine(connectionLine, dashPattern, 2, dashPattern[0], 0);
         }
     }
+    g.setColour(Colour::greyLevel(0.5f).withAlpha(0.5f));
+    for (int i = 1; i <= numStrings; ++i)
+        g.drawLine(0, i * ((getHeight() / 2.0) / static_cast<double>(numStrings)), getWidth(), i * ((getHeight() / 2.0) / static_cast<double>(numStrings)));
 }
 
 void Instrument::resized()
@@ -278,6 +280,8 @@ void Instrument::mouseDown(const MouseEvent &e)
 void Instrument::mouseDrag(const MouseEvent &e)
 {
     double maxVb = 0.2;
+    double stringHeight = (getHeight() / 2.0) / static_cast<double>(numStrings);
+    
     for (int i = 0; i < numStrings; ++i)
     {
         if (e.y >= i * (getHeight() / 2.0) / static_cast<double>(numStrings) && e.y < (i + 1) * (getHeight() / 2.0) / static_cast<double>(numStrings))
@@ -299,12 +303,8 @@ void Instrument::mouseDrag(const MouseEvent &e)
             double Vb = maxVb;
             violinStrings[i]->setVb(Vb);
             bpX[i] = e.x <= 0 ? 0 : (e.x < getWidth() ? e.x / static_cast<double>(getWidth()) : 1);
-            if (i == 0)
-            {
-                bpY[i] = e.y <= 0 ? 0 : (e.y < getHeight() / 4.0 ? e.y / static_cast<double>(getHeight() / 4.0) : 1);
-            } else {
-                bpY[i] = e.y <= getHeight() / 4.0 ? 0 : (e.y < getHeight() ? (e.y - (getHeight() / 4.0)) / static_cast<double>(getHeight() / 4.0) : 1);
-            }
+            bpY[i] = e.y <= i * stringHeight ? 0 : (e.y > (i + 1) * stringHeight ? 1 : (e.y - i * stringHeight) / stringHeight);
+            
             violinStrings[i]->setBowPos(bpX[i], bpY[i]);
         }
     }

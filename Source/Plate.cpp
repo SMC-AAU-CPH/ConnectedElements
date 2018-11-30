@@ -107,7 +107,7 @@ int Plate::addConnection (tuple<double, double> cp)
 {
     auto [x, y] = cp;
     cpIdx.push_back(make_tuple(floor(x * Nx), floor(y * Ny)));
-    return cpIdx.size()-1;
+    return static_cast<int> (cpIdx.size() - 1);
 }
 
 void Plate::setDamping (float frequencyDependent, float frequencyIndependent)
