@@ -295,28 +295,33 @@ void ViolinString::mouseDrag (const MouseEvent& e)
 {
     double maxVb = 0.2;
     
-            //        if (ModifierKeys::getCurrentModifiers() == ModifierKeys::altModifier + ModifierKeys::leftButtonModifier)
-            //        {
-            //            cp[idx] = e.x <= 0 ? 0 : (e.x < getWidth() ? e.x / static_cast<double>(getWidth()) : 1);
-            ////            connections[0].setCP(idx, cp[idx]);
-            ////            violinStrings[idx]->setConnection (cp[idx]);
-            //        }
-            //        else if (ModifierKeys::getCurrentModifiers() == ModifierKeys::ctrlModifier + ModifierKeys::leftButtonModifier)
-            //        {
-            //            fp[idx] = e.x <= 0 ? 0 : (e.x < getWidth() ? e.x / static_cast<double>(getWidth()) : 1);
-            //            violinStrings[idx]->setFingerPoint(fp[idx]);
-            //        }
-            //        else
-            //        {
-            //        double Vb = (e.y - getHeight() * (idx == 0 ? 0.25 : 0.75)) / (static_cast<double>(getHeight() * 0.25)) * maxVb;
-    float bowVelocity = e.y / (static_cast<double>(getHeight())) * maxVb;
-    setVb(bowVelocity);
+    if (ModifierKeys::getCurrentModifiers() == ModifierKeys::altModifier + ModifierKeys::leftButtonModifier)
+    {
+        double cp = e.x <= 0 ? 0 : (e.x < getWidth() ? e.x / static_cast<double>(getWidth()) : 1);
+        cpIdx[0] = floor(cp * N);
+    }
+    else if (ModifierKeys::getCurrentModifiers() == ModifierKeys::altModifier + ModifierKeys::rightButtonModifier)
+    {
+        double cp = e.x <= 0 ? 0 : (e.x < getWidth() ? e.x / static_cast<double>(getWidth()) : 1);
+        cpIdx[1] = floor(cp * N);
+    }
+    else if (ModifierKeys::getCurrentModifiers() == ModifierKeys::ctrlModifier + ModifierKeys::leftButtonModifier)
+    {
+        fp = e.x <= 0 ? 0 : (e.x < getWidth() ? e.x / static_cast<double>(getWidth()) : 1);
+        setFingerPoint(fp);
+    }
     
-    float bowPositionX = e.x <= 0 ? 0 : (e.x < getWidth() ? e.x / static_cast<double>(getWidth()) : 1);
-    float bowPositionY = e.y <= 0 ? 0 : (e.y >= getHeight() ? 1 : e.y / static_cast<double>(getHeight()));
-    
-    _bpX.store (bowPositionX);
-    _bpY.store (bowPositionY);
+    else
+    {
+        float bowVelocity = e.y / (static_cast<double>(getHeight())) * maxVb;
+        setVb(bowVelocity);
+        
+        float bowPositionX = e.x <= 0 ? 0 : (e.x < getWidth() ? e.x / static_cast<double>(getWidth()) : 1);
+        float bowPositionY = e.y <= 0 ? 0 : (e.y >= getHeight() ? 1 : e.y / static_cast<double>(getHeight()));
+        
+        _bpX.store (bowPositionX);
+        _bpY.store (bowPositionY);
+    }
 }
 
 void ViolinString::mouseUp(const MouseEvent &e)

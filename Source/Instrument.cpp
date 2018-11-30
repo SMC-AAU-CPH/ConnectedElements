@@ -33,41 +33,42 @@ Instrument::Instrument (vector<ObjectType> objectTypes, double fs) : fs (fs)
     }
     numStrings = violinStrings.size();
     numPlates = plates.size();
-  
-    fp.resize(numStrings, 0);
-    bpX.resize(numStrings, 0);
-    bpY.resize(numStrings, 0);
-    cp.resize(numStrings, 0);
 
     connections.push_back(Connection (violinStrings[0], plates[0],
                                       0.5, 0.7, 0.7,
                                       1, 1,
-                                      1, 1000, 100, fs));
+                                      1, 1000, 100,
+                                      0.25, fs));
     
     connections.push_back(Connection (violinStrings[0], violinStrings[1],
                                       0.5, 0.5,
                                       1, 1,
-                                      1, 1000, 100, fs));
+                                      1, 1000, 100,
+                                      4, fs));
     
     connections.push_back(Connection (violinStrings[1], violinStrings[2],
                                       0.1, 0.5,
                                       1, 1,
-                                      1, 1000, 100, fs));
+                                      1, 1000, 100,
+                                      4, fs));
     
     connections.push_back(Connection (violinStrings[2], violinStrings[3],
                                       0.1, 0.5,
                                       1, 1,
-                                      1, 1000, 100, fs));
+                                      1, 1000, 100,
+                                      4, fs));
     
     connections.push_back(Connection (violinStrings[3], violinStrings[4],
                                       0.1, 0.5,
                                       1, 1,
-                                      1, 10000, 100, fs));
+                                      1, 10000, 100,
+                                      4, fs));
     
     connections.push_back(Connection (violinStrings[numStrings-1], plates[0],
                                       0.1, 0.3, 0.3,
                                       1, 1,
-                                      1, 10000, 4000, fs));
+                                      1, 10000, 4000,
+                                      1.0 / pow(4.0, 5.0), fs));
     
 }
 
@@ -127,55 +128,6 @@ void Instrument::resized()
     plates[0]->setBounds(0, getHeight() / 2.0, getWidth(), getHeight() / 2.0);
 }
 
-Instrument::Connection::Connection (ViolinString* object1, ViolinString* object2,
-                                       double cp1, double cp2,
-                                       double width1, double width2,
-                                       double sx, double w0, double w1, double fs) : width1(width1), width2(width2), sx(sx), w0(w0), w1(w1), k (1.0 / fs)
-{
-    violinStrings.push_back(object1);
-    violinStrings.push_back(object2);
-    
-    // Both adding a connection as well as retrieving its index (how manyth connection on that object)
-    connID.push_back(object1->addConnection (cp1));
-    connID.push_back(object2->addConnection (cp2));
-
-    hA = object1->getGridSpacing();
-    hB = object2->getGridSpacing();
-    s0A = object1->getS0();
-    s0B = object2->getS0();
-    
-    JFc.resize(2);
-    
-    jA = k * k / ((1 + s0A) * k);
-    jB = -k * k * massRatio / ((1 + s0B) * k);
-    
-    connectionType = stringString;
-}
-
-Instrument::Connection::Connection (ViolinString* object1, Plate* object2,
-                                    double cp1, double cp2x, double cp2y,
-                                    double width1, double width2,
-                                    double sx, double w0, double w1, double fs) : width1(width1), width2(width2), sx(sx), w0(w0), w1(w1), k (1.0 / fs)
-{
-    violinStrings.push_back(object1);
-    plates.push_back(object2);
-    
-    connID.push_back(object1->addConnection (cp1));
-    connID.push_back(object2->addConnection (make_tuple(cp2x, cp2y)));
-    
-    hA = object1->getGridSpacing();
-    hB = object2->getGridSpacing();
-    s0A = object1->getS0();
-    s0B = object2->getS0();
-    
-    JFc.resize(2);
-    
-    jA = k * k / ((1 + s0A) * k);
-    jB = -k * k * massRatio / ((1 + s0B) * k);
-    
-    connectionType = stringPlate;
-}
-
 vector<double> Instrument::calculateOutput()
 {
     vector<double> output = {0.0, 0.0};
@@ -229,54 +181,4 @@ vector<double> Instrument::calculateOutput()
     //output[1] = violinStrings[3]->getOutput(0.75) * 600 + 0.1 * plates[0]->getOutput(0.7, 0.4) * 3;
     
     return output;
-}
-
-void Instrument::Connection::calculateCoefs()
-{
-    // Relative displacement
-    int cp1 = violinStrings[0]->getCP (connID[0]);
-    if (connectionType == stringString)
-    {
-        int cp2 = violinStrings[1]->getCP (connID[1]);
-        etaR = hA * violinStrings[0]->getStateAt(cp1) - hB * violinStrings[1]->getStateAt(cp2);
-    } else if (connectionType == stringPlate)
-    {
-        auto cp2 = plates[0]->getCP (connID[1]);
-        etaR = hA * violinStrings[0]->getStateAt(cp1) - hB * plates[0]->getStateAt(cp2);
-    }
-    
-    rn = (2*sx/k - w0*w0 - pow(w1,4) * etaR*etaR) / (2.0*sx/k + w0*w0 + pow(w1,4) * etaR*etaR);
-    pn = -2.0/(2.0*sx/k + w0*w0 + pow(w1,4)*etaR*etaR);
-}
-
-vector<double> Instrument::Connection::calculateJFc()
-{
-    if(connectionType == stringString)
-    {
-        bn = hA * violinStrings[0]->getNextStateAt(violinStrings[0]->getCP(connID[0])) - hB * violinStrings[1]->getNextStateAt(violinStrings[1]->getCP(connID[1]));
-    } else if (connectionType == stringPlate)
-    {
-        bn = hA * violinStrings[0]->getNextStateAt(violinStrings[0]->getCP(connID[0])) - hB * plates[0]->getNextStateAt(plates[0]->getCP(connID[1]));
-    }
-    an = rn * etaRPrev;
-    
-    etaRPrev = etaR;
-    Fc = (an - bn) / ((hA * jA - hB * jB) - pn);
-    
-    JFc[0] = jA * Fc;
-    JFc[1] = jB * Fc;
-    
-    return JFc;
-}
-
-void Instrument::mouseDown(const MouseEvent &e)
-{
-}
-
-void Instrument::mouseDrag(const MouseEvent &e)
-{
-}
-
-void Instrument::mouseUp(const MouseEvent &e)
-{
 }

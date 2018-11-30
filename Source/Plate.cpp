@@ -183,16 +183,27 @@ void Plate::mouseDrag (const MouseEvent& e)
     int stateHeight = getHeight() / static_cast<double> (Ny - 4);
     int idX = e.x / stateWidth + 2;
     int idY = e.y / stateHeight + 2;
-    for (int x = 2; x < Nx - 2; x++)
+    
+    if (ModifierKeys::getCurrentModifiers() == ModifierKeys::altModifier + ModifierKeys::leftButtonModifier)
     {
-        for (int y = 2; y < Ny - 2; y++)
-        {
-            if (x == idX && y == idY)
-                excitationArea[x][y] = 1.0f;
-            else
-                excitationArea[x][y] = 0.0f;
-        }
+        cpIdx[0] = make_tuple(idX, idY);
     }
-
-    input = 5000.0;
+    else if (ModifierKeys::getCurrentModifiers() == ModifierKeys::altModifier + ModifierKeys::rightButtonModifier)
+    {
+        cpIdx[1] = make_tuple(idX, idY);
+    }
+    else
+    {
+        for (int x = 2; x < Nx - 2; x++)
+        {
+            for (int y = 2; y < Ny - 2; y++)
+            {
+                if (x == idX && y == idY)
+                    excitationArea[x][y] = 1.0f;
+                else
+                    excitationArea[x][y] = 0.0f;
+            }
+        }
+        input = 5000.0;
+    }
 }
