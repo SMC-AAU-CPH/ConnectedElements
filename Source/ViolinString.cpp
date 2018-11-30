@@ -16,7 +16,7 @@ ViolinString::ViolinString (double freq, double fs) : fs (fs), freq (freq)
 {
     // In your constructor, you should add any child components, and
     // initialise any special settings that your component needs.
-    setInterceptsMouseClicks (false, false);
+//    setInterceptsMouseClicks (false, false);
     
     _bpX.store(0.25);
     _bpY.store(0);
@@ -281,4 +281,45 @@ double ViolinString::clamp (double input, double min, double max)
         return min;
     else
         return input;
+}
+
+void ViolinString::mouseDown(const MouseEvent& e)
+{
+    if (ModifierKeys::getCurrentModifiers() == ModifierKeys::leftButtonModifier)
+    {
+        setBow(true);
+    }
+}
+
+void ViolinString::mouseDrag (const MouseEvent& e)
+{
+    double maxVb = 0.2;
+    
+            //        if (ModifierKeys::getCurrentModifiers() == ModifierKeys::altModifier + ModifierKeys::leftButtonModifier)
+            //        {
+            //            cp[idx] = e.x <= 0 ? 0 : (e.x < getWidth() ? e.x / static_cast<double>(getWidth()) : 1);
+            ////            connections[0].setCP(idx, cp[idx]);
+            ////            violinStrings[idx]->setConnection (cp[idx]);
+            //        }
+            //        else if (ModifierKeys::getCurrentModifiers() == ModifierKeys::ctrlModifier + ModifierKeys::leftButtonModifier)
+            //        {
+            //            fp[idx] = e.x <= 0 ? 0 : (e.x < getWidth() ? e.x / static_cast<double>(getWidth()) : 1);
+            //            violinStrings[idx]->setFingerPoint(fp[idx]);
+            //        }
+            //        else
+            //        {
+            //        double Vb = (e.y - getHeight() * (idx == 0 ? 0.25 : 0.75)) / (static_cast<double>(getHeight() * 0.25)) * maxVb;
+    float bowVelocity = e.y / (static_cast<double>(getHeight())) * maxVb;
+    setVb(bowVelocity);
+    
+    float bowPositionX = e.x <= 0 ? 0 : (e.x < getWidth() ? e.x / static_cast<double>(getWidth()) : 1);
+    float bowPositionY = e.y <= 0 ? 0 : (e.y >= getHeight() ? 1 : e.y / static_cast<double>(getHeight()));
+    
+    _bpX.store (bowPositionX);
+    _bpY.store (bowPositionY);
+}
+
+void ViolinString::mouseUp(const MouseEvent &e)
+{
+    setBow(false);
 }

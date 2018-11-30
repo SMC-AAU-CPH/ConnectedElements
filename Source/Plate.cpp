@@ -38,7 +38,7 @@ void Plate::setSampleRate (double sampleRate)
     setFrequency(220);
 }
 
-void Plate::excite ()
+void Plate::excite()
 {
     double excitation = input * 10;
     
@@ -55,14 +55,15 @@ void Plate::excite ()
             + C4 * excitationArea[l][m] * excitation;
         }
     }
-//    input = 0.0;
+    
+    input = 0.0;
 }
 
 float Plate::getOutput (float ratioX, float ratioY)
 {
     int x = clamp(floor(ratioX * Nx), 2, Nx - 2);
     int y = clamp(floor(ratioY * Ny), 2, Ny - 2);
-    return clamp(u[x][y]*1000, -1.0, 1.0);
+    return clamp(u[x][y] * 1000, -1.0, 1.0);
 }
 
 void Plate::setImpactPosition (float xPos, float yPos)
@@ -134,23 +135,22 @@ void Plate::addJFc(double JFc, tuple<int, int> cpIdx)
     u[x][y] = u[x][y] + JFc;
 }
 
-double Plate::clamp (double input, double min, double max)
+double Plate::clamp (double in, double min, double max)
 {
-    if (input > max)
+    if (in > max)
         return max;
-    else if (input < min)
+    else if (in < min)
         return min;
     else
-        return input;
+        return in;
 }
 
 void Plate::paint (Graphics& g)
 {
-//    g.fillAll(Colours::grey);
+
     int stateWidth = getWidth() / static_cast<double> (Nx - 4);
     int stateHeight = getHeight() / static_cast<double> (Ny - 4);
     int scaling = 10000;
-    
     
     for (int x = 2; x < Nx - 2; ++x)
     {
@@ -175,4 +175,24 @@ void Plate::paint (Graphics& g)
 
 void Plate::resized()
 {
+}
+
+void Plate::mouseDrag (const MouseEvent& e)
+{
+    int stateWidth = getWidth() / static_cast<double> (Nx - 4);
+    int stateHeight = getHeight() / static_cast<double> (Ny - 4);
+    int idX = e.x / stateWidth + 2;
+    int idY = e.y / stateHeight + 2;
+    for (int x = 2; x < Nx - 2; x++)
+    {
+        for (int y = 2; y < Ny - 2; y++)
+        {
+            if (x == idX && y == idY)
+                excitationArea[x][y] = 1.0f;
+            else
+                excitationArea[x][y] = 0.0f;
+        }
+    }
+
+    input = 5000.0;
 }

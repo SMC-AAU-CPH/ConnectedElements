@@ -25,17 +25,17 @@ class Plate : public Component
 public:
     Plate(double fs);
     
-    void setSampleRate(double sampleRate);
+    void setSampleRate (double sampleRate);
     void excite();
-    float getOutput(float ratioX, float ratioY);
+    float getOutput (float ratioX, float ratioY);
     
     void setImpactPosition (float xPos, float yPos);
+
+    void setFrequency (float f);
+    void setInput (float in) {input = in;};
+    void setDamping (float frequencyDependent, float frequencyIndependent);
     
-    void setFrequency(float f);
-    void setInput(float in) {input = in;};
-    void setDamping(float frequencyDependent, float frequencyIndependent);
-    
-    tuple<int, int> getCP(int idx) { return cpIdx[idx]; };
+    tuple<int, int> getCP (int idx) { return cpIdx[idx]; };
     void setConnection (int idx, tuple<double, double> cp) {auto [x, y] = cp; cpIdx[idx] = make_tuple(floor(x * Nx), floor(y * Ny)); };
     int addConnection (tuple<double, double> cp);
     
@@ -59,6 +59,8 @@ public:
     void paint(Graphics &g) override;
     
     void resized() override;
+    
+    void mouseDrag (const MouseEvent& e) override;
     
 private:
     float frequency = 220;

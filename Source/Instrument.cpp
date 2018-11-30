@@ -34,6 +34,11 @@ Instrument::Instrument (vector<ObjectType> objectTypes, double fs) : fs (fs)
     numStrings = violinStrings.size();
     numPlates = plates.size();
   
+    fp.resize(numStrings, 0);
+    bpX.resize(numStrings, 0);
+    bpY.resize(numStrings, 0);
+    cp.resize(numStrings, 0);
+
     connections.push_back(Connection (violinStrings[0], plates[0],
                                       0.5, 0.7, 0.7,
                                       1, 1,
@@ -43,6 +48,7 @@ Instrument::Instrument (vector<ObjectType> objectTypes, double fs) : fs (fs)
                                       0.5, 0.5,
                                       1, 1,
                                       1, 1000, 100, fs));
+    
     connections.push_back(Connection (violinStrings[1], violinStrings[2],
                                       0.1, 0.5,
                                       1, 1,
@@ -265,55 +271,12 @@ vector<double> Instrument::Connection::calculateJFc()
 
 void Instrument::mouseDown(const MouseEvent &e)
 {
-    if (ModifierKeys::getCurrentModifiers() == ModifierKeys::leftButtonModifier)
-    {
-        for (int i = 0; i < numStrings; ++i)
-        {
-            if (e.y >= i * (getHeight() / 2.0) / static_cast<double>(numStrings) && e.y < (i + 1) * (getHeight() / 2.0) / static_cast<double>(numStrings))
-            {
-                violinStrings[i]->setBow(true);
-            }
-        }
-    }
 }
 
 void Instrument::mouseDrag(const MouseEvent &e)
 {
-    double maxVb = 0.2;
-    double stringHeight = (getHeight() / 2.0) / static_cast<double>(numStrings);
-    
-    for (int i = 0; i < numStrings; ++i)
-    {
-        if (e.y >= i * (getHeight() / 2.0) / static_cast<double>(numStrings) && e.y < (i + 1) * (getHeight() / 2.0) / static_cast<double>(numStrings))
-        {
-    //        if (ModifierKeys::getCurrentModifiers() == ModifierKeys::altModifier + ModifierKeys::leftButtonModifier)
-    //        {
-    //            cp[idx] = e.x <= 0 ? 0 : (e.x < getWidth() ? e.x / static_cast<double>(getWidth()) : 1);
-    ////            connections[0].setCP(idx, cp[idx]);
-    ////            violinStrings[idx]->setConnection (cp[idx]);
-    //        }
-    //        else if (ModifierKeys::getCurrentModifiers() == ModifierKeys::ctrlModifier + ModifierKeys::leftButtonModifier)
-    //        {
-    //            fp[idx] = e.x <= 0 ? 0 : (e.x < getWidth() ? e.x / static_cast<double>(getWidth()) : 1);
-    //            violinStrings[idx]->setFingerPoint(fp[idx]);
-    //        }
-    //        else
-    //        {
-    //        double Vb = (e.y - getHeight() * (idx == 0 ? 0.25 : 0.75)) / (static_cast<double>(getHeight() * 0.25)) * maxVb;
-            double Vb = maxVb;
-            violinStrings[i]->setVb(Vb);
-            bpX[i] = e.x <= 0 ? 0 : (e.x < getWidth() ? e.x / static_cast<double>(getWidth()) : 1);
-            bpY[i] = e.y <= i * stringHeight ? 0 : (e.y > (i + 1) * stringHeight ? 1 : (e.y - i * stringHeight) / stringHeight);
-            
-            violinStrings[i]->setBowPos(bpX[i], bpY[i]);
-        }
-    }
 }
 
 void Instrument::mouseUp(const MouseEvent &e)
 {
-    for (auto violinString : violinStrings)
-    {
-        violinString->setBow(false);
-    }
 }
