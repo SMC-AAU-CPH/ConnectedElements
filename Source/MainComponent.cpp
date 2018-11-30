@@ -46,7 +46,7 @@ void MainComponent::prepareToPlay(int samplesPerBlockExpected, double sampleRate
     {
         sensels.add(new Sensel(i)); // chooses the device in the sensel device list
     }
-    vector<ObjectType> objects{bowedString, bowedString, bowedString, bowedString, bowedString, plate};
+    vector<ObjectType> objects{bowedString, bowedString, bowedString, bowedString, plate};
 
     instruments.add(new Instrument(objects, fs));
     addAndMakeVisible(instruments[0]);
@@ -76,20 +76,28 @@ void MainComponent::hiResTimerCallback()
                 {
 
                     bool state = sensel->fingers[f].state;
-                    float xpos = sensel->fingers[f].x;
-                    float ypos = sensel->fingers[f].y;
+                    float x = sensel->fingers[f].x;
+                    float y = sensel->fingers[f].y;
                     float Vb = sensel->fingers[f].delta_y * maxVb;
                     float Fb = sensel->fingers[f].force * 1000;
 
-                    
                     //fp[index] = sensel->fingers[f].x;
 
                     if (f < instruments[0]->getNumStrings())
                     {
-                        instruments[0]->getStrings()[f]->setBow(state);
-                        instruments[0]->getStrings()[f]->setVb(Vb);
-                        instruments[0]->getStrings()[f]->setFb(Fb);
-                        instruments[0]->getStrings()[f]->setBowPos(xpos, ypos);
+                        unsigned int pickAString = 0;
+                        // only four string at the moment!
+                        if (y > 0.25 && y < 0.5)
+                            pickAString = 1;
+                        else if (y > 0.5 && y < 0.75)
+                            pickAString = 2;
+                        else if (y > 0.75)
+                            pickAString = 3;
+
+                        instruments[0]->getStrings()[pickAString]->setBow(state);
+                        instruments[0]->getStrings()[pickAString]->setVb(Vb);
+                        instruments[0]->getStrings()[pickAString]->setFb(Fb);
+                        instruments[0]->getStrings()[pickAString]->setBowPos(x, y);
                         //instruments[0]->getStrings()[f]->setFingerPoint(fp[index]);
                     }
                 }
