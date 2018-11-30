@@ -47,10 +47,10 @@ void MainComponent::prepareToPlay(int samplesPerBlockExpected, double sampleRate
         sensels.add(new Sensel(i)); // chooses the device in the sensel device list
     }
     vector<ObjectType> objects{bowedString, bowedString, bowedString, bowedString, bowedString, plate};
-    
+
     instruments.add(new Instrument(objects, fs));
     addAndMakeVisible(instruments[0]);
-    
+
     numInstruments = instruments.size();
     // start the hi-res timer
     HighResolutionTimer::startTimer(1000.0 / 150.0);
@@ -73,36 +73,42 @@ void MainComponent::hiResTimerCallback()
             {
                 for (int f = 0; f < fingerCount; f++)
                 {
-                    if (sensel->fingers[f].x >= 0.7)
-                    {
-                        state[index] = sensel->fingers[f].state;
-                        xpos[index] = sensel->fingers[f].x;
+                    state[index] = sensel->fingers[f].state;
+                    xpos[index] = sensel->fingers[f].x;
 
-                        ypos[index] = sensel->fingers[f].y;
-                        Vb[index] = sensel->fingers[f].delta_y * maxVb;
-                        Fb[index] = sensel->fingers[f].force * 1000;
-                    }
+                    ypos[index] = sensel->fingers[f].y;
+                    Vb[index] = sensel->fingers[f].delta_y * maxVb;
+                    Fb[index] = sensel->fingers[f].force * 1000;
+                  
+                    if (sensel->fingers[f].y < 0.1)
+                        connectionPoint[index] = sensel->fingers[f].x;
                     else
+                        fp[index] = sensel->fingers[f].x;
+
+                    if (f < instruments[0]->getNumStrings())
                     {
-                        if (sensel->fingers[f].y < 0.1)
-                            connectionPoint[index] = sensel->fingers[f].x;
-                        else
-                            fp[index] = sensel->fingers[f].x;
+                        instruments[0]->getStrings()[f]->setBow(state[index]);
+                        instruments[0]->getStrings()[f]->setVb(Vb[index]);
+                        instruments[0]->getStrings()[f]->setFb(Fb[index]);
+                        instruments[0]->getStrings()[f]->setBowPos(xpos[index], ypos[index]);
+                        //instruments[0]->getStrings()[f]->setFingerPoint(fp[index]);
+                        instruments[0]->getStrings()[f]->setConnection(0, connectionPoint[index]);
                     }
                 }
-                instruments[0]->getStrings()[index]->setBow(state[index]);
-                instruments[0]->getStrings()[index]->setVb(Vb[index]);
-                instruments[0]->getStrings()[index]->setFb(Fb[index]);
-                instruments[0]->getStrings()[index]->setBowPos(xpos[index], ypos[index]);
-                instruments[0]->getStrings()[index]->setFingerPoint(fp[index]);
-                instruments[0]->getStrings()[index]->setConnection(0, connectionPoint[index]);
+                if(fingerCount == 0)
+                    for (auto violinString : instruments[0]->getStrings())
+                        violinString->setBow(false);
             }
             else if (index == 1)
             {
-                instruments[0]->getPlates()[0]->setImpactPosition (sensel->fingers[0].x, sensel->fingers[0].y);
-                instruments[0]->getPlates()[0]->setInput (sensel->fingers[0].force * 1000);
+                for (int f = 0; f < fingerCount; f++)
+                {
+                    
+                        instruments[0]->getPlates()[0]->setImpactPosition(sensel->fingers[f].x, sensel->fingers[f].y);
+                        instruments[0]->getPlates()[0]->setInput(sensel->fingers[f].force * 1000);
+                    
+                }
             }
-//                instrument->getConnections()[0].setCP(index, connectionPoint[index]);
         }
     }
 }
