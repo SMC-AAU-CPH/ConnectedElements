@@ -46,7 +46,7 @@ void MainComponent::prepareToPlay(int samplesPerBlockExpected, double sampleRate
     {
         sensels.add(new Sensel(i)); // chooses the device in the sensel device list
     }
-    vector<ObjectType> objects{bowedString, bowedString, bowedString, bowedString, plate};
+    vector<ObjectType> objects {bowedString, bowedString, bowedString, bowedString, plate};
 
     instruments.add(new Instrument(objects, fs));
     addAndMakeVisible(instruments[0]);
@@ -112,8 +112,11 @@ void MainComponent::hiResTimerCallback()
                 for (int f = 0; f < fingerCount; f++)
                 {
 
-                    instruments[0]->getPlates()[0]->setImpactPosition(sensel->fingers[f].x, sensel->fingers[f].y);
-                    instruments[0]->getPlates()[0]->setInput(sensel->fingers[f].force * 1000);
+                    for (auto plate : instruments[0]->getPlates())
+                    {
+                        plate->setImpactPosition(sensel->fingers[f].x, sensel->fingers[f].y);
+                        plate->setInput(sensel->fingers[f].force * 1000);
+                    }
                 }
             }
         }

@@ -64,7 +64,7 @@ public:
     
 private:
     float frequency = 220;
-    double k;;
+    double k;
     double fs;
     const static int Nx = 20; // Number of spatial points
     const static int Ny = 10;

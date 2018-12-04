@@ -39,9 +39,14 @@ ViolinString::ViolinString (double freq, double fs) : fs (fs), freq (freq)
     h = 1.0 / N;                            // Recalculate gridspacing
 
     // Initialise vectors
-    u.resize (N);
-    uPrev.resize (N);
-    uNext.resize (N);
+    
+    uVecs.resize(3);
+    for (int i = 0; i < 3; ++i)
+        uVecs[i].resize (N);
+    
+    uNext = &uVecs[uNextPtrIdx][0];
+    u = &uVecs[1][0];
+    uPrev = &uVecs[2][0];
     
     reset();
     
@@ -61,37 +66,15 @@ ViolinString::ViolinString (double freq, double fs) : fs (fs), freq (freq)
     // Initialise variables for Newton Raphson
     tol = 1e-4;
     qPrev = 0;
+    
+    fp = 0;
 }
 
 void ViolinString::reset()
 {
-    fill(u.begin(), u.end(), 0.0);
-    fill(uPrev.begin(), uPrev.end(), 0.0);
-    fill(uNext.begin(), uNext.end(), 0.0);
+    for (int i = 0; i < 3; ++i)
+        fill(uVecs[i].begin(), uVecs[i].end(), 0.0);
 }
-
-//void ViolinString::setFrequency (double freq)
-//{
-//    gamma = freq * 2;                       // Wave speed
-//   // we dont want to set the kappa according to the gamma 
-////    kappa = sqrt (B) * (gamma / double_Pi); // Stiffness Factor
-//    
-//    // Grid spacing
-//    h = sqrt ((gamma * gamma * k * k + 4.0 * s1 * k
-//               + sqrt (pow (gamma * gamma * k * k + 4.0 * s1 * k, 2.0)
-//                       + 16.0 * kappa * kappa * k * k)) * 0.5);
-//
-//    N = floor (1.0 / h);                    // Number of gridpoints
-//    h = 1.0 / N;                            // Recalculate gridspacing
-//    N = 100;
-//    
-//    // Courant numbers
-//    lambdaSq = pow (gamma * k / h, 2);
-//    muSq = pow (k * kappa / (h * h), 2);
-//    
-//    kOh = (kappa * kappa) / (h * h);
-//    gOh = (gamma * gamma) / (h * h);
-//}
 
 ViolinString::~ViolinString()
 {
@@ -166,7 +149,8 @@ void ViolinString::bow()
     {
         ff = 1; std::cout << "wait" << std::endl;
     }
-    uNext[fp] = uNext[fp] * (1 - ff);
+    int fingerPos = floor(fp * N);
+    uNext[fingerPos] = uNext[fingerPos] * (1 - ff);
 }
 
 void ViolinString::newtonRaphson()
@@ -213,6 +197,8 @@ void ViolinString::updateUVectors()
 {
     uPrev = u;
     u = uNext;
+    uNext = &uVecs[uNextPtrIdx][0];
+    uNextPtrIdx = (uNextPtrIdx + 1) % 3;
 }
 
 void ViolinString::setRaisedCos (double exciterPos, double width)
@@ -229,7 +215,7 @@ void ViolinString::setRaisedCos (double exciterPos, double width)
 
 void ViolinString::setRaisedCosSinglePoint (double exciterPos)
 {
-    u[floor(exciterPos * N)] = 1;
+//    u[floor(exciterPos * N)] = 1;
     uPrev = u;
 }
 
@@ -254,7 +240,7 @@ Path ViolinString::generateStringPathAdvanced()
                 cy[c] = newY;
             }
         }
-        if (y == fp)
+        if (y == floor(fp * N))
         {
             fpx = x;
         }
@@ -308,7 +294,6 @@ void ViolinString::mouseDrag (const MouseEvent& e)
     else if (ModifierKeys::getCurrentModifiers() == ModifierKeys::ctrlModifier + ModifierKeys::leftButtonModifier)
     {
         fp = e.x <= 0 ? 0 : (e.x < getWidth() ? e.x / static_cast<double>(getWidth()) : 1);
-        setFingerPoint(fp);
     }
     
     else

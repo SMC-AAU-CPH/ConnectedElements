@@ -15,13 +15,16 @@
 Instrument::Instrument (vector<ObjectType> objectTypes, double fs) : fs (fs)
 {
     
-    double frequencyInHz[] = {110.0, 110.0 * pow(2, 12.0 / 12.0), 110.0 * pow(2, (12.0 + 7.0) / 12.0), 115.0 * pow(2, 12.0 / 12.0), 115 * pow(2, (12.0 + 7.0) / 12.0)};
+    vector<double> frequencyInHz = {110.0, 110.0 * pow(2, 7.0 / 12.0), 110.0 * pow(2, (14.0) / 12.0), 110.0 * pow(2, 21.0 / 12.0), 115 * pow(2, (12.0 + 7.0) / 12.0)};
     
     // TODO counter for individual objecttypes
     for (int i = 0; i < objectTypes.size(); ++i)
     {
         if (objectTypes[i] == bowedString)
         {
+            if (i > frequencyInHz.size() - 1)
+                frequencyInHz.push_back(frequencyInHz[frequencyInHz.size()-1]);
+            
             violinStrings.add (new ViolinString(frequencyInHz[i], fs));
             addAndMakeVisible (violinStrings[i]);
         }
@@ -69,7 +72,7 @@ Instrument::Instrument (vector<ObjectType> objectTypes, double fs) : fs (fs)
                                       1, 1,
                                       1, 10000, 4000,
                                       0.25, fs));
-    
+
 }
 
 Instrument::~Instrument()
@@ -125,7 +128,10 @@ void Instrument::resized()
     {
         violinStrings[i]->setBounds(0 , i * ((getHeight() / 2.0) / static_cast<double>(numStrings)), getWidth(), (getHeight() / 2.0) / static_cast<double>(numStrings));
     }
-    plates[0]->setBounds(0, getHeight() / 2.0, getWidth(), getHeight() / 2.0);
+    for (int i = 0; i < numPlates; ++i)
+    {
+        plates[i]->setBounds(0, getHeight() / 2.0 + i * (getHeight() / 2.0) / static_cast<double>(numPlates), getWidth(), (getHeight() / 2.0) / static_cast<double>(numPlates));
+    }
 }
 
 vector<double> Instrument::calculateOutput()
@@ -171,10 +177,10 @@ vector<double> Instrument::calculateOutput()
     {
         float volume = 1;
         //volume *= 5;
-        output[0] +=  violinStrings[i]->getOutput(0.5) * 600 * volume;
+        output[0] +=  violinStrings[i]->getOutput(0.75) * 600 * volume;
     }
     
-    output[0] += plates[0]->getOutput(0.3, 0.4) * 3;
+//    output[0] += plates[0]->getOutput(0.3, 0.4) * 3;
     output[1] = output[0];
     
     //output[0] = violinStrings[2]->getOutput(0.75) * 600 + 0.1 * plates[0]->getOutput(0.3, 0.4) * 3;

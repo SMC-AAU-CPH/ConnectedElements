@@ -33,7 +33,6 @@ public:
     void newtonRaphson();
     double getOutput (double ratio);
 
-    void setFingerPoint(double val) { fp = floor (val * N); };
     void setFingerForce(double val) { ff = val; };
 
     void setBow(bool val) { _isBowing.store(val); };
@@ -47,7 +46,7 @@ public:
     double getStateAt (int idx) { return u[idx]; };
     double getNextStateAt (int idx) { return uNext[idx]; };
     
-    vector<double>& getState() { return u; };
+//    vector<double>& getState() { return u; };
     double getGridSpacing() { return h; };
     double getS0() { return s0; };
     
@@ -81,7 +80,11 @@ private:
     vector<int> cx, cy, cpIdx;
     atomic<bool> _isBowing{false};
 
-    vector<double> u, uPrev, uNext;
+    double* uNext;
+    double* u;
+    double* uPrev;
+    int uNextPtrIdx = 0;
+    vector<vector<double>> uVecs;
     bool active = false;
 
     unsigned long count;
