@@ -13,6 +13,13 @@
 #include "../JuceLibraryCode/JuceHeader.h"
 //#include "Object.h"
 
+enum InterpolationType
+{
+    noInterpolation,
+    linear,
+    cubic,
+};
+
 using namespace std;
 //==============================================================================
 /*
@@ -63,14 +70,14 @@ public:
     }
     int addConnection (double cp);
     
-    int getCP(int idx) { return cpIdx[idx]; };
-    int getCy(int idx) { return cy[idx]; };
+    int getCP (int idx) { return cpIdx[idx]; };
+    int getCy (int idx) { return cy[idx]; };
     
     double clamp (double input, double min, double max);
     
-    void mouseDown(const MouseEvent& e) override;
-    void mouseDrag(const MouseEvent& e) override;
-    void mouseUp(const MouseEvent& e) override;
+    void mouseDown (const MouseEvent& e) override;
+    void mouseDrag (const MouseEvent& e) override;
+    void mouseUp (const MouseEvent& e) override;
     
 private:
     double fs, freq, gamma, k, s0, s1, B, kappa, h, N, lambdaSq, muSq, kOh, gOh, a, BM, tol, q, qPrev, b, eps, fp;
@@ -92,6 +99,8 @@ private:
     
     bool fingerOn = false;
     int fpx = 0;
+    
+    InterpolationType interpolation = cubic;
     
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ViolinString)
 };

@@ -128,7 +128,8 @@ void ViolinString::bow()
     }
     
     double Fb = _Fb.load();
-    int bp = _bpX.load() * N;
+    double bowPos = clamp(_bpX.load() * N, 2, N - 3);
+    int bp = floor(bowPos);
     bool isBowing = _isBowing.load();
     
     newtonRaphson();
@@ -140,11 +141,36 @@ void ViolinString::bow()
                     + s0 * k * uPrev[l]
                     + (2 * s1 * k) / (h * h) * ((u[l+1] - 2 * u[l] + u[l-1])
                                                 - (uPrev[l+1] - 2 * uPrev[l] + uPrev[l-1]))) / (1 + s0 * k);
-        if (l == bp && isBowing == true)
+    }
+    
+    if (isBowing)
+    {
+        double alpha = bowPos - floor(bowPos);
+        if (interpolation == noInterpolation)
         {
-            uNext[l] = uNext[l] - excitation;
+            uNext[bp] = uNext[bp] - excitation;
+        }
+        else if (interpolation == linear)
+        {
+            uNext[bp] = uNext[bp] - excitation * (1 - alpha);
+            
+            if (bp < N - 3)
+                uNext[bp + 1] = uNext[bp + 1] - excitation * alpha;
+        }
+        else if (interpolation == cubic)
+        {
+            if (bp > 3)
+                uNext[bp-1] = uNext[bp-1] - excitation * (alpha * (alpha - 1) * (alpha - 2)) / -6.0;
+            
+            uNext[bp] = uNext[bp] - excitation * ((alpha - 1) * (alpha + 1) * (alpha - 2)) / 2.0;
+            
+            if (bp < N - 4)
+                uNext[bp+1] = uNext[bp+1] - excitation * (alpha * (alpha + 1) * (alpha - 2)) / -2.0;
+            if (bp < N - 5)
+                uNext[bp+2] = uNext[bp+2] - excitation * (alpha * (alpha + 1) * (alpha - 1)) / 6.0;
         }
     }
+    
     if (ff > 1)
     {
         ff = 1; std::cout << "wait" << std::endl;
