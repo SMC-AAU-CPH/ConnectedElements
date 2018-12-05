@@ -41,7 +41,7 @@ public:
     double getOutput (double ratio);
 
     void setFingerForce(double val) { ff = val; };
-
+    void setFingerPosition(double fingerPos){ fp = clamp(fingerPos, 0, 1); };
     void setBow(bool val) { _isBowing.store(val); };
     void setVb(double val) { _Vb.store(val); }
     void setFb(double val) { _Fb.store(val); }
