@@ -13,9 +13,9 @@
 #include "../JuceLibraryCode/JuceHeader.h"
 //#include "Object.h"
 
-enum InterpolationType
+enum StringInterpolType
 {
-    noInterpolation,
+    noStringInterpol,
     linear,
     cubic,
 };
@@ -60,14 +60,10 @@ public:
     void updateUVectors();
     
     void setRaisedCos (double exciterPos, double width);
-    void setRaisedCosSinglePoint (double exciterPos);
     
     Path generateStringPathAdvanced();
     
-    void setConnection (int idx, double cp) {
-        if(cpIdx.size())
-            cpIdx[idx] = clamp(floor(cp * N), 2, N-2);
-    }
+    void setConnection (int idx, double cp);
     int addConnection (double cp);
     
     int getCP (int idx) { return cpIdx[idx]; };
@@ -100,7 +96,8 @@ private:
     bool fingerOn = false;
     int fpx = 0;
     
-    InterpolationType interpolation = cubic;
-    
+    StringInterpolType interpolation = cubic;
+    int cpMoveIdx = -1;
+    int cpMR = 10; //connection point move range
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ViolinString)
 };

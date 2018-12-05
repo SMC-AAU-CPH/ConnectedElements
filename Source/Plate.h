@@ -18,6 +18,12 @@
 
 #include "../JuceLibraryCode/JuceHeader.h"
 
+enum PlateInterpolType
+{
+    noPlateInterpol,
+    bilinear,
+};
+
 using namespace std;
 
 class Plate : public Component
@@ -36,7 +42,7 @@ public:
     void setDamping (float frequencyDependent, float frequencyIndependent);
     
     tuple<int, int> getCP (int idx) { return cpIdx[idx]; };
-    void setConnection (int idx, tuple<double, double> cp) {auto [x, y] = cp; cpIdx[idx] = make_tuple(floor(x * Nx), floor(y * Ny)); };
+    void setConnection (int idx, tuple<double, double> cp) {auto [x, y] = cp; cpIdx[idx] = make_tuple(clamp(floor(x * Nx), 2, Nx - 2), clamp(floor(y * Ny), 2, Ny - 2)); };
     int addConnection (tuple<double, double> cp);
     
     void addJFc (double JFc, tuple<int, int> cpIdx);
@@ -60,32 +66,38 @@ public:
     
     void resized() override;
     
+    void mouseDown (const MouseEvent& e) override;
     void mouseDrag (const MouseEvent& e) override;
+    void mouseUp (const MouseEvent& e) override;
     
 private:
     float frequency = 220;
     double k;
     double fs;
-    const static int Nx = 20; // Number of spatial points
-    const static int Ny = 10;
+    int Nx = 20; // Number of spatial points
+    int Ny = 10;
     const double h = getGridSpacing();
     
     double d, B1, B2, B3, C, C1, C2, C3, C4;
     double kappa, sigma0, sigma1;
     //vector<double> u, un, un1, excitationArea;
-    double u[Nx][Ny] = {0};
-    double un[Nx][Ny] = {0};
-    double un1[Nx][Ny] = {0};
-    double excitationArea[Nx][Ny] = {0};
+    vector<double>* u;
+    vector<double>* un;
+    vector<double>* un1;
+    vector<vector<vector<double>>> uMats;
+    vector<vector<double>> excitationArea;
     
-    int strikePositionX = 5;
-    int strikePositionY = 5;
+    double strikePositionX = 2;
+    double strikePositionY = 2;
     
     double input = 0.0;
     int outputPositionX = 2;
     int outputPositionY = 3;
     
     vector<tuple<int, int>> cpIdx;
+    PlateInterpolType interpolation = bilinear;
+    
+    int cpMoveIdx = -1;
 };
 
 

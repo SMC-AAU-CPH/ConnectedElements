@@ -21,6 +21,24 @@ void Plate::setSampleRate (double sampleRate)
     fs = sampleRate;
     k = 1.0f / sampleRate;
     
+    uMats.resize(3);
+    excitationArea.resize(Nx);
+    
+    for (int i = 0; i < 3; ++i)
+    {
+        uMats[i].resize (Nx);
+        for (int j = 0; j < Nx; ++j)
+        {
+            uMats[i][j].resize(Ny);
+            excitationArea[j].resize(Ny);
+        }
+    }
+    
+    
+    u = &uMats[0][0];
+    un = &uMats[1][0];
+    un1 = &uMats[2][0];
+
     for (int x = 0; x < Nx; x++)
     {
         for (int y = 0; y < Ny; y++)
@@ -68,21 +86,40 @@ float Plate::getOutput (float ratioX, float ratioY)
 
 void Plate::setImpactPosition (float xPos, float yPos)
 {
-    auto pointX = xPos * Nx;
-    auto pointY = yPos * Ny;
-    strikePositionX = clamp(pointX, 2, Nx - 2); // clamp position between 2 -> 7
-    strikePositionY = clamp(pointY, 2, Ny - 2); // clamp position between 2 -> 7
+    double pointX = xPos * Nx;
+    double pointY = yPos * Ny;
+    strikePositionX = clamp(pointX, 2, Nx - 2);
+    strikePositionY = clamp(pointY, 2, Ny - 2);
+
+    int spX = floor (strikePositionX);
+    int spY = floor (strikePositionY);
     
     for (int x = 0; x < Nx; x++)
     {
         for (int y = 0; y < Ny; y++)
         {
-            
-            //if ((x == strikePositionX || x == strikePositionX + 1) && (y == strikePositionY || y == strikePositionY + 1))
-            if (x == strikePositionX && y == strikePositionY)
-                excitationArea[x][y] = 1.0f;
-            else
-                excitationArea[x][y] = 0.0f;
+            if (interpolation == noPlateInterpol)
+            {
+                if (x == spX && y == spY)
+                    excitationArea[x][y] = 1.0f;
+                else
+                    excitationArea[x][y] = 0.0f;
+            } else if (interpolation == bilinear)
+            {
+                double alphaX = strikePositionX - spX;
+                double alphaY = strikePositionY - spY;
+                
+                if (x == spX && y == spY)
+                {
+                    excitationArea[x][y] = (1-alphaX) * (1-alphaY) * 1.0f;
+                    if (spX < Nx - 3)
+                        excitationArea[x+1][y] = alphaX * (1-alphaY) * 1.0f;
+                    if (spY < Ny - 3)
+                    excitationArea[x][y+1] = (1-alphaX) * alphaY * 1.0f;
+                    if (spX < Nx - 3 && spY < Ny - 3)
+                        excitationArea[x+1][y+1] = alphaX * alphaY * 1.0f;
+                }
+            }
         }
     }
 }
@@ -107,7 +144,7 @@ void Plate::setFrequency (float f)
 int Plate::addConnection (tuple<double, double> cp)
 {
     auto [x, y] = cp;
-    cpIdx.push_back(make_tuple(floor(x * Nx), floor(y * Ny)));
+    cpIdx.push_back (make_tuple(clamp(floor(x * Nx), 2, Nx - 2), clamp(floor(y * Ny), 2, Ny - 2)));
     return static_cast<int> (cpIdx.size() - 1);
 }
 
@@ -119,14 +156,10 @@ void Plate::setDamping (float frequencyDependent, float frequencyIndependent)
 
 void Plate::updateUVectors()
 {
-    for (int l = 0; l < Nx; l++)
-    {
-        for (int m = 0; m < Ny; m++)
-        {
-            un1[l][m] = un[l][m];
-            un[l][m] = u[l][m];
-        }
-    }
+    vector<double>* dummyPtr = un1;
+    un1 = un;
+    un = u;
+    u = dummyPtr;
 }
 
 void Plate::addJFc(double JFc, tuple<int, int> cpIdx)
@@ -177,7 +210,7 @@ void Plate::resized()
 {
 }
 
-void Plate::mouseDrag (const MouseEvent& e)
+void Plate::mouseDown (const MouseEvent &e)
 {
     int stateWidth = getWidth() / static_cast<double> (Nx - 4);
     int stateHeight = getHeight() / static_cast<double> (Ny - 4);
@@ -186,24 +219,54 @@ void Plate::mouseDrag (const MouseEvent& e)
     
     if (ModifierKeys::getCurrentModifiers() == ModifierKeys::altModifier + ModifierKeys::leftButtonModifier)
     {
-        cpIdx[0] = make_tuple(idX, idY);
+        bool cpMove = false;
+        for (int i = 0; i < cpIdx.size(); ++i)
+        {
+            if (idX == get<0>(cpIdx[i]) && idY == get<1>(cpIdx[i]))
+            {
+                cpMove = true;
+                cpMoveIdx = i;
+                break;
+            }
+        }
+        // if the location of the click didn't contain an existing connection, create a new one
+        if (!cpMove)
+        {
+            //create new connection
+            std::cout << "check" << std::endl;
+        }
     }
-    else if (ModifierKeys::getCurrentModifiers() == ModifierKeys::altModifier + ModifierKeys::rightButtonModifier)
+}
+void Plate::mouseDrag (const MouseEvent& e)
+{
+    int stateWidth = getWidth() / static_cast<double> (Nx - 4);
+    int stateHeight = getHeight() / static_cast<double> (Ny - 4);
+    double idX = e.x / static_cast<double>(stateWidth) + 2;
+    double idY = e.y / static_cast<double>(stateHeight) + 2;
+    
+    if (cpMoveIdx != -1 || ModifierKeys::getCurrentModifiers() == ModifierKeys::altModifier + ModifierKeys::leftButtonModifier)
     {
-        cpIdx[1] = make_tuple(idX, idY);
+        if (cpMoveIdx != -1)
+            cpIdx[cpMoveIdx] = make_tuple(idX, idY);
     }
     else
     {
-        for (int x = 2; x < Nx - 2; x++)
-        {
-            for (int y = 2; y < Ny - 2; y++)
-            {
-                if (x == idX && y == idY)
-                    excitationArea[x][y] = 1.0f;
-                else
-                    excitationArea[x][y] = 0.0f;
-            }
-        }
-        input = 5000.0;
+        setImpactPosition (idX / static_cast<double>(Nx), idY / static_cast<double>(Ny));
+//        for (int x = 2; x < Nx - 2; x++)
+//        {
+//            for (int y = 2; y < Ny - 2; y++)
+//            {
+//                if (x == idX && y == idY)
+//                    excitationArea[x][y] = 1.0f;
+//                else
+//                    excitationArea[x][y] = 0.0f;
+//            }
+//        }
+        input = 2000.0;
     }
+}
+
+void Plate::mouseUp (const MouseEvent &e)
+{
+    cpMoveIdx = -1;
 }

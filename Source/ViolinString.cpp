@@ -146,7 +146,7 @@ void ViolinString::bow()
     if (isBowing)
     {
         double alpha = bowPos - floor(bowPos);
-        if (interpolation == noInterpolation)
+        if (interpolation == noStringInterpol)
         {
             uNext[bp] = uNext[bp] - excitation;
         }
@@ -239,12 +239,6 @@ void ViolinString::setRaisedCos (double exciterPos, double width)
     
 }
 
-void ViolinString::setRaisedCosSinglePoint (double exciterPos)
-{
-//    u[floor(exciterPos * N)] = 1;
-    uPrev = u;
-}
-
 Path ViolinString::generateStringPathAdvanced() 
 {
     auto stringBounds = getHeight() / 2.0;
@@ -277,6 +271,12 @@ Path ViolinString::generateStringPathAdvanced()
     return stringPath;
 }
 
+void ViolinString::setConnection (int idx, double cp)
+{
+    if(cpIdx.size())
+        cpIdx[idx] = clamp(floor(cp * N), 2, N-2);
+}
+
 int ViolinString::addConnection (double cp)
 {
     cpIdx.push_back (clamp(floor(cp * N), 2, N-2));
@@ -301,16 +301,39 @@ void ViolinString::mouseDown(const MouseEvent& e)
     {
         setBow(true);
     }
+    if (e.y >= (getHeight() / 2.0) - cpMR && e.y <= (getHeight() / 2.0) + cpMR
+        && ModifierKeys::getCurrentModifiers() == ModifierKeys::altModifier + ModifierKeys::leftButtonModifier)
+    {
+        bool cpMove = false;
+        for (int i = 0; i < cpIdx.size(); ++i)
+        {
+            if (getWidth() * cpIdx[i] / static_cast<double>(N) >= e.x - cpMR && getWidth() * cpIdx[i] / static_cast<double>(N) <= e.x + cpMR)
+            {
+                cpMove = true;
+                cpMoveIdx = i;
+                break;
+            }
+        }
+        // if the location of the click didn't contain an existing connection, create a new one
+        if (!cpMove)
+        {
+            //create new connection
+            std::cout << "check" << std::endl;
+        }
+    }
 }
 
 void ViolinString::mouseDrag (const MouseEvent& e)
 {
     double maxVb = 0.2;
-    
-    if (ModifierKeys::getCurrentModifiers() == ModifierKeys::altModifier + ModifierKeys::leftButtonModifier)
+
+    if (cpMoveIdx != -1 || ModifierKeys::getCurrentModifiers() == ModifierKeys::altModifier + ModifierKeys::leftButtonModifier)
     {
-        double cp = e.x <= 0 ? 0 : (e.x < getWidth() ? e.x / static_cast<double>(getWidth()) : 1);
-        cpIdx[0] = floor(cp * N);
+        if (cpMoveIdx != -1)
+        {
+            double cp = e.x <= 0 ? 0 : (e.x < getWidth() ? e.x / static_cast<double>(getWidth()) : 1);
+            cpIdx[cpMoveIdx] = floor(cp * N);
+        }
     }
     else if (ModifierKeys::getCurrentModifiers() == ModifierKeys::altModifier + ModifierKeys::rightButtonModifier)
     {
@@ -322,7 +345,7 @@ void ViolinString::mouseDrag (const MouseEvent& e)
         fp = e.x <= 0 ? 0 : (e.x < getWidth() ? e.x / static_cast<double>(getWidth()) : 1);
     }
     
-    else
+    else if (cpMoveIdx == -1)
     {
         float bowVelocity = e.y / (static_cast<double>(getHeight())) * maxVb;
         setVb(bowVelocity);
@@ -338,4 +361,5 @@ void ViolinString::mouseDrag (const MouseEvent& e)
 void ViolinString::mouseUp(const MouseEvent &e)
 {
     setBow(false);
+    cpMoveIdx = -1;
 }
