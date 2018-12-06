@@ -37,41 +37,41 @@ Instrument::Instrument (vector<ObjectType> objectTypes, double fs) : fs (fs)
     numStrings = violinStrings.size();
     numPlates = plates.size();
 
-    connections.push_back(Connection (violinStrings[0], plates[0],
-                                      0.5, 0.7, 0.7,
-                                      1, 1,
-                                      1, 1000, 100,
-                                      0.25, fs));
-    
-    connections.push_back(Connection (violinStrings[0], violinStrings[1],
-                                      0.5, 0.5,
-                                      1, 1,
-                                      1, 1000, 100,
-                                      1, fs));
-    
-    connections.push_back(Connection (violinStrings[1], violinStrings[2],
-                                      0.1, 0.5,
-                                      1, 1,
-                                      1, 1000, 100,
-                                      1, fs));
-    
-    connections.push_back(Connection (violinStrings[2], violinStrings[3],
-                                      0.1, 0.5,
-                                      1, 1,
-                                      1, 1000, 100,
-                                      1, fs));
-//    
-//     connections.push_back(Connection (violinStrings[3], violinStrings[4],
-//                                       0.1, 0.5,
-//                                       1, 1,
-//                                       1, 10000, 100,
-//                                       1, fs));
-    
-    connections.push_back(Connection (violinStrings[numStrings-1], plates[0],
-                                      0.1, 0.3, 0.3,
-                                      1, 1,
-                                      1, 10000, 4000,
-                                      0.25, fs));
+//    connections.push_back(Connection (violinStrings[0], plates[0],
+//                                      0.5, 0.7, 0.7,
+//                                      1, 1,
+//                                      1, 1000, 100,
+//                                      0.25, fs));
+//
+//    connections.push_back(Connection (violinStrings[0], violinStrings[1],
+//                                      0.5, 0.5,
+//                                      1, 1,
+//                                      1, 1000, 100,
+//                                      1, fs));
+//
+//    connections.push_back(Connection (violinStrings[1], violinStrings[2],
+//                                      0.1, 0.5,
+//                                      1, 1,
+//                                      1, 1000, 100,
+//                                      1, fs));
+//
+//    connections.push_back(Connection (violinStrings[2], violinStrings[3],
+//                                      0.1, 0.5,
+//                                      1, 1,
+//                                      1, 1000, 100,
+//                                      1, fs));
+////
+////     connections.push_back(Connection (violinStrings[3], violinStrings[4],
+////                                       0.1, 0.5,
+////                                       1, 1,
+////                                       1, 10000, 100,
+////                                       1, fs));
+//
+//    connections.push_back(Connection (violinStrings[numStrings-1], plates[0],
+//                                      0.1, 0.3, 0.3,
+//                                      1, 1,
+//                                      1, 10000, 4000,
+//                                      0.25, fs));
 
 }
 
@@ -177,10 +177,10 @@ vector<double> Instrument::calculateOutput()
     {
         float volume = 1;
         //volume *= 5;
-//        output[0] +=  violinStrings[i]->getOutput(0.75) * 600 * volume;
+        output[0] +=  violinStrings[i]->getOutput(0.75) * 600 * volume;
     }
     
-    output[0] += plates[0]->getOutput(0.3, 0.4) * 3;
+//    output[0] += plates[0]->getOutput(0.3, 0.4) * 3;
     output[1] = output[0];
     
     //output[0] = violinStrings[2]->getOutput(0.75) * 600 + 0.1 * plates[0]->getOutput(0.3, 0.4) * 3;

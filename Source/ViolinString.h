@@ -75,10 +75,15 @@ public:
     void mouseDrag (const MouseEvent& e) override;
     void mouseUp (const MouseEvent& e) override;
     
+    double linearInterpolation (double* uVec, int bowPosition, double alpha);
+    double cubicInterpolation (double* uVec, int bowPosition, double alpha);
+    
 private:
     double fs, freq, gamma, k, s0, s1, B, kappa, h, N, lambdaSq, muSq, kOh, gOh, a, BM, tol, q, qPrev, b, eps, fp;
     double ff = 0.7;
     atomic<double> _Vb, _Fb, _bpX, _bpY;
+    
+    double bowPos;
     
     vector<int> cx, cy, cpIdx;
     atomic<bool> _isBowing{false};
@@ -88,6 +93,17 @@ private:
     double* uPrev;
     int uNextPtrIdx = 0;
     vector<vector<double>> uVecs;
+    
+    //NR interpolation variables
+    double uI = 0;
+    double uIPrev = 0;
+    double uI1 = 0;
+    double uI2 = 0;
+    double uIM1 = 0;
+    double uIM2 = 0;
+    double uIPrev1 = 0;
+    double uIPrevM1 = 0;
+    
     bool active = false;
 
     unsigned long count;

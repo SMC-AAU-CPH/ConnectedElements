@@ -128,11 +128,14 @@ void ViolinString::bow()
     }
     
     double Fb = _Fb.load();
-    double bowPos = clamp(_bpX.load() * N, 2, N - 3);
+    bowPos = clamp(_bpX.load() * N, 2, N - 3);
     int bp = floor(bowPos);
     bool isBowing = _isBowing.load();
     
-    newtonRaphson();
+//    if (isBowing)
+//    {
+        newtonRaphson();
+//    }
     double excitation = k * k * (1 / h) * Fb * BM * q * exp (-a * q * q);
     for (int l = 2; l < N - 2; ++l)
     {
@@ -183,14 +186,49 @@ void ViolinString::newtonRaphson()
 {
     double Vb = _Vb.load();
     double Fb = _Fb.load();
-    int bp = _bpX.load() * N;
+    int bp = floor(bowPos);
+    double alpha = bowPos - bp;
+//    std::cout << alpha << std::endl;
+    if (interpolation == noStringInterpol)
+    {
+        uI = u[bp];
+        uIPrev = uPrev[bp];
+        uI1 = u[bp + 1];
+        uI2 = u[bp + 2];
+        uIM1 = u[bp - 1];
+        uIM2 = u[bp - 2];
+        uIPrev1 = uPrev[bp + 1];
+        uIPrevM1 = uPrev[bp - 1];
+    }
+    else if (interpolation == linear)
+    {
+        uI = linearInterpolation (u, bp, alpha);
+        uIPrev = linearInterpolation (uPrev, bp, alpha);
+        uI1 = linearInterpolation (u, bp + 1, alpha);
+        uI2 = linearInterpolation (u, bp + 2, alpha);
+        uIM1 = linearInterpolation (u, bp - 1, alpha);
+        uIM2 = linearInterpolation (u, bp - 2, alpha);
+        uIPrev1 = linearInterpolation (uPrev, bp + 1, alpha);
+        uIPrevM1 = linearInterpolation (uPrev, bp - 1, alpha);
+    }
+    else if (interpolation == cubic)
+    {
+        uI = cubicInterpolation (u, bp, alpha);
+        uIPrev = cubicInterpolation (uPrev, bp, alpha);
+        uI1 = cubicInterpolation (u, bp + 1, alpha);
+        uI2 = cubicInterpolation (u, bp + 2, alpha);
+        uIM1 = cubicInterpolation (u, bp - 1, alpha);
+        uIM2 = cubicInterpolation (u, bp - 2, alpha);
+        uIPrev1 = cubicInterpolation (uPrev, bp + 1, alpha);
+        uIPrevM1 = cubicInterpolation (uPrev, bp - 1, alpha);
+    }
     
-    b = 2.0 / k * Vb - (2.0 / (k * k)) * (u[bp] - uPrev[bp])
-    - gOh * (u[bp + 1] - 2 * u[bp] + u[bp - 1])
-    + kOh * (u[bp + 2] - 4 * u[bp + 1] + 6 * u[bp] - 4 * u[bp - 1] + u[bp - 2])
+    
+    b = 2.0 / k * Vb - (2.0 / (k * k)) * (uI - uIPrev) - gOh * (uI1 - 2 * uI + uIM1)
+    + kOh * (uI2 - 4 * uI1 + 6 * uI - 4 * uIM1 + uIM2)
     + 2 * s0 * Vb
-    - (2 * s1 / (k * h * h)) * ((u[bp + 1] - 2 * u[bp] + u[bp - 1])
-                                - (uPrev[bp + 1] - 2 * uPrev[bp] + uPrev[bp - 1]));
+    - (2 * s1 / (k * h * h)) * ((uI1 - 2 * uI + uIM1)
+                                - (uIPrev1 - 2 * uIPrev + uIPrevM1));
     eps = 1;
     int i = 0;
     while (eps>tol)
@@ -362,4 +400,18 @@ void ViolinString::mouseUp(const MouseEvent &e)
 {
     setBow(false);
     cpMoveIdx = -1;
+}
+
+double ViolinString::linearInterpolation (double* uVec, int bp, double alpha)
+{
+    return uVec[bp] * (1 - alpha) + uVec[bp + 1] * alpha;
+}
+
+
+double ViolinString::cubicInterpolation(double* uVec, int bp, double alpha)
+{
+    return  uVec[bp-1] * (alpha * (alpha - 1) * (alpha - 2)) / -6.0
+            + uVec[bp] * ((alpha - 1) * (alpha + 1) * (alpha - 2)) / 2.0
+            + uVec[bp+1] * (alpha * (alpha + 1) * (alpha - 2)) / -2.0
+            + uVec[bp+2] * (alpha * (alpha + 1) * (alpha - 1)) / 6.0;
 }
