@@ -67,7 +67,8 @@ void Plate::excite()
             u[l][m] =
             B1 * (un[l][m + 2] + un[l][m - 2] + un[l + 2][m] + un[l - 2][m])
             + B2 * (un[l + 1][m + 1] + un[l - 1][m + 1] + un[l + 1][m - 1] + un[l - 1][m - 1])
-            + B3 * (un[l][m + 1] + un[l][m - 1] + un[l + 1][m] + un[l - 1][m]) + C1 * un[l][m]
+            + B3 * (un[l][m + 1] + un[l][m - 1] + un[l + 1][m] + un[l - 1][m])
+            + C1 * un[l][m]
             + C2 * un1[l][m]
             + C3 * (un[l][m + 1] + un[l][m - 1] + un[l + 1][m] + un[l - 1][m] - un1[l][m + 1] - un1[l][m - 1] - un1[l + 1][m] - un1[l - 1][m])
             + C4 * excitationArea[l][m] * excitation;
@@ -128,10 +129,10 @@ void Plate::setFrequency (float f)
 {
     frequency = clamp(f, 30, 1300); // not really precise frequency here yet
     
-    kappa = double(frequency * (27.15 / 110) * 4); // Stiffness of plate
+    kappaSq = double(frequency * (27.15 / 110) * 4); // Stiffness of plate
     
     d = 1.0f / (1.0f + sigma0 * k);
-    B1 = -(kappa * (k * k)) / (h * h * h * h) * d;
+    B1 = -(kappaSq * k * k) / (h * h * h * h) * d;
     B2 = B1 * 2.0f;
     B3 = B1 * -8.0f;
     C = (2.0f * sigma1 * k) / (h * h);

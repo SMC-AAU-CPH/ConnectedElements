@@ -177,10 +177,10 @@ vector<double> Instrument::calculateOutput()
     {
         float volume = 1;
         //volume *= 5;
-        output[0] +=  violinStrings[i]->getOutput(0.75) * 600 * volume;
+//        output[0] +=  violinStrings[i]->getOutput(0.75) * 600 * volume;
     }
     
-//    output[0] += plates[0]->getOutput(0.3, 0.4) * 3;
+    output[0] += plates[0]->getOutput(0.3, 0.4) * 3;
     output[1] = output[0];
     
     //output[0] = violinStrings[2]->getOutput(0.75) * 600 + 0.1 * plates[0]->getOutput(0.3, 0.4) * 3;

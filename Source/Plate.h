@@ -79,7 +79,7 @@ private:
     const double h = getGridSpacing();
     
     double d, B1, B2, B3, C, C1, C2, C3, C4;
-    double kappa, sigma0, sigma1;
+    double kappaSq, sigma0, sigma1;
     //vector<double> u, un, un1, excitationArea;
     vector<double>* u;
     vector<double>* un;
