@@ -32,7 +32,16 @@ Connection::Connection (ViolinString* object1, ViolinString* object2,
     jA = k * k / ((1 + s0A) * k);
     jB = -k * k * massRatio / ((1 + s0B) * k);
     
-    connectionType = stringString;
+    if (object1->getStringType() == bowedString)
+    {
+        if (object2->getStringType() == bowedString)
+            connectionType = bowedStringBowedString;
+        else
+            connectionType = bowedStringSympString;
+    } else {
+        connectionType = sympStringSympString;
+    }
+    
 }
 
 Connection::Connection (ViolinString* object1, Plate* object2,
@@ -57,7 +66,7 @@ Connection::Connection (ViolinString* object1, Plate* object2,
     jA = k * k / ((1 + s0A) * k);
     jB = -k * k * massRatio / ((1 + s0B) * k);
     
-    connectionType = stringPlate;
+    connectionType = object1->getStringType() == bowedString ? bowedStringPlate : sympStringPlate;
 }
 
 
@@ -66,14 +75,25 @@ void Connection::calculateCoefs()
 {
     // Relative displacement
     int cp1 = violinStrings[0]->getCP (connID[0]);
-    if (connectionType == stringString)
+    switch (connectionType)
     {
-        int cp2 = violinStrings[1]->getCP (connID[1]);
-        etaR = hA * violinStrings[0]->getStateAt(cp1) - hB * violinStrings[1]->getStateAt(cp2);
-    } else if (connectionType == stringPlate)
-    {
-        auto cp2 = plates[0]->getCP (connID[1]);
-        etaR = hA * violinStrings[0]->getStateAt(cp1) - hB * plates[0]->getStateAt(cp2);
+        case bowedStringBowedString:
+        case bowedStringSympString:
+        case sympStringSympString:
+        {
+            int cp2 = violinStrings[1]->getCP (connID[1]);
+            etaR = hA * violinStrings[0]->getStateAt(cp1) - hB * violinStrings[1]->getStateAt(cp2);
+            break;
+        }
+        case bowedStringPlate:
+        case sympStringPlate:
+        {
+            auto cp2 = plates[0]->getCP (connID[1]);
+            etaR = hA * violinStrings[0]->getStateAt(cp1) - hB * plates[0]->getStateAt(cp2);
+            break;
+        }
+        case platePlate:
+            break;
     }
     
     rn = (2*sx/k - w0*w0 - pow(w1,4) * etaR*etaR) / (2.0*sx/k + w0*w0 + pow(w1,4) * etaR*etaR);
@@ -82,12 +102,19 @@ void Connection::calculateCoefs()
 
 vector<double> Connection::calculateJFc()
 {
-    if(connectionType == stringString)
+    switch (connectionType)
     {
-        bn = hA * violinStrings[0]->getNextStateAt(violinStrings[0]->getCP(connID[0])) - hB * violinStrings[1]->getNextStateAt(violinStrings[1]->getCP(connID[1]));
-    } else if (connectionType == stringPlate)
-    {
-        bn = hA * violinStrings[0]->getNextStateAt(violinStrings[0]->getCP(connID[0])) - hB * plates[0]->getNextStateAt(plates[0]->getCP(connID[1]));
+        case bowedStringBowedString:
+        case bowedStringSympString:
+        case sympStringSympString:
+            bn = hA * violinStrings[0]->getNextStateAt(violinStrings[0]->getCP(connID[0])) - hB * violinStrings[1]->getNextStateAt(violinStrings[1]->getCP(connID[1]));
+            break;
+        case bowedStringPlate:
+        case sympStringPlate:
+            bn = hA * violinStrings[0]->getNextStateAt(violinStrings[0]->getCP(connID[0])) - hB * plates[0]->getNextStateAt(plates[0]->getCP(connID[1]));
+            break;
+        case platePlate:
+            break;
     }
     an = rn * etaRPrev;
     

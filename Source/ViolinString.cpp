@@ -12,11 +12,11 @@
 #include "ViolinString.h"
 
 //==============================================================================
-ViolinString::ViolinString (double freq, double fs) : fs (fs), freq (freq)
+ViolinString::ViolinString (double freq, double fs, ObjectType stringType, int stringID) : fs (fs), freq (freq), stringType (stringType),
+                                                                                           stringID (stringID)
 {
     // In your constructor, you should add any child components, and
     // initialise any special settings that your component needs.
-//    setInterceptsMouseClicks (false, false);
     
     _bpX.store(0.25);
     _bpY.store(0);
@@ -36,6 +36,7 @@ ViolinString::ViolinString (double freq, double fs) : fs (fs), freq (freq)
                      + 16.0 * kappa * kappa * k * k)) * 0.5);
     
     N = floor (1.0 / h);                    // Number of gridpoints
+    N = 48;
     h = 1.0 / N;                            // Recalculate gridspacing
 
     // Initialise vectors
@@ -89,27 +90,32 @@ void ViolinString::paint (Graphics& g)
        drawing code..
     */
 
-    g.setColour (Colours::cyan);
+    g.setColour (stringType == bowedString ? Colours::cyan : Colours::mediumpurple);
     g.strokePath (generateStringPathAdvanced(), PathStrokeType (2.0f));
     g.setColour(Colours::orange);
     for (int c = 0; c < cpIdx.size(); ++c)
     {
-        g.drawEllipse(floor(cx[c] - 20), floor(cy[c] - 5), 10, 10, 2);
+        g.drawEllipse(floor(cpIdx[c] * getWidth() / N - 5), floor(cy[c] - 5), 10, 10, 2);
     }
     
-    g.setColour(Colours::yellow);
-    g.fillEllipse(fpx - 5, getHeight() / 2.0 - 5, 10, 10);
-    
-    // draw bow
-    g.setColour (Colours::yellow);
-    double opa = 90.0 / 100.0;
-    if (opa >= 1.0)
+    if (stringType == bowedString)
     {
-        g.setOpacity (1.0);
-    } else {
-        g.setOpacity(opa);
+        g.setColour(Colours::yellow);
+        g.fillEllipse(fpx - 5, getHeight() / 2.0 - 5, 10, 10);
+        
+        // draw bow
+        g.setColour (Colours::yellow);
+        double opa = 90.0 / 100.0;
+        if (opa >= 1.0)
+        {
+            g.setOpacity (1.0);
+        } else {
+            g.setOpacity(opa);
+        }
+        g.fillRect (floor(_bpX.load() * getWidth()), floor(_bpY.load() * getHeight()) - getHeight() / 2.0, 10, getHeight());
     }
-    g.fillRect (floor(_bpX.load() * getWidth()), floor(_bpY.load() * getHeight()) - getHeight() / 2.0, 10, getHeight());
+    g.setColour(Colour::greyLevel(0.5f).withAlpha(0.5f));
+    g.drawLine(0, getHeight() - 1, getWidth(), getHeight() - 1);
 }
 
 void ViolinString::resized()
@@ -132,9 +138,14 @@ void ViolinString::bow()
     int bp = floor(bowPos);
     bool isBowing = _isBowing.load();
     
-//    if (isBowing)
-//    {
+    if (isBowing)
+    {
         newtonRaphson();
+    }
+    
+//    if (pluck && pluckIdx < pluckLength)
+//    {
+//
 //    }
     double excitation = k * k * (1 / h) * Fb * BM * q * exp (-a * q * q);
     for (int l = 2; l < N - 2; ++l)
@@ -373,12 +384,8 @@ void ViolinString::mouseDrag (const MouseEvent& e)
             cpIdx[cpMoveIdx] = floor(cp * N);
         }
     }
-    else if (ModifierKeys::getCurrentModifiers() == ModifierKeys::altModifier + ModifierKeys::rightButtonModifier)
-    {
-        double cp = e.x <= 0 ? 0 : (e.x < getWidth() ? e.x / static_cast<double>(getWidth()) : 1);
-        cpIdx[1] = floor(cp * N);
-    }
-    else if (ModifierKeys::getCurrentModifiers() == ModifierKeys::ctrlModifier + ModifierKeys::leftButtonModifier)
+    else if (stringType == bowedString
+             && ModifierKeys::getCurrentModifiers() == ModifierKeys::ctrlModifier + ModifierKeys::leftButtonModifier)
     {
         fp = e.x <= 0 ? 0 : (e.x < getWidth() ? e.x / static_cast<double>(getWidth()) : 1);
     }

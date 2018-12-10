@@ -145,7 +145,7 @@ void Plate::setFrequency (float f)
 int Plate::addConnection (tuple<double, double> cp)
 {
     auto [x, y] = cp;
-    cpIdx.push_back (make_tuple(clamp(floor(x * Nx), 2, Nx - 2), clamp(floor(y * Ny), 2, Ny - 2)));
+    cpIdx.push_back (make_tuple(clamp(floor(x * Nx), 2, Nx - 3), clamp(floor(y * Ny), 2, Ny - 3)));
     return static_cast<int> (cpIdx.size() - 1);
 }
 

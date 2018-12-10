@@ -18,8 +18,11 @@ using namespace std;
 
 enum ConnectionType
 {
-    stringString,
-    stringPlate,
+    bowedStringBowedString,
+    bowedStringSympString,
+    bowedStringPlate,
+    sympStringPlate,
+    sympStringSympString,
     platePlate
 };
 

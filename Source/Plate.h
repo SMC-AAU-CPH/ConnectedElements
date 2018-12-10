@@ -17,6 +17,7 @@
 #pragma once
 
 #include "../JuceLibraryCode/JuceHeader.h"
+#include "ObjectTypes.h"
 
 enum PlateInterpolType
 {
@@ -71,7 +72,7 @@ public:
     void mouseUp (const MouseEvent& e) override;
     
 private:
-    float frequency = 220;
+    float frequency = 1000;
     double k;
     double fs;
     int Nx = 20; // Number of spatial points

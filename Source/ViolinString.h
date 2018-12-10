@@ -11,7 +11,7 @@
 #pragma once
 
 #include "../JuceLibraryCode/JuceHeader.h"
-//#include "Object.h"
+#include "ObjectTypes.h"
 
 enum StringInterpolType
 {
@@ -27,7 +27,7 @@ using namespace std;
 class ViolinString : public Component
 {
 public:
-    ViolinString(double freq, double fs);
+    ViolinString(double freq, double fs, ObjectType stringType, int stringID);
     ~ViolinString();
     
     void paint(Graphics &) override;
@@ -78,6 +78,9 @@ public:
     double linearInterpolation (double* uVec, int bowPosition, double alpha);
     double cubicInterpolation (double* uVec, int bowPosition, double alpha);
     
+    ObjectType getStringType() { return stringType; };
+    int getStringID() { return stringID; };
+    
 private:
     double fs, freq, gamma, k, s0, s1, B, kappa, h, N, lambdaSq, muSq, kOh, gOh, a, BM, tol, q, qPrev, b, eps, fp;
     double ff = 0.7;
@@ -85,7 +88,9 @@ private:
     
     double bowPos;
     
-    vector<int> cx, cy, cpIdx;
+    vector<int> cx;
+    vector<int> cy;
+    vector<int> cpIdx;
     atomic<bool> _isBowing{false};
 
     double* uNext;
@@ -115,5 +120,12 @@ private:
     StringInterpolType interpolation = cubic;
     int cpMoveIdx = -1;
     int cpMR = 10; //connection point move range
+    
+    ObjectType stringType;
+    int stringID;
+    
+    bool pluck = false;
+    int pluckIdx = 0;
+    
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ViolinString)
 };

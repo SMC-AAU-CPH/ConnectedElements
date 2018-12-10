@@ -16,15 +16,11 @@
 //==============================================================================
 /*
 */
-enum ObjectType
-{
-    bowedString,
-    plate,
-};
+
 class Instrument    : public Component
 {
 public:
-    Instrument (vector<ObjectType> objectTypes, double fs);
+    Instrument (vector<ObjectType> objectTypes, double fs, int stringPlateDivision);
     ~Instrument();
 
     void paint (Graphics&) override;
@@ -37,7 +33,8 @@ public:
     
     vector<Connection>& getConnections() { return connections; };
     
-    int getNumStrings() { return numStrings; };
+    int getNumBowedStrings() { return numBowedStrings; };
+    int getNumSympStrings() { return numSympStrings; };
     int getNumPlates() { return numPlates; };
     
 private:
@@ -45,8 +42,12 @@ private:
     OwnedArray<Plate> plates;
     vector<Connection> connections;
     double fs;
-    unsigned int numStrings;
-    unsigned int numPlates;
-    
+    unsigned int numBowedStrings = 0;
+    unsigned int numSympStrings = 0;
+    unsigned int numPlates = 0;
+    int stringPlateDivision;
+    int sympStringHeight = 50;
+    int totBowedStringHeight;
+    int totSympStringHeight;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Instrument)
 };
