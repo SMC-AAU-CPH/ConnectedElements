@@ -59,8 +59,9 @@ public:
     
     void updateUVectors();
     
-    void setRaisedCos (double exciterPos, double width);
+    void setRaisedCos (double exciterPos, double width, double force);
     void pick(bool pick) {_isPicking = pick;};
+    bool isPicking() { return _isPicking; };
     
     Path generateStringPathAdvanced();
     

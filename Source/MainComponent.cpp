@@ -178,6 +178,11 @@ void MainComponent::hiResTimerCallback()
 
                 if (index == 1)
                 {
+                    if (fingerCount == 0)
+                    {
+                        for (int i = instruments[0]->getNumBowedStrings(); i < instruments[0]->getNumBowedStrings() + instruments[0]->getNumSympStrings(); ++i)
+                            instruments[0]->getStrings()[i]->pick(false);
+                    }
                     for (int f = 0; f < fingerCount; f++)
                     {
                         bool state = sensel->fingers[f].state;
@@ -193,22 +198,35 @@ void MainComponent::hiResTimerCallback()
                             plate->setInput(sensel->fingers[f].force * 10000);
                         }
                         */
-
-                        //int bowedStringsAmount = instruments[0]->getNumBowedStrings();
-                        //int sympStringsAmount = instruments[0]->getNumSympStrings();
+//                        if (f == 0)
+//                        {
+                        int bowedStringsAmount = instruments[0]->getNumBowedStrings();
+                        int sympStringsAmount = instruments[0]->getNumSympStrings();
                         int totalStringsAmount = instruments[0]->getNumSympStrings() + instruments[0]->getNumBowedStrings();
 
-                        float range = 1.0 / static_cast<float>(totalStringsAmount);
+                        float range = 1.0 / static_cast<float>(sympStringsAmount);
 
-                        unsigned int pickAString = 0;
+                        unsigned int pickAString = -1;
                         
-                        for (int j = 0; j < totalStringsAmount; ++j)
+                        for (int j = 0; j < sympStringsAmount; ++j)
                             if (y > (range * j) && y < range * (j + 1))
-                                pickAString = j;
+                                pickAString = j + bowedStringsAmount;
                         
-                        
-                        instruments[0]->getStrings()[pickAString]->pick(state);
-                        instruments[0]->getStrings()[pickAString]->setRaisedCos(x, 5);
+                        for (int i = bowedStringsAmount; i < totalStringsAmount; ++i)
+                        {
+                            if (i == pickAString)
+                            {
+                                if (!instruments[0]->getStrings()[i]->isPicking())
+                                {
+//                                    std::cout << pickAString << std::endl;
+                                    instruments[0]->getStrings()[i]->pick(true);
+                                    instruments[0]->getStrings()[i]->setRaisedCos(x, 5, Fb / 500.0);
+                                    
+                                }
+                            } else {
+                                instruments[0]->getStrings()[i]->pick(false);
+                            }
+                        }
                         /*
                         for (int ps = 0; ps < totalStringsAmount; ps++)
                         {
@@ -221,6 +239,7 @@ void MainComponent::hiResTimerCallback()
                                 instruments[0]->getStrings()[ps]->pick(false);
                         }
                          */
+//                        }
                     }
                 }
             }

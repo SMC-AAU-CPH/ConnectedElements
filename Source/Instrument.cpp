@@ -265,7 +265,7 @@ vector<double> Instrument::calculateOutput()
     {
         float volume = 1;
         //volume *= 5;
-        output[0] +=  violinStrings[i]->getOutput(0.75) * (violinStrings[i]->getStringType() == sympString ? 1200 : 400) * volume;
+        output[0] +=  violinStrings[i]->getOutput(0.75) * 800 * volume;
     }
     
 //    output[0] += plates[0]->getOutput(0.3, 0.4) * 3;

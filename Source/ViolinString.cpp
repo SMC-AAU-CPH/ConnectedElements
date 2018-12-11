@@ -277,10 +277,9 @@ void ViolinString::updateUVectors()
     uNextPtrIdx = (uNextPtrIdx + 1) % 3;
 }
 
-void ViolinString::setRaisedCos(double exciterPos, double width)
+void ViolinString::setRaisedCos(double exciterPos, double width, double force)
 {
-    bool isPicking = _isPicking;
-    if (isPicking)
+    if (_isPicking)
     {
         int j = 0;
 
@@ -289,7 +288,7 @@ void ViolinString::setRaisedCos(double exciterPos, double width)
 
         for (int i = exciterStart; i < exciterEnd; ++i)
         {
-            uNext[i] += ((1 - cos(1 * double_Pi * j / width)) * 0.5) * 0.0001;
+            u[i] += ((1 - cos(1 * double_Pi * j / width)) * 0.5) * 0.001 * force;
             ++j;
         }
     }
