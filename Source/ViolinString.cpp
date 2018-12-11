@@ -117,12 +117,15 @@ void ViolinString::paint (Graphics& g)
         }
         g.fillRect (floor(_bpX.load() * getWidth()), floor(_bpY.load() * getHeight()) - getHeight() / 2.0, 10, getHeight());
         g.setColour(Colour::greyLevel(0.5f).withAlpha(0.5f));
-//        for (double i = 1.0; i <= 12.0; ++i)
-//        {
-//            double val = pow(2.0, i / 12.0) * getWidth();
+        for (double i = -12.0; i < 12.0; ++i)
+        {
+            double val = (1 - (pow(2.0, (i / 12.0)) - 1)) * getWidth() / 2.0;
 //            std::cout << val << std::endl;
-//            g.drawLine(val, 0, val, getHeight(), 2);
-//        }
+
+            g.drawLine(val, 0, val, getHeight(), 2);
+        }
+        g.setColour(Colour::fromRGBA(255, 255, 0, 127));
+        g.drawLine(getWidth() / 2.0, 0, getWidth() / 2.0, getHeight(), 2);
     }
     g.setColour(Colour::greyLevel(0.5f).withAlpha(0.5f));
     g.drawLine(0, getHeight() - 1, getWidth(), getHeight() - 1);
