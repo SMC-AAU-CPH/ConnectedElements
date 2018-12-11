@@ -65,5 +65,6 @@ private:
     // array<float, amountOfSensels> connectionPoint = {0.0};
     // array<bool, amountOfSensels> state = {0};
     
+    int chooseInstrument;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MainComponent)
 };

@@ -46,12 +46,23 @@ void MainComponent::prepareToPlay(int samplesPerBlockExpected, double sampleRate
     {
         sensels.add(new Sensel(i)); // chooses the device in the sensel device list
     }
-    vector<ObjectType> objects{bowedString, bowedString,
-                               sympString, sympString, sympString, sympString,
-                               plate};
-
-    int stringPlateDivision = 3 * 800 / 4.0;
-    instruments.add(new Instrument(objects, fs, stringPlateDivision));
+    chooseInstrument = 1;
+    if (chooseInstrument == 0)
+    {
+        vector<ObjectType> objects{bowedString, bowedString};
+        int stringPlateDivision = 800;
+        instruments.add(new Instrument(objects, fs, stringPlateDivision));
+    }
+    else if (chooseInstrument == 1)
+    {
+        vector<ObjectType> objects{bowedString, bowedString,
+            sympString, sympString, sympString, sympString,
+            plate};
+        
+        int stringPlateDivision = 3 * 800 / 4.0;
+        instruments.add(new Instrument(objects, fs, stringPlateDivision));
+    }
+    
     addAndMakeVisible(instruments[0]);
 
     numInstruments = instruments.size();
@@ -72,95 +83,110 @@ void MainComponent::hiResTimerCallback()
 
             unsigned int fingerCount = sensel->contactAmount;
             int index = sensel->senselIndex;
-
-            if (index == 0)
+            if (chooseInstrument == 0)
             {
                 for (int f = 0; f < fingerCount; f++)
                 {
-
+                    
                     bool state = sensel->fingers[f].state;
                     float x = sensel->fingers[f].x;
                     float y = sensel->fingers[f].y;
                     float Vb = sensel->fingers[f].delta_y * maxVb;
                     float Fb = sensel->fingers[f].force * 1000;
                     int fingerID = sensel->fingers[f].fingerID;
-                    //fp[index] = sensel->fingers[f].x;
-
-                    /*if (f < instruments[0]->getNumStrings())
-                    {
-                        unsigned int pickAString = 0;
-                        // only four string at the moment!
-                        if (y > 0.25 && y < 0.5)
-                            pickAString = 1;
-                        else if (y > 0.5 && y < 0.75)
-                            pickAString = 2;
-                        else if (y > 0.75)
-                            pickAString = 3;
-
-                        instruments[0]->getStrings()[pickAString]->setBow(state);
-                        instruments[0]->getStrings()[pickAString]->setVb(Vb);
-                        instruments[0]->getStrings()[pickAString]->setFb(Fb);
-                        instruments[0]->getStrings()[pickAString]->setBowPos(x, y);
-                        //instruments[0]->getStrings()[f]->setFingerPoint(fp[index]);
-                    }*/
-                    float range = 1.0 / static_cast<float>(instruments[0]->getNumBowedStrings());
+                    
                     if (f == 0 && state)//fingerID == 0)
                     {
-                        unsigned int pickAString = 0;
-                        for (int j = 0; j < instruments[0]->getNumBowedStrings(); ++j)
-                            if (y > (range  * j) && y < range * (j + 1))
-                                pickAString = j;
-
-                        for (int ps = 0; ps < instruments[0]->getNumBowedStrings(); ps++)
-                        {
-                            if (ps == pickAString)
-                            {
-                                instruments[0]->getStrings()[ps]->setBow(state);
-                                instruments[0]->getStrings()[ps]->setVb(Vb);
-                                instruments[0]->getStrings()[ps]->setFb(Fb);
-                                instruments[0]->getStrings()[ps]->setBowPos(x, y);
-                            }
-                            else
-                                instruments[0]->getStrings()[ps]->setBow(false);
-                        }
-                        //instruments[0]->getStrings()[f]->setFingerPoint(fp[index]);
+                    
+                        instruments[0]->getStrings()[index]->setBow(state);
+                        instruments[0]->getStrings()[index]->setVb(Vb);
+                        instruments[0]->getStrings()[index]->setFb(Fb);
+                        instruments[0]->getStrings()[index]->setBowPos(x, y);
                     }
                     else if (fingerID > 0)
                     {
-                        unsigned int pickAString = 0;
-                        for (int j = 0; j < instruments[0]->getNumBowedStrings(); ++j)
-                            if (y > (range  * j) && y < range * (j + 1))
-                                pickAString = j;
+                        instruments[0]->getStrings()[index]->setFingerPosition(x);
+                    }
+                }
+                
+                if (fingerCount == 0)
+                {
+                        instruments[0]->getStrings()[index]->setBow(false);
+                }
+            }
+            else if (chooseInstrument == 1)
+            {
+                if (index == 0)
+                {
+                    for (int f = 0; f < fingerCount; f++)
+                    {
 
-                        for (int ps = 0; ps < instruments[0]->getNumBowedStrings(); ps++)
+                        bool state = sensel->fingers[f].state;
+                        float x = sensel->fingers[f].x;
+                        float y = sensel->fingers[f].y;
+                        float Vb = sensel->fingers[f].delta_y * maxVb;
+                        float Fb = sensel->fingers[f].force * 1000;
+                        int fingerID = sensel->fingers[f].fingerID;
+                        
+                        float range = 1.0 / static_cast<float>(instruments[0]->getNumBowedStrings());
+                        if (f == 0 && state)//fingerID == 0)
                         {
-                            if (ps == pickAString)
+                            unsigned int pickAString = 0;
+                            for (int j = 0; j < instruments[0]->getNumBowedStrings(); ++j)
+                                if (y > (range  * j) && y < range * (j + 1))
+                                    pickAString = j;
+
+                            for (int ps = 0; ps < instruments[0]->getNumBowedStrings(); ps++)
                             {
-                                instruments[0]->getStrings()[ps]->setFingerPosition(x);
+                                if (ps == pickAString)
+                                {
+                                    instruments[0]->getStrings()[ps]->setBow(state);
+                                    instruments[0]->getStrings()[ps]->setVb(Vb);
+                                    instruments[0]->getStrings()[ps]->setFb(Fb);
+                                    instruments[0]->getStrings()[ps]->setBowPos(x, y);
+                                }
+                                else
+                                    instruments[0]->getStrings()[ps]->setBow(false);
                             }
-                            //else
-                                //instruments[0]->getStrings()[ps]->setFingerPosition(0);;
+                            //instruments[0]->getStrings()[f]->setFingerPoint(fp[index]);
                         }
+                        else if (fingerID > 0)
+                        {
+                            unsigned int pickAString = 0;
+                            for (int j = 0; j < instruments[0]->getNumBowedStrings(); ++j)
+                                if (y > (range  * j) && y < range * (j + 1))
+                                    pickAString = j;
+
+                            for (int ps = 0; ps < instruments[0]->getNumBowedStrings(); ps++)
+                            {
+                                if (ps == pickAString)
+                                {
+                                    instruments[0]->getStrings()[ps]->setFingerPosition(x);
+                                }
+                                //else
+                                    //instruments[0]->getStrings()[ps]->setFingerPosition(0);;
+                            }
+                        }
+                    }
+
+                    if (fingerCount == 0)
+                    {
+                        for (auto violinString : instruments[0]->getStrings())
+                            violinString->setBow(false);
+                        
                     }
                 }
 
-                if (fingerCount == 0)
+                if (index == 1)
                 {
-                    for (auto violinString : instruments[0]->getStrings())
-                        violinString->setBow(false);
-                    
-                }
-            }
-
-            if (index == 1)
-            {
-                for (int f = 0; f < fingerCount; f++)
-                {
-
-                    for (auto plate : instruments[0]->getPlates())
+                    for (int f = 0; f < fingerCount; f++)
                     {
-                        plate->setImpactPosition(sensel->fingers[f].x, sensel->fingers[f].y);
-                        plate->setInput(sensel->fingers[f].force * 3000);
+
+                        for (auto plate : instruments[0]->getPlates())
+                        {
+                            plate->setImpactPosition(sensel->fingers[f].x, sensel->fingers[f].y);
+                            plate->setInput(sensel->fingers[f].force * 10000);
+                        }
                     }
                 }
             }

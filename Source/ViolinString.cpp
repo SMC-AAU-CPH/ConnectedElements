@@ -36,7 +36,10 @@ ViolinString::ViolinString (double freq, double fs, ObjectType stringType, int s
                      + 16.0 * kappa * kappa * k * k)) * 0.5);
     
     N = floor (1.0 / h);                    // Number of gridpoints
-    N = 48;
+//    if (fixedPoints)
+//    {
+//        N = 48;
+//    }
     h = 1.0 / N;                            // Recalculate gridspacing
 
     // Initialise vectors
@@ -113,6 +116,13 @@ void ViolinString::paint (Graphics& g)
             g.setOpacity(opa);
         }
         g.fillRect (floor(_bpX.load() * getWidth()), floor(_bpY.load() * getHeight()) - getHeight() / 2.0, 10, getHeight());
+        g.setColour(Colour::greyLevel(0.5f).withAlpha(0.5f));
+//        for (double i = 1.0; i <= 12.0; ++i)
+//        {
+//            double val = pow(2.0, i / 12.0) * getWidth();
+//            std::cout << val << std::endl;
+//            g.drawLine(val, 0, val, getHeight(), 2);
+//        }
     }
     g.setColour(Colour::greyLevel(0.5f).withAlpha(0.5f));
     g.drawLine(0, getHeight() - 1, getWidth(), getHeight() - 1);
