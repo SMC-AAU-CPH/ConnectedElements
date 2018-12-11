@@ -198,8 +198,8 @@ void MainComponent::hiResTimerCallback()
                             plate->setInput(sensel->fingers[f].force * 10000);
                         }
                         */
-//                        if (f == 0)
-//                        {
+                        if (f == 0)
+                        {
                         int bowedStringsAmount = instruments[0]->getNumBowedStrings();
                         int sympStringsAmount = instruments[0]->getNumSympStrings();
                         int totalStringsAmount = instruments[0]->getNumSympStrings() + instruments[0]->getNumBowedStrings();
@@ -239,7 +239,7 @@ void MainComponent::hiResTimerCallback()
                                 instruments[0]->getStrings()[ps]->pick(false);
                         }
                          */
-//                        }
+                        }
                     }
                 }
             }
