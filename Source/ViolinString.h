@@ -60,6 +60,7 @@ public:
     void updateUVectors();
     
     void setRaisedCos (double exciterPos, double width);
+    void pick(bool pick) {_isPicking = pick;};
     
     Path generateStringPathAdvanced();
     
@@ -92,6 +93,7 @@ private:
     vector<int> cy;
     vector<int> cpIdx;
     atomic<bool> _isBowing{false};
+    atomic<bool> _isPicking{false};
 
     double* uNext;
     double* u;
