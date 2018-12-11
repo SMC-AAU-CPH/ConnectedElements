@@ -292,11 +292,13 @@ void ViolinString::updateUVectors()
 void ViolinString::setRaisedCos (double exciterPos, double width)
 {
     int j = 0;
-    for (int i = floor(exciterPos*N) - floor(width / 2.0); i < floor(exciterPos*N) + floor(width / 2.0); ++i)
+    
+    int exciterStart = clamp(exciterPos*N - width * 0.5, 2, N - 3);
+    int exciterEnd = clamp(exciterPos*N + width * 0.5, 2, N-3);
+
+    for (int i = exciterStart; i < exciterEnd; ++i)
     {
         uNext[i] += ((1 - cos(1 * double_Pi * j / width)) * 0.5)*0.0001;
-        
-//        uPrev = u;
         ++j;
     }
     

@@ -194,15 +194,18 @@ void MainComponent::hiResTimerCallback()
                         }
                         */
 
-                        float range = 1.0 / static_cast<float>(instruments[0]->getNumSympStrings());
+                        int bowedStringsAmount = instruments[0]->getNumBowedStrings();
+                        int sympStringsAmount = instruments[0]->getNumSympStrings();
+                        int totalStringsAmount = instruments[0]->getNumSympStrings() + instruments[0]->getNumBowedStrings();
 
-                        unsigned int pickAString = instruments[0]->getNumBowedStrings();
-                        for (int j = 0; j < instruments[0]->getNumSympStrings(); ++j)
+                        float range = 1.0 / static_cast<float>(totalStringsAmount);
+
+                        unsigned int pickAString = bowedStringsAmount;
+                        for (int j = 0; j < sympStringsAmount; ++j)
                             if (y > (range * j) && y < range * (j + 1))
-                                pickAString = j + instruments[0]->getNumBowedStrings();
+                                pickAString = j + bowedStringsAmount;
 
-                        for (int ps = instruments[0]->getNumBowedStrings();
-                             ps < instruments[0]->getNumBowedStrings() + instruments[0]->getNumSympStrings(); ps++)
+                        for (int ps = bowedStringsAmount; ps < totalStringsAmount; ps++)
                         {
                             if (ps == pickAString)
                                 instruments[0]->getStrings()[ps]->setRaisedCos(x, 5);
