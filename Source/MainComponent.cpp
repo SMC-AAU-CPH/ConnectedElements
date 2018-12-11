@@ -205,7 +205,11 @@ void MainComponent::hiResTimerCallback()
                         for (int j = 0; j < totalStringsAmount; ++j)
                             if (y > (range * j) && y < range * (j + 1))
                                 pickAString = j;
-
+                        
+                        
+                        instruments[0]->getStrings()[pickAString]->pick(state);
+                        instruments[0]->getStrings()[pickAString]->setRaisedCos(x, 5);
+                        /*
                         for (int ps = 0; ps < totalStringsAmount; ps++)
                         {
                             if (ps == pickAString)
@@ -216,6 +220,7 @@ void MainComponent::hiResTimerCallback()
                             else
                                 instruments[0]->getStrings()[ps]->pick(false);
                         }
+                         */
                     }
                 }
             }
