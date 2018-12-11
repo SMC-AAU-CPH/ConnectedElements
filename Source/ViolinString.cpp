@@ -294,8 +294,9 @@ void ViolinString::setRaisedCos (double exciterPos, double width)
     int j = 0;
     for (int i = floor(exciterPos*N) - floor(width / 2.0); i < floor(exciterPos*N) + floor(width / 2.0); ++i)
     {
-        u[i] = (1 - cos(1 * double_Pi * j / width)) * 0.5;
-        uPrev = u;
+        uNext[i] += ((1 - cos(1 * double_Pi * j / width)) * 0.5)*0.0001;
+        
+//        uPrev = u;
         ++j;
     }
     
