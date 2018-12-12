@@ -38,7 +38,7 @@ class Distortion
     Clipper clipper; 
     SergeWavefolder serge[6];
     
-    DistortionType dType = None;
-    atomic<float> gain {1.0};
+    DistortionType dType = Both;
+    atomic<float> gain {5.0};
     atomic<float> mix {0.5}; 
 };

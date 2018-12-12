@@ -20,7 +20,7 @@ void Distortion::setSamplingRate(double fs)
 
 double Distortion::getOutput(double input)
 {
-  double out = input;
+  double out = 0;
 
   double outD = 0; // Diode-clipper
   double outS = 0; // serge
@@ -33,14 +33,18 @@ double Distortion::getOutput(double input)
     outD = clipper.process(input * drive);
     out += outD * m;
   }
+
   if (dType == SergeVCM || dType == Both)
   {
     outS = serge[0].process(input * drive);
     for (int i = 1; i < 6; i++)
       outS = serge[i].process(outS);
 
-    out += outS * (1-m);
+    out += outS * (1 - m);
   }
+
+  if (dType == None)
+    out = input;
 
   return out;
 }
