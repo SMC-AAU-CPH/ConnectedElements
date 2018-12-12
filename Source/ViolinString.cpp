@@ -36,7 +36,7 @@ ViolinString::ViolinString(double freq, double fs, ObjectType stringType, int st
     N = floor(1.0 / h); // Number of gridpoints
                         //    if (fixedPoints)
                         //    {
-    N = 15;
+//    N = 15;
                         //    }
     h = 1.0 / N;        // Recalculate gridspacing
 
@@ -218,15 +218,21 @@ void ViolinString::bow()
         std::cout << "wait" << std::endl;
     }
     
-    int fingerPos = floor(fp * N - 1);
-    double scale = 1;
-    double alphaFP = pow((fp * N - 1 - fingerPos), 4) * scale;
-    if (t % 1000 == 0)
-        std::cout << (1-alphaFP) << std::endl;
-    ++t;
-    uNext[fingerPos - 1] = 0;
-    uNext[fingerPos] = uNext[fingerPos] * (alphaFP + (1-scale));
-    uNext[fingerPos + 1] = uNext[fingerPos + 1] * (1 - alphaFP);
+    if (stringType == bowedString)
+    {
+        ///////// heuristic interpolation
+        int fingerPos = floor(fp * N - 1);
+        double scale = 1;
+        //pow((cos(double_Pi + (fp * N - 1 - fingerPos) * double_Pi) + 1) * 0.5, 4);
+        double alphaFP = pow(fp * N - 1 - fingerPos, 6) * scale;
+    //    if (t % 1000 == 0 && stringID == 0)
+    //        std::cout << alphaFP << std::endl;
+    //    ++t;
+//        uNext[fingerPos - 2] = 0;
+        uNext[fingerPos - 1] = 0;
+        uNext[fingerPos] = uNext[fingerPos] * (alphaFP + (1-scale));
+        uNext[fingerPos + 1] = uNext[fingerPos + 1] * (1 - alphaFP);
+    }
 }
 
 void ViolinString::newtonRaphson()
