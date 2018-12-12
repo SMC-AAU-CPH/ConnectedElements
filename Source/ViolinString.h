@@ -12,6 +12,7 @@
 
 #include "../JuceLibraryCode/JuceHeader.h"
 #include "ObjectTypes.h"
+#include "Exciter.h"
 
 enum StringInterpolType
 {
@@ -60,8 +61,8 @@ public:
     void updateUVectors();
     
     void setRaisedCos (double exciterPos, double width, double force);
-    void pick(bool pick) {_isPicking = pick;};
-    bool isPicking() { return _isPicking; };
+    void pick(bool pick) {_isPicking = pick; stringExciter.excite();};
+    bool isPicking() { return _isPicking;};
     
     Path generateStringPathAdvanced();
     
@@ -134,71 +135,9 @@ private:
     int exciterEnd = 0;
     double exciterForce = 0;
     
+    StringExciter stringExciter; 
+
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ViolinString)
 };
 
-class StringExciter
-{
-public:
-    StringExciter()
-    {
-        Fe.resize(maxLength);
-        
-        for (int i = 0; i < exciterLength; i++)
-            Fe[i] = Fmax / 2.0f * (1 - cos(2 * M_PI * i / exciterLength));
-        
-        /*for (int i = 0; i < exciterLength; i++)
-         std::cout << "exciter: " << Fe[i] << "\n";*/
-    }
-    
-    void excite()
-    {
-        play = true;
-    }
-    void setLength(int L)
-    {
-        if (L > maxLength)
-            L = maxLength;
-        
-        exciterLength = L;
-        
-        for (int i = 0; i < exciterLength; i++)
-            Fe[i] = Fmax * 0.5f * (1.0f - cos(q * M_PI * i / exciterLength));
-    }
-    
-    void setLevel(double level)
-    {
-        //Fmax = level * 1e8;
-        
-        for (int i = 0; i < exciterLength; i++)
-            Fe[i] = Fmax * 0.5f * (1.0f - cos(q * M_PI * i / exciterLength));
-    }
-    
-    double getOutput()
-    {
-        double output = 0.0f;
-        
-        if (play)
-        {
-            output = Fe[pos];
-            //std::cout << "exciter: " << Fe[pos] << "\n";
-            pos++;
-        }
-        
-        if (pos >= exciterLength)
-        {
-            pos = 0;
-            play = false;
-        }
-        return output;
-    }
-    
-    bool play = false;
-    int pos = 0;
-    float q = 1;
-    int exciterLength = 10;
-    int maxLength = 2000;
-    double Fmax = 1.0f;
-    
-    vector<double> Fe;
-};
+

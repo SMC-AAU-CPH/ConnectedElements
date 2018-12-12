@@ -166,12 +166,16 @@ void ViolinString::bow()
 
     if (_isPicking)
     {
-        int j = 0;
         int width = exciterEnd - exciterStart;
+
+        double in = stringExciter.getOutput(); 
+
         for (int i = exciterStart; i < exciterEnd; ++i)
         {
-            uNext[i] += ((1 - cos(1 * double_Pi * j / width)) * 0.5) * 0.001 * exciterForce;
-            ++j;
+            //uNext[i] += ((1 - cos(1 * double_Pi * j / width)) * 0.5) * 0.001 * exciterForce;
+            float distribution = (1 - cos(2 * double_Pi * i / width)) * 0.5; 
+            
+            uNext[i] += distribution * in * exciterForce * 0.001; 
         }
     }
     
