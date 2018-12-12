@@ -30,6 +30,10 @@
       <FILE id="ZKt6JY" name="SenselWrapper.h" compile="0" resource="0" file="SenselWrapper/SenselWrapper.h"/>
     </GROUP>
     <GROUP id="{C397437D-6387-2E58-15AE-F03A3C683002}" name="Source">
+      <FILE id="Q9OPBf" name="Serge.hpp" compile="0" resource="0" file="Source/Serge.hpp"/>
+      <FILE id="hxnz4Q" name="Clipper.hpp" compile="0" resource="0" file="Source/Clipper.hpp"/>
+      <FILE id="DNgOis" name="Distortion.cpp" compile="1" resource="0" file="Source/Distortion.cpp"/>
+      <FILE id="plmMyb" name="Distortion.h" compile="0" resource="0" file="Source/Distortion.h"/>
       <FILE id="xC9JW4" name="Exciter.cpp" compile="1" resource="0" file="Source/Exciter.cpp"/>
       <FILE id="zuRSye" name="Exciter.h" compile="0" resource="0" file="Source/Exciter.h"/>
       <FILE id="oQxjuG" name="ObjectTypes.h" compile="0" resource="0" file="Source/ObjectTypes.h"/>
