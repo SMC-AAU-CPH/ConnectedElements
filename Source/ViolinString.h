@@ -44,9 +44,9 @@ public:
     void setFingerForce(double val) { ff = val; };
     void setFingerPosition(double fingerPos){ fp = clamp(fingerPos, 0, 1); };
     void setBow(bool val) { _isBowing.store(val); };
-    void setVb(double val) { _Vb.store(val); }
-    void setFb(double val) { _Fb.store(val); }
-    void setBowPos(double bpX, double bpY) { _bpX.store(bpX); _bpY.store(bpY); };
+    void setVb(double val) { _Vb = val; };
+    void setFb(double val) { _Fb = val; };
+    void setBowPos(double bpX, double bpY) { _bpX = bpX; _bpY = bpY; };
     void setFingerOn (bool val) { fingerOn = val; };
     
     double getNumPoints() { return N; };
@@ -135,8 +135,7 @@ private:
     int exciterEnd = 0;
     double exciterForce = 0;
     
-    StringExciter stringExciter; 
-
+    StringExciter stringExciter;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ViolinString)
 };
 
