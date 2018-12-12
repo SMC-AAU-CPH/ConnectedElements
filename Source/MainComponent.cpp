@@ -51,16 +51,19 @@ void MainComponent::prepareToPlay(int samplesPerBlockExpected, double sampleRate
     {
         vector<ObjectType> objects{bowedString, bowedString};
         int stringPlateDivision = 800;
-        instruments.add(new Instrument(objects, fs, stringPlateDivision));
+        int bowedSympDivision = 1440;
+        instruments.add(new Instrument(objects, fs, stringPlateDivision, bowedSympDivision));
     }
     else if (chooseInstrument == 1)
     {
         vector<ObjectType> objects{bowedString, bowedString,
                                    sympString, sympString, sympString, sympString,
+                                   sympString, sympString, sympString, sympString,
                                    plate};
 
         int stringPlateDivision = 3 * 800 / 4.0;
-        instruments.add(new Instrument(objects, fs, stringPlateDivision));
+        int bowedSympDivision = 800;
+        instruments.add(new Instrument(objects, fs, stringPlateDivision, bowedSympDivision));
     }
 
     addAndMakeVisible(instruments[0]);
@@ -183,13 +186,13 @@ void MainComponent::hiResTimerCallback()
                         for (int i = instruments[0]->getNumBowedStrings(); i < instruments[0]->getNumBowedStrings() + instruments[0]->getNumSympStrings(); ++i)
                             instruments[0]->getStrings()[i]->pick(false);
                     }
-                    vector<bool> pickAString (4, false);
-                    vector<double> forces (4, 0);
-                    vector<double> xPositions (4, 0);
-                    
                     int bowedStringsAmount = instruments[0]->getNumBowedStrings();
                     int sympStringsAmount = instruments[0]->getNumSympStrings();
                     int totalStringsAmount = instruments[0]->getNumSympStrings() + instruments[0]->getNumBowedStrings();
+                    
+                    vector<bool> pickAString (sympStringsAmount, false);
+                    vector<double> forces (sympStringsAmount, 0);
+                    vector<double> xPositions (sympStringsAmount, 0);
                     
                     float range = 1.0 / static_cast<float>(sympStringsAmount);
                     

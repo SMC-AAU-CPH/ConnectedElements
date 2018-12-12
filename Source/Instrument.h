@@ -20,7 +20,7 @@
 class Instrument    : public Component
 {
 public:
-    Instrument (vector<ObjectType> objectTypes, double fs, int stringPlateDivision);
+    Instrument (vector<ObjectType> objectTypes, double fs, int stringPlateDivision, int bowedSympDivision);
     ~Instrument();
 
     void paint (Graphics&) override;
@@ -46,7 +46,7 @@ private:
     unsigned int numSympStrings = 0;
     unsigned int numPlates = 0;
     int stringPlateDivision;
-    int sympStringHeight = 50;
+    int bowedSympDivision;
     int totBowedStringHeight;
     int totSympStringHeight;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Instrument)
