@@ -164,6 +164,17 @@ void ViolinString::bow()
         uNext[l] = (2 * u[l] - uPrev[l] + lambdaSq * (u[l + 1] - 2 * u[l] + u[l - 1]) - muSq * (u[l + 2] - 4 * u[l + 1] + 6 * u[l] - 4 * u[l - 1] + u[l - 2]) + s0 * k * uPrev[l] + (2 * s1 * k) / (h * h) * ((u[l + 1] - 2 * u[l] + u[l - 1]) - (uPrev[l + 1] - 2 * uPrev[l] + uPrev[l - 1]))) / (1 + s0 * k);
     }
 
+    if (_isPicking)
+    {
+        int j = 0;
+        int width = exciterEnd - exciterStart;
+        for (int i = exciterStart; i < exciterEnd; ++i)
+        {
+            uNext[i] += ((1 - cos(1 * double_Pi * j / width)) * 0.5) * 0.001 * exciterForce;
+            ++j;
+        }
+    }
+    
     if (isBowing)
     {
         double alpha = bowPos - floor(bowPos);
@@ -279,19 +290,10 @@ void ViolinString::updateUVectors()
 
 void ViolinString::setRaisedCos(double exciterPos, double width, double force)
 {
-    if (_isPicking)
-    {
-        int j = 0;
 
-        int exciterStart = clamp(exciterPos * N - width * 0.5, 2, N - 3);
-        int exciterEnd = clamp(exciterPos * N + width * 0.5, 2, N - 3);
-
-        for (int i = exciterStart; i < exciterEnd; ++i)
-        {
-            u[i] += ((1 - cos(1 * double_Pi * j / width)) * 0.5) * 0.001 * force;
-            ++j;
-        }
-    }
+    exciterStart = clamp(exciterPos * N - width * 0.5, 2, N - 3);
+    exciterEnd = clamp(exciterPos * N + width * 0.5, 2, N - 3);
+    exciterForce = force;
 }
 
 Path ViolinString::generateStringPathAdvanced()

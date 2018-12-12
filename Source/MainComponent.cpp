@@ -183,6 +183,16 @@ void MainComponent::hiResTimerCallback()
                         for (int i = instruments[0]->getNumBowedStrings(); i < instruments[0]->getNumBowedStrings() + instruments[0]->getNumSympStrings(); ++i)
                             instruments[0]->getStrings()[i]->pick(false);
                     }
+                    vector<bool> pickAString (4, false);
+                    vector<double> forces (4, 0);
+                    vector<double> xPositions (4, 0);
+                    
+                    int bowedStringsAmount = instruments[0]->getNumBowedStrings();
+                    int sympStringsAmount = instruments[0]->getNumSympStrings();
+                    int totalStringsAmount = instruments[0]->getNumSympStrings() + instruments[0]->getNumBowedStrings();
+                    
+                    float range = 1.0 / static_cast<float>(sympStringsAmount);
+                    
                     for (int f = 0; f < fingerCount; f++)
                     {
                         bool state = sensel->fingers[f].state;
@@ -191,54 +201,30 @@ void MainComponent::hiResTimerCallback()
                         float Vb = sensel->fingers[f].delta_y * maxVb;
                         float Fb = sensel->fingers[f].force * 1000;
                         int fingerID = sensel->fingers[f].fingerID;
-                        /*
-                        for (auto plate : instruments[0]->getPlates())
-                        {
-                            plate->setImpactPosition(sensel->fingers[f].x, sensel->fingers[f].y);
-                            plate->setInput(sensel->fingers[f].force * 10000);
-                        }
-                        */
-                        if (f == 0)
-                        {
-                        int bowedStringsAmount = instruments[0]->getNumBowedStrings();
-                        int sympStringsAmount = instruments[0]->getNumSympStrings();
-                        int totalStringsAmount = instruments[0]->getNumSympStrings() + instruments[0]->getNumBowedStrings();
-
-                        float range = 1.0 / static_cast<float>(sympStringsAmount);
-
-                        unsigned int pickAString = -1;
+        
                         
                         for (int j = 0; j < sympStringsAmount; ++j)
                             if (y > (range * j) && y < range * (j + 1))
-                                pickAString = j + bowedStringsAmount;
+                            {
+                                pickAString[j] = true;
+                                forces[j] = Fb;
+                                xPositions[j] = x;
+                            }
                         
-                        for (int i = bowedStringsAmount; i < totalStringsAmount; ++i)
+                        
+                        
+                    }
+                    for (int i = 0; i < sympStringsAmount; ++i)
+                    {
+                        if (pickAString[i])
                         {
-                            if (i == pickAString)
+                            if (!instruments[0]->getStrings()[i+bowedStringsAmount]->isPicking())
                             {
-                                if (!instruments[0]->getStrings()[i]->isPicking())
-                                {
-//                                    std::cout << pickAString << std::endl;
-                                    instruments[0]->getStrings()[i]->pick(true);
-                                    instruments[0]->getStrings()[i]->setRaisedCos(x, 5, Fb / 500.0);
-                                    
-                                }
-                            } else {
-                                instruments[0]->getStrings()[i]->pick(false);
+                                instruments[0]->getStrings()[i+bowedStringsAmount]->setRaisedCos(xPositions[i], 5, forces[i] / 500.0);
+                                instruments[0]->getStrings()[i+bowedStringsAmount]->pick(true);
                             }
-                        }
-                        /*
-                        for (int ps = 0; ps < totalStringsAmount; ps++)
-                        {
-                            if (ps == pickAString)
-                            {
-                                instruments[0]->getStrings()[ps]->pick(true);
-                                instruments[0]->getStrings()[ps]->setRaisedCos(x, 5);
-                            }
-                            else
-                                instruments[0]->getStrings()[ps]->pick(false);
-                        }
-                         */
+                        } else {
+                            instruments[0]->getStrings()[i+bowedStringsAmount]->pick(false);
                         }
                     }
                 }
