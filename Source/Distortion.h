@@ -15,7 +15,8 @@
 
 enum DistortionType
 { 
-    DiodeClipper, 
+    DiodeClipper,
+    Both,
     SergeVCM
 };
 
@@ -27,5 +28,8 @@ class Distortion
   private: 
 
     Clipper clipper; 
-    SergeWavefolder serge[6]; 
+    SergeWavefolder serge[6];
+    
+    DistortionType dType = Both; 
+    float mix = 0.0; 
 };

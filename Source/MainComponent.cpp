@@ -254,8 +254,8 @@ void MainComponent::getNextAudioBlock(const AudioSourceChannelInfo &bufferToFill
         }
         output[0] = dist.getOutput(output[0]);
         
-        channelData1[i] = clip(output[0]);
-        channelData2[i] = clip(output[0]);
+        channelData1[i] = output[0];
+        channelData2[i] = output[0];
     }
 }
 

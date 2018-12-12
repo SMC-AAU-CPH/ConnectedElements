@@ -42,15 +42,15 @@ class Clipper
             step = clamp(step, -stepsize, stepsize);
 
             double newVo = Vo - lambda * step;
-
+            /*
             double newF = 0.5 * ((Vin - newVo) * coef1 - coef2 * sinh(newVo / Vt)) + 0.5 * ((dVin - dVo) * coef1 - coef2 * sinh(dVo / Vt)) - (1 / T) * (newVo - dVo);
 
             if (fabs(newF) >= fabs(f))
                 lambda = lambda * 0.5;
-
+             */
             if (fabs(Vo - newVo) < err)
                 break;
-
+             
             Vo = newVo;
         }
 
@@ -93,7 +93,7 @@ class Clipper
     const double coef2 = 2.0f * Is / C;
     //const float coef3 = coef2 * Vt;
 
-    const double err = 1e-7;
+    const double err = 1e-6;
     const int iterations = 10;
     const float stepsize = 0.5;
 };
