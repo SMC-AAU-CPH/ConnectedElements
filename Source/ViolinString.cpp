@@ -18,8 +18,8 @@ ViolinString::ViolinString(double freq, double fs, ObjectType stringType, int st
     // In your constructor, you should add any child components, and
     // initialise any special settings that your component needs.
 
-    _bpX.store(0.25);
-    _bpY.store(0);
+    _bpX = 0.25;
+    _bpY = 0;
 
     gamma = freq * 2; // Wave speed
     k = 1 / fs;       // Time-step
@@ -36,7 +36,7 @@ ViolinString::ViolinString(double freq, double fs, ObjectType stringType, int st
     N = floor(1.0 / h); // Number of gridpoints
                         //    if (fixedPoints)
                         //    {
-                        //        N = 48;
+    N = 15;
                         //    }
     h = 1.0 / N;        // Recalculate gridspacing
 
@@ -62,8 +62,8 @@ ViolinString::ViolinString(double freq, double fs, ObjectType stringType, int st
     a = 100; // Free parameter
     BM = sqrt(2 * a) * exp(0.5);
 
-    _Vb.store(0.2); // Bowing speed
-    _Fb.store(80);  // Bowing force / total mass of bow;
+    _Vb = 0.2; // Bowing speed
+    _Fb = 80;  // Bowing force / total mass of bow;
     // Initialise variables for Newton Raphson
     tol = 1e-4;
     qPrev = 0;
@@ -145,9 +145,9 @@ void ViolinString::bow()
     }
 
     double Fb = _Fb.load();
-    bowPos = clamp(_bpX.load() * N, 2, N - 3);
+    bowPos = clamp(_bpX * N, 2, N - 3);
     int bp = floor(bowPos);
-    bool isBowing = _isBowing.load();
+    bool isBowing = _isBowing;
 
     if (isBowing)
     {
@@ -214,18 +214,19 @@ void ViolinString::bow()
     }
     
     int fingerPos = floor(fp * N);
-    double alphaFP = fp * N - fingerPos;
+    double scale = 1;
+    double alphaFP = (fp * N - fingerPos) * scale;
     if (t % 1000 == 0)
-        std::cout << alphaFP << std::endl;
+        std::cout << (1-alphaFP) << std::endl;
     ++t;
-    uNext[fingerPos] -= uNext[fingerPos] * alphaFP;
-    uNext[fingerPos + 1] -= uNext[fingerPos + 1] * (1-alphaFP);
+    uNext[fingerPos] = uNext[fingerPos] * (alphaFP + (1-scale));
+    uNext[fingerPos + 1] = uNext[fingerPos + 1] * (1-alphaFP);
 }
 
 void ViolinString::newtonRaphson()
 {
-    double Vb = _Vb.load();
-    double Fb = _Fb.load();
+    double Vb = _Vb;
+    double Fb = _Fb;
     int bp = floor(bowPos);
     double alpha = bowPos - bp;
     //    std::cout << alpha << std::endl;
@@ -430,7 +431,7 @@ double ViolinString::linearInterpolation(double* uVec, int bp, double alpha)
     return uVec[bp] * (1 - alpha) + uVec[bp + 1] * alpha;
 }
 
-double ViolinString::cubicInterpolation(double *uVec, int bp, double alpha)
+double ViolinString::cubicInterpolation(double* uVec, int bp, double alpha)
 {
     return uVec[bp - 1] * (alpha * (alpha - 1) * (alpha - 2)) / -6.0 + uVec[bp] * ((alpha - 1) * (alpha + 1) * (alpha - 2)) / 2.0 + uVec[bp + 1] * (alpha * (alpha + 1) * (alpha - 2)) / -2.0 + uVec[bp + 2] * (alpha * (alpha + 1) * (alpha - 1)) / 6.0;
 }
