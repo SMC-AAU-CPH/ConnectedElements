@@ -20,24 +20,27 @@ void Distortion::setSamplingRate(double fs)
 
 double Distortion::getOutput(double input)
 {
-  double out = 0;
+  double out = input;
 
   double outD = 0; // Diode-clipper
   double outS = 0; // serge
 
-  float drive = 5;
+  float drive = gain;
+  float m = mix;
 
   if (dType == DiodeClipper || dType == Both)
+  {
     outD = clipper.process(input * drive);
-
+    out += outD * m;
+  }
   if (dType == SergeVCM || dType == Both)
   {
     outS = serge[0].process(input * drive);
     for (int i = 1; i < 6; i++)
       outS = serge[i].process(outS);
+
+    out += outS * (1-m);
   }
-  //outS *= 4;
-  out = mix * outD + (1 - mix) * outS;
 
   return out;
 }
