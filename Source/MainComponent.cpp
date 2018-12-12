@@ -204,11 +204,11 @@ void MainComponent::hiResTimerCallback()
         
                         
                         for (int j = 0; j < sympStringsAmount; ++j)
-                            if (y > (range * j) && y < range * (j + 1))
+                            if (x > (range * j) && x < range * (j + 1))
                             {
                                 pickAString[j] = true;
                                 forces[j] = Fb;
-                                xPositions[j] = x;
+                                xPositions[j] = y;
                             }
                         
                         
