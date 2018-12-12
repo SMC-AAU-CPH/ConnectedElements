@@ -22,7 +22,7 @@ Instrument::Instrument (vector<ObjectType> objectTypes, double fs, int stringPla
                                     110.0 * pow(2, 12.0 / 12.0),
                                     110.0 * pow(2, 14.0 / 12.0),
                                     110.0 * pow(2, 16.0 / 12.0),
-                                    108.0 * pow(2, 17.0 / 12.0),
+                                    110.0 * pow(2, 17.0 / 12.0),
                                     110.0 * pow(2, 19.0 / 12.0),
                                     110.0 * pow(2, 21.0 / 12.0),
                                     110.0 * pow(2, 23.0 / 12.0),

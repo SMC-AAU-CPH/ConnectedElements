@@ -135,8 +135,7 @@ private:
     int exciterEnd = 0;
     double exciterForce = 0;
     
-    StringExciter stringExciter; 
-
+    StringExciter stringExciter;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ViolinString)
 };
 

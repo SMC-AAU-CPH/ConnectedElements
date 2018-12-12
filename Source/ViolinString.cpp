@@ -101,7 +101,7 @@ void ViolinString::paint(Graphics &g)
     if (stringType == bowedString)
     {
         g.setColour(Colours::yellow);
-        g.fillEllipse(fpx - 5, getHeight() / 2.0 - 5, 10, 10);
+        g.fillEllipse(fp * getWidth() - 5, getHeight() / 2.0 - 5, 10, 10);
 
         // draw bow
         g.setColour(Colours::yellow);
@@ -212,8 +212,14 @@ void ViolinString::bow()
         ff = 1;
         std::cout << "wait" << std::endl;
     }
+    
     int fingerPos = floor(fp * N);
-    uNext[fingerPos] = uNext[fingerPos] * (1 - ff);
+    double alphaFP = fp * N - fingerPos;
+    if (t % 1000 == 0)
+        std::cout << alphaFP << std::endl;
+    ++t;
+    uNext[fingerPos] -= uNext[fingerPos] * alphaFP;
+    uNext[fingerPos + 1] -= uNext[fingerPos + 1] * (1-alphaFP);
 }
 
 void ViolinString::newtonRaphson()
@@ -419,7 +425,7 @@ void ViolinString::mouseUp(const MouseEvent &e)
     cpMoveIdx = -1;
 }
 
-double ViolinString::linearInterpolation(double *uVec, int bp, double alpha)
+double ViolinString::linearInterpolation(double* uVec, int bp, double alpha)
 {
     return uVec[bp] * (1 - alpha) + uVec[bp + 1] * alpha;
 }
