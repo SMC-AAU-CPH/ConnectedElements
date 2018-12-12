@@ -10,26 +10,35 @@
 
 #include "Clipper.hpp"
 #include "Serge.hpp"
+#include <atomic>
 
 #pragma once
 
 enum DistortionType
 { 
-    DiodeClipper,
+    None, 
     Both,
+    DiodeClipper,
     SergeVCM
 };
+
+using namespace std;
 
 class Distortion
 {
   public: 
     void setSamplingRate(double fs);
     double getOutput(double input);
+
+    void setDrive(double drive) {gain = drive;}; 
+    void setMix(double m) {mix = m;}; 
+
   private: 
 
     Clipper clipper; 
     SergeWavefolder serge[6];
     
-    DistortionType dType = Both; 
-    float mix = 0.0; 
+    DistortionType dType = None;
+    atomic<float> gain {1.0};
+    atomic<float> mix {0.5}; 
 };
