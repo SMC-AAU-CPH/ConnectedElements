@@ -71,6 +71,19 @@ void MainComponent::prepareToPlay(int samplesPerBlockExpected, double sampleRate
     addAndMakeVisible(instruments[0]);
 
     numInstruments = instruments.size();
+
+    if (amountOfSensels == 2)
+    {
+
+        int sympStringsAmount = instruments[0]->getNumSympStrings();
+
+        float range = 1.0 / static_cast<float>(sympStringsAmount);
+
+        for (int i = 0; i < sympStringsAmount; i++)
+        {
+            sensels[1]->addLEDBrightness(range * i, 1);
+        }
+    }
     // start the hi-res timer
     HighResolutionTimer::startTimer(1000.0 / 150.0);
     Timer::startTimerHz(15);
@@ -191,13 +204,13 @@ void MainComponent::hiResTimerCallback()
                     int bowedStringsAmount = instruments[0]->getNumBowedStrings();
                     int sympStringsAmount = instruments[0]->getNumSympStrings();
                     int totalStringsAmount = instruments[0]->getNumSympStrings() + instruments[0]->getNumBowedStrings();
-                    
-                    vector<bool> pickAString (sympStringsAmount, false);
-                    vector<double> forces (sympStringsAmount, 0);
-                    vector<double> xPositions (sympStringsAmount, 0);
-                    
+
+                    vector<bool> pickAString(sympStringsAmount, false);
+                    vector<double> forces(sympStringsAmount, 0);
+                    vector<double> xPositions(sympStringsAmount, 0);
+
                     float range = 1.0 / static_cast<float>(sympStringsAmount);
-                    
+
                     for (int f = 0; f < fingerCount; f++)
                     {
                         bool state = sensel->fingers[f].state;
@@ -206,8 +219,7 @@ void MainComponent::hiResTimerCallback()
                         float Vb = sensel->fingers[f].delta_y * maxVb;
                         float Fb = sensel->fingers[f].force * 1000;
                         int fingerID = sensel->fingers[f].fingerID;
-        
-                        
+
                         for (int j = 0; j < sympStringsAmount; ++j)
                             if (x > (range * j) && x < range * (j + 1))
                             {
@@ -215,21 +227,20 @@ void MainComponent::hiResTimerCallback()
                                 forces[j] = Fb;
                                 xPositions[j] = y;
                             }
-                        
-                        
-                        
                     }
                     for (int i = 0; i < sympStringsAmount; ++i)
                     {
                         if (pickAString[i])
                         {
-                            if (!instruments[0]->getStrings()[i+bowedStringsAmount]->isPicking())
+                            if (!instruments[0]->getStrings()[i + bowedStringsAmount]->isPicking())
                             {
-                                instruments[0]->getStrings()[i+bowedStringsAmount]->setRaisedCos(xPositions[i], 5, forces[i] / 500.0);
-                                instruments[0]->getStrings()[i+bowedStringsAmount]->pick(true);
+                                instruments[0]->getStrings()[i + bowedStringsAmount]->setRaisedCos(xPositions[i], 5, forces[i] / 500.0);
+                                instruments[0]->getStrings()[i + bowedStringsAmount]->pick(true);
                             }
-                        } else {
-                            instruments[0]->getStrings()[i+bowedStringsAmount]->pick(false);
+                        }
+                        else
+                        {
+                            instruments[0]->getStrings()[i + bowedStringsAmount]->pick(false);
                         }
                     }
                 }
@@ -245,15 +256,15 @@ void MainComponent::getNextAudioBlock(const AudioSourceChannelInfo &bufferToFill
     float *const channelData2 = bufferToFill.buffer->getWritePointer(1, bufferToFill.startSample);
 
     vector<double> output{0.0, 0.0};
- 
+
     for (int i = 0; i < bufferToFill.buffer->getNumSamples(); i++)
     {
         for (int j = 0; j < numInstruments; ++j)
         {
             output = instruments[j]->calculateOutput();
         }
-//        output[0] = dist.getOutput(output[0]);
-        
+        //        output[0] = dist.getOutput(output[0]);
+
         channelData1[i] = output[0];
         channelData2[i] = output[0];
     }
