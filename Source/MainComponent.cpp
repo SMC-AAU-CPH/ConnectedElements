@@ -42,6 +42,8 @@ void MainComponent::prepareToPlay(int samplesPerBlockExpected, double sampleRate
     fs = sampleRate;
     bufferSize = samplesPerBlockExpected;
 
+    dist.setSamplingRate(fs);
+
     for (int i = 0; i < amountOfSensels; i++)
     {
         sensels.add(new Sensel(i)); // chooses the device in the sensel device list
@@ -243,15 +245,17 @@ void MainComponent::getNextAudioBlock(const AudioSourceChannelInfo &bufferToFill
     float *const channelData2 = bufferToFill.buffer->getWritePointer(1, bufferToFill.startSample);
 
     vector<double> output{0.0, 0.0};
-
+ 
     for (int i = 0; i < bufferToFill.buffer->getNumSamples(); i++)
     {
         for (int j = 0; j < numInstruments; ++j)
         {
             output = instruments[j]->calculateOutput();
         }
+        output[0] = dist.getOutput(output[0]);
+        
         channelData1[i] = clip(output[0]);
-        channelData2[i] = clip(output[1]);
+        channelData2[i] = clip(output[0]);
     }
 }
 

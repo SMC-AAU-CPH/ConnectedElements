@@ -11,6 +11,8 @@
 #include "../JuceLibraryCode/JuceHeader.h"
 #include "../SenselWrapper/SenselWrapper.h"
 #include "Instrument.h"
+#include "Distortion.h"
+
 //==============================================================================
 /*
  This component lives inside our window, and this is where you should put all
@@ -64,7 +66,7 @@ private:
     // array<float, amountOfSensels> fp = {0.0};
     // array<float, amountOfSensels> connectionPoint = {0.0};
     // array<bool, amountOfSensels> state = {0};
-    
+    Distortion dist; 
     int chooseInstrument;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MainComponent)
 };
