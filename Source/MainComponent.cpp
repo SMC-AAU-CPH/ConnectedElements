@@ -60,7 +60,7 @@ void MainComponent::prepareToPlay(int samplesPerBlockExpected, double sampleRate
     {
         vector<ObjectType> objects{bowedString, bowedString,
                                    sympString, sympString, sympString, sympString,
-                                   sympString, sympString, sympString, sympString,
+//                                   sympString, sympString, sympString, sympString,
                                    plate};
 
         int stringPlateDivision = 3 * 800 / 4.0;
@@ -234,13 +234,13 @@ void MainComponent::hiResTimerCallback()
                         {
                             if (!instruments[0]->getStrings()[i + bowedStringsAmount]->isPicking())
                             {
-                                instruments[0]->getStrings()[i + bowedStringsAmount]->setRaisedCos(xPositions[i], 5, forces[i] / 500.0);
-                                instruments[0]->getStrings()[i + bowedStringsAmount]->pick(true);
+                                instruments[0]->getStrings()[i + bowedStringsAmount]->setRaisedCos (xPositions[i], 5, forces[i] / 1000.0);
+                                instruments[0]->getStrings()[i + bowedStringsAmount]->pick (true);
                             }
                         }
                         else
                         {
-                            instruments[0]->getStrings()[i + bowedStringsAmount]->pick(false);
+                            instruments[0]->getStrings()[i + bowedStringsAmount]->pick (false);
                         }
                     }
                 }
@@ -263,7 +263,7 @@ void MainComponent::getNextAudioBlock(const AudioSourceChannelInfo &bufferToFill
         {
             output = instruments[j]->calculateOutput();
         }
-        //        output[0] = dist.getOutput(output[0]);
+        output[0] = dist.getOutput(output[0]);
 
         channelData1[i] = output[0];
         channelData2[i] = output[0];

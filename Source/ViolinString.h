@@ -121,7 +121,7 @@ private:
     bool fingerOn = false;
     int fpx = 0;
     
-    StringInterpolType interpolation = cubic;
+    StringInterpolType interpolation = linear;
     int cpMoveIdx = -1;
     int cpMR = 10; //connection point move range
     

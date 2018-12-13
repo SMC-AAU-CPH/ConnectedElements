@@ -26,19 +26,21 @@ using namespace std;
 
 class Distortion
 {
-  public: 
+  public:
+    Distortion (DistortionType type) : dType (type){};
     void setSamplingRate(double fs);
     double getOutput(double input);
 
     void setDrive(double drive) {gain = drive;}; 
-    void setMix(double m) {mix = m;}; 
+    void setMix(double m) {mix = m;};
+//    void setDistortionType (DistortionType type) {dType = type;};
 
   private: 
 
     Clipper clipper; 
     SergeWavefolder serge[6];
     
-    DistortionType dType = Both;
+    DistortionType dType;
     atomic<float> gain {5.0};
     atomic<float> mix {0.5}; 
 };

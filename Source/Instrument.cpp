@@ -57,16 +57,27 @@ Instrument::Instrument (vector<ObjectType> objectTypes, double fs, int stringPla
 
     if (numPlates != 0)
     {
-//        for (int i = 0; i < numBowedStrings + numSympStrings; ++i)
-//        {
-//            std::cout<<(violinStrings[i]->getNumPoints() - 5) / static_cast<double>(violinStrings[i]->getNumPoints())<<std::endl;
+//        connections.push_back(Connection (violinStrings[0], plates[0],
+//                                          (violinStrings[0]->getNumPoints() - 5) / static_cast<double>(violinStrings[0]->getNumPoints()),
+//                                          (6) / static_cast<double>(plates[0]->getNumXPoints()), 0.4,
+//                                          1, 1,
+//                                          1, 10000, 1,
+//                                          violinStrings[0]->getStringType() == bowedString ? 1 : 1, fs));
+//        connections.push_back(Connection (violinStrings[1], plates[0],
+//                                          (violinStrings[1]->getNumPoints() - 5) / static_cast<double>(violinStrings[1]->getNumPoints()),
+//                                          (5) / static_cast<double>(plates[0]->getNumXPoints()), 0.4,
+//                                          1, 1,
+//                                          1, 10000, 1,
+//                                          violinStrings[1]->getStringType() == bowedString ? 1 : 1, fs));
+        for (int i = 0; i < numBowedStrings + numSympStrings; ++i)
+        {
 //            connections.push_back(Connection (violinStrings[i], plates[0],
-//                                              (violinStrings[i]->getNumPoints() - 3) / static_cast<double>(violinStrings[i]->getNumPoints()),
+//                                              (violinStrings[i]->getNumPoints() - 5) / static_cast<double>(violinStrings[i]->getNumPoints()),
 //                                              (i + 5) / static_cast<double>(plates[0]->getNumXPoints()), 0.4,
 //                                              1, 1,
-//                                              1, 100000, 1,
-//                                              violinStrings[i]->getStringType() == bowedString ? 8 : 1, fs));
-//        }
+//                                              1, 10000, 1,
+//                                              violinStrings[i]->getStringType() == bowedString ? 1 : 1, fs));
+        }
     }
 //    connections.push_back(Connection (violinStrings[0], violinStrings[1],
 //                                      0.5, 0.5,
@@ -276,7 +287,7 @@ vector<double> Instrument::calculateOutput()
         output[0] +=  violinStrings[i]->getOutput(0.75) * 800 * volume;
     }
     
-//    output[0] += plates[0]->getOutput(0.3, 0.4) * 3;
+//    output[0] += 100 * plates[0]->getOutput(0.3, 0.4) * 3;
     output[1] = output[0];
     
     //output[0] = violinStrings[2]->getOutput(0.75) * 600 + 0.1 * plates[0]->getOutput(0.3, 0.4) * 3;
