@@ -60,7 +60,11 @@ void MainComponent::prepareToPlay(int samplesPerBlockExpected, double sampleRate
     {
         vector<ObjectType> objects{bowedString, bowedString,
                                    sympString, sympString, sympString, sympString,
-//                                   sympString, sympString, sympString, sympString,
+                                   sympString, sympString, sympString, sympString,
+                                sympString, sympString, sympString, sympString,
+                                sympString, sympString, sympString, sympString,
+                                sympString, sympString, sympString, sympString,
+                                sympString,
                                    plate};
 
         int stringPlateDivision = 3 * 800 / 4.0;
@@ -92,7 +96,7 @@ void MainComponent::prepareToPlay(int samplesPerBlockExpected, double sampleRate
 
 void MainComponent::hiResTimerCallback()
 {
-    double maxVb = 0.2;
+    double maxVb = 0.5;
     for (auto sensel : sensels)
     {
         if (sensel->senselDetected)
@@ -217,7 +221,7 @@ void MainComponent::hiResTimerCallback()
                         float x = sensel->fingers[f].x;
                         float y = sensel->fingers[f].y;
                         float Vb = sensel->fingers[f].delta_y * maxVb;
-                        float Fb = sensel->fingers[f].force * 1000;
+                        float Fb = sensel->fingers[f].force;
                         int fingerID = sensel->fingers[f].fingerID;
 
                         for (int j = 0; j < sympStringsAmount; ++j)
@@ -234,7 +238,7 @@ void MainComponent::hiResTimerCallback()
                         {
                             if (!instruments[0]->getStrings()[i + bowedStringsAmount]->isPicking())
                             {
-                                instruments[0]->getStrings()[i + bowedStringsAmount]->setRaisedCos (xPositions[i], 5, forces[i] / 1000.0);
+                                instruments[0]->getStrings()[i + bowedStringsAmount]->setRaisedCos (xPositions[i], 5, forces[i] / 2.0);
                                 instruments[0]->getStrings()[i + bowedStringsAmount]->pick (true);
                             }
                         }
@@ -263,7 +267,7 @@ void MainComponent::getNextAudioBlock(const AudioSourceChannelInfo &bufferToFill
         {
             output = instruments[j]->calculateOutput();
         }
-        output[0] = dist.getOutput(output[0]);
+//        output[0] = dist.getOutput(output[0]);
 
         channelData1[i] = output[0];
         channelData2[i] = output[0];

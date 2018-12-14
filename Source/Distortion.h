@@ -41,6 +41,6 @@ class Distortion
     SergeWavefolder serge[6];
     
     DistortionType dType;
-    atomic<float> gain {5.0};
+    atomic<float> gain {1.0};
     atomic<float> mix {0.5}; 
 };

@@ -36,9 +36,9 @@ ViolinString::ViolinString(double freq, double fs, ObjectType stringType, int st
     N = floor(1.0 / h); // Number of gridpoints
     if (stringType == sympString)
     {
-        N = 48;
+        N = 42;
     }
-    h = 1.0 / N;        // Recalculate gridspacing
+    h = 1.0 / N; // Recalculate gridspacing
 
     // Initialise vectors
 
@@ -69,6 +69,25 @@ ViolinString::ViolinString(double freq, double fs, ObjectType stringType, int st
     qPrev = 0;
 
     fp = 0;
+    
+    double B1 = s0 * k;
+    double B2 = (2 * s1 * k) / (h * h);
+    
+    D = 1.0 / (1.0 + s0 * k);
+    
+    A1 = 2 - 2 * lambdaSq - 6 * muSq - 2 * B2;
+    A2 = lambdaSq + 4 * muSq + B2;
+    A3 = muSq;
+    A4 = B1 - 1 + 2 * B2;
+    A5 = B2;
+    
+    A1 *= D;
+    A2 *= D;
+    A3 *= D;
+    A4 *= D;
+    A5 *= D;
+    
+    E = k * k * (1 / h) * BM;
 }
 
 void ViolinString::reset()
@@ -163,43 +182,43 @@ void ViolinString::bow()
     //    {
     //
     //    }
-    double excitation = k * k * (1 / h) * Fb * BM * q * exp(-a * q * q);
+    double excitation = E * Fb * q * exp(-a * q * q);
     for (int l = 2; l < N - 2; ++l)
     {
-        uNext[l] = (2 * u[l] - uPrev[l] + lambdaSq * (u[l + 1] - 2 * u[l] + u[l - 1]) - muSq * (u[l + 2] - 4 * u[l + 1] + 6 * u[l] - 4 * u[l - 1] + u[l - 2]) + s0 * k * uPrev[l] + (2 * s1 * k) / (h * h) * ((u[l + 1] - 2 * u[l] + u[l - 1]) - (uPrev[l + 1] - 2 * uPrev[l] + uPrev[l - 1]))) / (1 + s0 * k);
+        uNext[l] = A1 * u[l] + A2 * (u[l + 1] + u[l - 1]) - A3 * (u[l + 2] + u[l - 2]) + A4 * uPrev[l] - A5 * (uPrev[l + 1] + uPrev[l - 1]);
     }
 
-//    if (_isPicking)
-//    {
-//        int width = exciterEnd - exciterStart;
-//
-//        double in = stringExciter.getOutput(); 
-//
-//        for (int i = exciterStart; i < exciterEnd; ++i)
-//        {
-//            //uNext[i] += ((1 - cos(1 * double_Pi * j / width)) * 0.5) * 0.001 * exciterForce;
-//            float distribution = (1 - cos(2 * double_Pi * i / width)) * 0.5; 
-//            
-//            uNext[i] += distribution * in * exciterForce * 0.001; 
-//        }
-//    }
+    if (_isPicking)
+    {
+        int width = exciterEnd - exciterStart;
+
+        double in = stringExciter.getOutput();
+
+        for (int i = exciterStart; i < exciterEnd; ++i)
+        {
+            //uNext[i] += ((1 - cos(1 * double_Pi * j / width)) * 0.5) * 0.001 * exciterForce;
+            float distribution = (1 - cos(2 * double_Pi * i / width)) * 0.5;
+            
+            uNext[i] += distribution * in * exciterForce * 0.001;
+        }
+    }
     
     if (isBowing)
     {
         double alpha = bowPos - floor(bowPos);
-        if (t % 1000 == 0 && stringID == 0)
-            std::cout << alpha << std::endl;
-        ++t;
+//        if (t % 10000 == 0 && stringID == 0)
+//            std::cout << alpha << " " << excitation * 100000 << std::endl;
+//        ++t;
         if (interpolation == noStringInterpol)
         {
             uNext[bp] = uNext[bp] - excitation;
         }
         else if (interpolation == linear)
         {
-            uNext[bp] = uNext[bp] - excitation;// * (1-alpha);
+            uNext[bp] = uNext[bp] - excitation * (1-alpha);
 
-//            if (bp < N - 3)
-//                uNext[bp + 1] = uNext[bp + 1] - excitation * alpha;
+            if (bp < N - 3)
+                uNext[bp + 1] = uNext[bp + 1] - excitation * alpha;
         }
         else if (interpolation == cubic)
         {
@@ -221,21 +240,21 @@ void ViolinString::bow()
         std::cout << "wait" << std::endl;
     }
     
-//    if (stringType == bowedString)
-//    {
-//        ///////// heuristic interpolation
-//        int fingerPos = floor(fp * N - 1);
-//        double scale = 1;
-//        //pow((cos(double_Pi + (fp * N - 1 - fingerPos) * double_Pi) + 1) * 0.5, 4);
-//        double alphaFP = pow(fp * N - 1 - fingerPos, 6) * scale;
-//    //    if (t % 1000 == 0 && stringID == 0)
-//    //        std::cout << alphaFP << std::endl;
-//    //    ++t;
-////        uNext[fingerPos - 2] = 0;
-//        uNext[fingerPos - 1] = 0;
-//        uNext[fingerPos] = uNext[fingerPos] * (alphaFP + (1-scale));
-//        uNext[fingerPos + 1] = uNext[fingerPos + 1] * (1 - alphaFP);
-//    }
+    if (stringType == bowedString)
+    {
+        ///////// heuristic interpolation
+        int fingerPos = floor(fp * N - 1);
+        double scale = 1;
+        //pow((cos(double_Pi + (fp * N - 1 - fingerPos) * double_Pi) + 1) * 0.5, 4);
+        double alphaFP = pow(fp * N - 1 - fingerPos, 6) * scale;
+    //    if (t % 1000 == 0 && stringID == 0)
+    //        std::cout << alphaFP << std::endl;
+    //    ++t;
+//        uNext[fingerPos - 2] = 0;
+        uNext[fingerPos - 1] = 0;
+        uNext[fingerPos] = uNext[fingerPos] * (alphaFP + (1-scale));
+        uNext[fingerPos + 1] = uNext[fingerPos + 1] * (1 - alphaFP);
+    }
 }
 
 void ViolinString::newtonRaphson()
@@ -448,5 +467,8 @@ double ViolinString::linearInterpolation(double* uVec, int bp, double alpha)
 
 double ViolinString::cubicInterpolation(double* uVec, int bp, double alpha)
 {
-    return uVec[bp - 1] * (alpha * (alpha - 1) * (alpha - 2)) / -6.0 + uVec[bp] * ((alpha - 1) * (alpha + 1) * (alpha - 2)) / 2.0 + uVec[bp + 1] * (alpha * (alpha + 1) * (alpha - 2)) / -2.0 + uVec[bp + 2] * (alpha * (alpha + 1) * (alpha - 1)) / 6.0;
+    return uVec[bp - 1] * (alpha * (alpha - 1) * (alpha - 2)) / -6.0
+            + uVec[bp] * ((alpha - 1) * (alpha + 1) * (alpha - 2)) / 2.0
+            + uVec[bp + 1] * (alpha * (alpha + 1) * (alpha - 2)) / -2.0
+            + uVec[bp + 2] * (alpha * (alpha + 1) * (alpha - 1)) / 6.0;
 }

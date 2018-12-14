@@ -85,7 +85,7 @@ public:
     int getStringID() { return stringID; };
     
 private:
-    double fs, freq, gamma, k, s0, s1, B, kappa, h, N, lambdaSq, muSq, kOh, gOh, a, BM, tol, q, qPrev, b, eps, fp;
+    double fs, freq, gamma, k, s0, s1, B, kappa, h, N, lambdaSq, muSq, kOh, gOh, a, BM, tol, q, qPrev, b, eps, fp, A1, A2, A3, A4, A5, D, E;
     double ff = 0.7;
     atomic<double> _Vb, _Fb, _bpX, _bpY;
     
@@ -121,7 +121,7 @@ private:
     bool fingerOn = false;
     int fpx = 0;
     
-    StringInterpolType interpolation = linear;
+    StringInterpolType interpolation = cubic;
     int cpMoveIdx = -1;
     int cpMR = 10; //connection point move range
     
