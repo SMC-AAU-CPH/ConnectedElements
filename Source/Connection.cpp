@@ -32,15 +32,7 @@ Connection::Connection (ViolinString* object1, ViolinString* object2,
     jA = k * k / ((1 + s0A) * k);
     jB = -k * k * massRatio / ((1 + s0B) * k);
     
-    if (object1->getStringType() == bowedString)
-    {
-        if (object2->getStringType() == bowedString)
-            connectionType = bowedStringBowedString;
-        else
-            connectionType = bowedStringSympString;
-    } else {
-        connectionType = sympStringSympString;
-    }
+    setConnectionType (object1->getStringType(), object2->getStringType());
     
 }
 
@@ -66,7 +58,7 @@ Connection::Connection (ViolinString* object1, Plate* object2,
     jA = k * k / ((1 + s0A) * k);
     jB = -k * k * massRatio / ((1 + s0B) * k);
     
-    connectionType = object1->getStringType() == bowedString ? bowedStringPlate : sympStringPlate;
+    setConnectionType (object1->getStringType(), plate);
 }
 
 
@@ -125,4 +117,58 @@ vector<double> Connection::calculateJFc()
     JFc[1] = jB * Fc;
     
     return JFc;
+}
+
+void Connection::setConnectionType (ObjectType type1, ObjectType type2)
+{
+    switch (type1) {
+        case bowedString:
+        {
+            switch (type2) {
+                case bowedString:
+                    connectionType = bowedStringBowedString;
+                    break;
+                case pluckedString:
+                    connectionType = bowedStringPluckedString;
+                    break;
+                case sympString:
+                    connectionType = bowedStringSympString;
+                    break;
+                case plate:
+                    connectionType = bowedStringPlate;
+                    break;
+            }
+            break;
+        }
+        case pluckedString:
+        {
+            switch (type2) {
+                case pluckedString:
+                    connectionType = pluckedStringPluckedString;
+                    break;
+                case sympString:
+                    connectionType = pluckedStringSympString;
+                    break;
+                case plate:
+                    connectionType = pluckedStringPlate;
+                    break;
+            }
+            break;
+        }
+        case sympString:
+        {
+            switch (type2) {
+                case sympString:
+                    connectionType = sympStringSympString;
+                    break;
+                case plate:
+                    connectionType = sympStringPlate;
+                    break;
+            }
+            break;
+        }
+        case plate:
+            connectionType = platePlate;
+            break;
+    }
 }

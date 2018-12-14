@@ -34,9 +34,9 @@ ViolinString::ViolinString(double freq, double fs, ObjectType stringType, int st
     h = sqrt((gamma * gamma * k * k + 4.0 * s1 * k + sqrt(pow(gamma * gamma * k * k + 4.0 * s1 * k, 2.0) + 16.0 * kappa * kappa * k * k)) * 0.5);
 
     N = floor(1.0 / h); // Number of gridpoints
-    if (stringType == sympString)
+    if (stringType == pluckedString || stringType == sympString)
     {
-        N = 42;
+        N = 30;
     }
     h = 1.0 / N; // Recalculate gridspacing
 
@@ -60,7 +60,7 @@ ViolinString::ViolinString(double freq, double fs, ObjectType stringType, int st
     gOh = (gamma * gamma) / (h * h);
     // Bow Model
     a = 100; // Free parameter
-    BM = sqrt(2 * a) * exp(0.5);
+    BM = sqrt(2 * a) * exp1(0.5);
 
     _Vb = 0.2; // Bowing speed
     _Fb = 80;  // Bowing force / total mass of bow;
@@ -109,7 +109,7 @@ void ViolinString::paint(Graphics &g)
        drawing code..
     */
 
-    g.setColour(stringType == bowedString ? Colours::cyan : Colours::mediumpurple);
+    g.setColour(stringType == bowedString ? Colours::cyan : (stringType == pluckedString ? Colours::mediumpurple : Colours::lawngreen));
     g.strokePath(generateStringPathAdvanced(), PathStrokeType(2.0f));
 //    g.setColour(Colours::green);
 //    for (int i = 1; i < N; ++i)
@@ -182,7 +182,7 @@ void ViolinString::bow()
     //    {
     //
     //    }
-    double excitation = E * Fb * q * exp(-a * q * q);
+    double excitation = E * Fb * q * exp1(-a * q * q);
     for (int l = 2; l < N - 2; ++l)
     {
         uNext[l] = A1 * u[l] + A2 * (u[l + 1] + u[l - 1]) - A3 * (u[l + 2] + u[l - 2]) + A4 * uPrev[l] - A5 * (uPrev[l + 1] + uPrev[l - 1]);
@@ -303,7 +303,7 @@ void ViolinString::newtonRaphson()
     int i = 0;
     while (eps > tol)
     {
-        q = qPrev - (Fb * BM * qPrev * exp(-a * qPrev * qPrev) + 2 * qPrev / k + 2 * s0 * qPrev + b) / (Fb * BM * (1 - 2 * a * qPrev * qPrev) * exp(-a * qPrev * qPrev) + 2 / k + 2 * s0);
+        q = qPrev - (Fb * BM * qPrev * exp1(-a * qPrev * qPrev) + 2 * qPrev / k + 2 * s0 * qPrev + b) / (Fb * BM * (1 - 2 * a * qPrev * qPrev) * exp(-a * qPrev * qPrev) + 2 / k + 2 * s0);
         eps = std::abs(q - qPrev);
         qPrev = q;
         ++i;

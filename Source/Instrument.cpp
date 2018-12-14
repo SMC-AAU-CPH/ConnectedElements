@@ -46,29 +46,44 @@ Instrument::Instrument (vector<ObjectType> objectTypes, double fs, int stringPla
     
     for (int i = 0; i < objectTypes.size(); ++i)
     {
-        if (objectTypes[i] == bowedString)
+        switch(objectTypes[i])
         {
-            if (i > frequencyInHz.size() - 1)
-                frequencyInHz.push_back(frequencyInHz[frequencyInHz.size()-1]);
-            violinStrings.add (new ViolinString(frequencyInHz[i], fs, objectTypes[i], i));
-            addAndMakeVisible (violinStrings[i]);
-            ++numBowedStrings;
+            case bowedString:
+            {
+                if (i > frequencyInHz.size() - 1)
+                    frequencyInHz.push_back(frequencyInHz[frequencyInHz.size()-1]);
+                violinStrings.add (new ViolinString(frequencyInHz[i], fs, objectTypes[i], i));
+                addAndMakeVisible (violinStrings[i]);
+                ++numBowedStrings;
+                break;
+            }
+            case pluckedString:
+            {
+                if (i > frequencyInHz.size() - 1)
+                    frequencyInHz.push_back(frequencyInHz[frequencyInHz.size()-1]);
+                violinStrings.add (new ViolinString(frequencyInHz[i], fs, objectTypes[i], i));
+                addAndMakeVisible (violinStrings[i]);
+                ++numPluckedStrings;
+                break;
+            }
+            case sympString:
+            {
+                if (i > frequencyInHz.size() - 1)
+                    frequencyInHz.push_back(frequencyInHz[frequencyInHz.size()-1]);
+                violinStrings.add (new ViolinString(frequencyInHz[i], fs, objectTypes[i], i));
+                addAndMakeVisible (violinStrings[i]);
+                ++numSympStrings;
+                break;
+            }
+            case plate:
+            {
+                plates.add (new Plate(fs));
+                addAndMakeVisible (plates[0]);
+                ++numPlates;
+                break;
+            }
         }
-        else if (objectTypes[i] == sympString)
-        {
-            if (i > frequencyInHz.size() - 1)
-                frequencyInHz.push_back(frequencyInHz[frequencyInHz.size()-1]);
             
-            violinStrings.add (new ViolinString(frequencyInHz[i], fs, objectTypes[i], i));
-            addAndMakeVisible (violinStrings[i]);
-            ++numSympStrings;
-        }
-        else if (objectTypes[i] == plate)
-        {
-            plates.add (new Plate(fs));
-            addAndMakeVisible (plates[0]);
-            ++numPlates;
-        }
     }
 
     if (numPlates != 0)
@@ -85,29 +100,54 @@ Instrument::Instrument (vector<ObjectType> objectTypes, double fs, int stringPla
 //                                          1, 1,
 //                                          1, 10000, 1,
 //                                          violinStrings[1]->getStringType() == bowedString ? 1 : 1, fs));
+
         for (int i = 0; i < numBowedStrings; ++i)
         {
+            double massRatio;
+            if (violinStrings[i]->getStringType() == bowedString || violinStrings[i]->getStringType() == pluckedString)
+                massRatio = 800;
+            else
+                massRatio = 800;
             connections.push_back(Connection (violinStrings[i], plates[0],
-                                              (violinStrings[i]->getNumPoints() - 5) / static_cast<double>(violinStrings[i]->getNumPoints()),
+                                            (violinStrings[i]->getNumPoints() - 5) / static_cast<double>(violinStrings[i]->getNumPoints()),
                                               0.5, (0.3 + i * 0.3),
                                               1, 1,
-                                              1, 10000, 1,
-                                              violinStrings[i]->getStringType() == bowedString ? 1 : 1, fs));
+                                              0, 10000, 1,
+                                              massRatio, fs));
         }
-        int j = 2;
-        for (int i = 2; i < numBowedStrings + numSympStrings; ++i)
+        int numUnbowedStrings = numPluckedStrings + numSympStrings;
+        for (int i = numBowedStrings; i < numBowedStrings + numPluckedStrings; ++i)
         {
-            
-            double x = (j + 2 - (j < (numSympStrings / 2) ? 0 : 8)) / static_cast<double>(plates[0]->getNumXPoints());
-            double y = (j < (numSympStrings / 2) ? 0.4 : 0.5);
+            double halfFlag = false;
+            if ((i - numBowedStrings > (numUnbowedStrings / 2)) && !halfFlag)
+                halfFlag = true;
+                                    
+            double x = (i - (halfFlag ? numUnbowedStrings / 2 : 0)) / static_cast<double>(plates[0]->getNumXPoints());
+            double y = (halfFlag ? 0.5 : 0.4);
             connections.push_back(Connection (violinStrings[i], plates[0],
                                               (violinStrings[i]->getNumPoints() - 5) / static_cast<double>(violinStrings[i]->getNumPoints()),
-                                              x,
+                                              x + 0.1,
                                               y,
                                               1, 1,
                                               1, 10000, 1,
                                               violinStrings[i]->getStringType() == bowedString ? 1 : 1, fs));
-            ++j;
+        }
+        
+        for (int i = numBowedStrings + numPluckedStrings; i < getTotNumStrings(); ++i)
+        {
+            double halfFlag = false;
+            if ((i - numBowedStrings > (numUnbowedStrings / 2)) && !halfFlag)
+                halfFlag = true;
+            
+            double x = (i - (halfFlag ? numUnbowedStrings / 2 : 0)) / static_cast<double>(plates[0]->getNumXPoints());
+            double y = (halfFlag ? 0.5 : 0.4);
+            connections.push_back(Connection (violinStrings[i], plates[0],
+                                              (violinStrings[i]->getNumPoints() - 5) / static_cast<double>(violinStrings[i]->getNumPoints()),
+                                              x + 0.1,
+                                              y,
+                                              1, 1,
+                                              1, 10000, 1,
+                                              violinStrings[i]->getStringType() == bowedString ? 1 : 1, fs));
         }
     }
 //    connections.push_back(Connection (violinStrings[0], violinStrings[1],
@@ -159,6 +199,7 @@ void Instrument::paint (Graphics& g)
 
     for (int i = 0; i < connections.size(); ++i)
     {
+        int numUnbowedStrings = numSympStrings + numPluckedStrings;
         switch(connections[i].connectionType)
         {
             case bowedStringBowedString:
@@ -186,7 +227,7 @@ void Instrument::paint (Graphics& g)
                 
                 int sympStringID = string2->getStringID() - numBowedStrings;
                 Line<float> connectionLine (ceil((cpX1 * bowedSympDivision) / string1->getNumPoints()), string1->getStringID() * totBowedStringHeight / static_cast<double>(numBowedStrings) + y1,
-                                            ceil((cpX2 * (getWidth() - bowedSympDivision)) / string2->getNumPoints()) + bowedSympDivision, sympStringID * totSympStringHeight / static_cast<double>(numSympStrings) + y2);
+                                            ceil((cpX2 * (getWidth() - bowedSympDivision)) / string2->getNumPoints()) + bowedSympDivision, ((numPluckedStrings + sympStringID) * totSympStringHeight) / static_cast<double>(numSympStrings) + y2);
                 g.drawDashedLine(connectionLine, dashPattern, 2, dashPattern[0], 0);
                 break;
             }
@@ -201,8 +242,8 @@ void Instrument::paint (Graphics& g)
                 
                 int sympStringID1 = string1->getStringID() - numBowedStrings;
                 int sympStringID2 = string2->getStringID() - numBowedStrings;
-                Line<float> connectionLine (ceil(cpX1 * getWidth() / string1->getNumPoints()),totBowedStringHeight +  sympStringID1 * totSympStringHeight / static_cast<double>(numSympStrings) + y1,
-                                            ceil(cpX2 * getWidth() / string2->getNumPoints()), totBowedStringHeight + sympStringID2 * totSympStringHeight / static_cast<double>(numSympStrings) + y2);
+                Line<float> connectionLine (ceil(cpX1 * getWidth() / string1->getNumPoints()),totBowedStringHeight +  (numPluckedStrings + sympStringID1) * totSympStringHeight / static_cast<double>(numSympStrings) + y1,
+                                            ceil(cpX2 * getWidth() / string2->getNumPoints()), totBowedStringHeight + (numPluckedStrings + sympStringID2) * totSympStringHeight / static_cast<double>(numSympStrings) + y2);
                 g.drawDashedLine(connectionLine, dashPattern, 2, dashPattern[0], 0);
                 break;
             }
@@ -222,6 +263,7 @@ void Instrument::paint (Graphics& g)
                 g.drawDashedLine(connectionLine, dashPattern, 2, dashPattern[0], 0);
                 break;
             }
+            case pluckedStringPlate:
             case sympStringPlate:
             {
                 ViolinString* string1 = connections[i].violinStrings[0];
@@ -235,7 +277,7 @@ void Instrument::paint (Graphics& g)
                 
                 int sympStringID = string1->getStringID() - numBowedStrings;
                 
-                Line<float> connectionLine (ceil(cpX1 * (getWidth() - bowedSympDivision) / string1->getNumPoints()) + bowedSympDivision, sympStringID * totSympStringHeight / static_cast<double>(numSympStrings) + y1,
+                Line<float> connectionLine (ceil(cpX1 * (getWidth() - bowedSympDivision) / string1->getNumPoints()) + bowedSympDivision, sympStringID * totSympStringHeight / static_cast<double>(numUnbowedStrings) + y1,
                                             (cpX2 - 1.5) * stateWidth, stringPlateDivision + (cpY2 - 1.5) * stateHeight);
                 g.drawDashedLine(connectionLine, dashPattern, 2, dashPattern[0], 0);
                 break;
@@ -254,9 +296,10 @@ void Instrument::resized()
     {
         violinStrings[i]->setBounds(0 , i * (totBowedStringHeight / static_cast<double>(numBowedStrings)), bowedSympDivision, stringPlateDivision / static_cast<double>(numBowedStrings));
     }
-    for (int i = 0; i < numSympStrings; ++i)
+    int numUnbowedStrings = numPluckedStrings + numSympStrings;
+    for (int i = 0; i < numUnbowedStrings; ++i)
     {
-        violinStrings[i+numBowedStrings]->setBounds(bowedSympDivision , i * (totSympStringHeight / static_cast<double>(numSympStrings)), getWidth() - bowedSympDivision, stringPlateDivision / static_cast<double>(numSympStrings));
+        violinStrings[i+numBowedStrings]->setBounds(bowedSympDivision , i * (totSympStringHeight / static_cast<double>(numUnbowedStrings)), getWidth() - bowedSympDivision, stringPlateDivision / static_cast<double>(numUnbowedStrings));
     }
     for (int i = 0; i < numPlates; ++i)
     {

@@ -34,7 +34,10 @@ public:
     vector<Connection>& getConnections() { return connections; };
     
     int getNumBowedStrings() { return numBowedStrings; };
+    int getNumPluckedStrings() { return numPluckedStrings; };
     int getNumSympStrings() { return numSympStrings; };
+    
+    int getTotNumStrings() { return numBowedStrings + numPluckedStrings + numSympStrings; };
     int getNumPlates() { return numPlates; };
     
 private:
@@ -43,11 +46,14 @@ private:
     vector<Connection> connections;
     double fs;
     unsigned int numBowedStrings = 0;
+    unsigned int numPluckedStrings = 0;
     unsigned int numSympStrings = 0;
     unsigned int numPlates = 0;
+    
     int stringPlateDivision;
     int bowedSympDivision;
     int totBowedStringHeight;
     int totSympStringHeight;
+    
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Instrument)
 };

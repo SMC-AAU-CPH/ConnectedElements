@@ -59,12 +59,12 @@ void MainComponent::prepareToPlay(int samplesPerBlockExpected, double sampleRate
     else if (chooseInstrument == 1)
     {
         vector<ObjectType> objects{bowedString, bowedString,
+                                   pluckedString, pluckedString, pluckedString, pluckedString,
+                                   pluckedString, pluckedString, pluckedString, pluckedString,
                                    sympString, sympString, sympString, sympString,
                                    sympString, sympString, sympString, sympString,
-                                sympString, sympString, sympString, sympString,
-                                sympString, sympString, sympString, sympString,
-                                sympString, sympString, sympString, sympString,
-                                sympString,
+                                   sympString, sympString, sympString, sympString,
+                                   sympString,
                                    plate};
 
         int stringPlateDivision = 3 * 800 / 4.0;
@@ -79,11 +79,11 @@ void MainComponent::prepareToPlay(int samplesPerBlockExpected, double sampleRate
     if (amountOfSensels == 2)
     {
 
-        int sympStringsAmount = instruments[0]->getNumSympStrings();
+        int pluckedStringsAmount = instruments[0]->getNumPluckedStrings();
 
-        float range = 1.0 / static_cast<float>(sympStringsAmount);
+        float range = 1.0 / static_cast<float>(pluckedStringsAmount);
 
-        for (int i = 0; i < sympStringsAmount; i++)
+        for (int i = 0; i < pluckedStringsAmount; i++)
         {
             sensels[1]->addLEDBrightness(range * i, 1);
         }
@@ -206,14 +206,16 @@ void MainComponent::hiResTimerCallback()
                             instruments[0]->getStrings()[i]->pick(false);
                     }
                     int bowedStringsAmount = instruments[0]->getNumBowedStrings();
+                    int pluckedStringsAmount = instruments[0]->getNumPluckedStrings();
                     int sympStringsAmount = instruments[0]->getNumSympStrings();
-                    int totalStringsAmount = instruments[0]->getNumSympStrings() + instruments[0]->getNumBowedStrings();
+                    
+                    int totalStringsAmount = bowedStringsAmount + pluckedStringsAmount + sympStringsAmount;
 
                     vector<bool> pickAString(sympStringsAmount, false);
                     vector<double> forces(sympStringsAmount, 0);
                     vector<double> xPositions(sympStringsAmount, 0);
 
-                    float range = 1.0 / static_cast<float>(sympStringsAmount);
+                    float range = 1.0 / static_cast<float>(pluckedStringsAmount);
 
                     for (int f = 0; f < fingerCount; f++)
                     {
@@ -224,7 +226,7 @@ void MainComponent::hiResTimerCallback()
                         float Fb = sensel->fingers[f].force;
                         int fingerID = sensel->fingers[f].fingerID;
 
-                        for (int j = 0; j < sympStringsAmount; ++j)
+                        for (int j = 0; j < pluckedStringsAmount; ++j)
                             if (x > (range * j) && x < range * (j + 1))
                             {
                                 pickAString[j] = true;
@@ -232,7 +234,7 @@ void MainComponent::hiResTimerCallback()
                                 xPositions[j] = y;
                             }
                     }
-                    for (int i = 0; i < sympStringsAmount; ++i)
+                    for (int i = 0; i < pluckedStringsAmount; ++i)
                     {
                         if (pickAString[i])
                         {
@@ -267,7 +269,7 @@ void MainComponent::getNextAudioBlock(const AudioSourceChannelInfo &bufferToFill
         {
             output = instruments[j]->calculateOutput();
         }
-//        output[0] = dist.getOutput(output[0]);
+        output[0] = dist.getOutput(output[0]);
 
         channelData1[i] = output[0];
         channelData2[i] = output[0];

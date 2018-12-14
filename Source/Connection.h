@@ -19,8 +19,12 @@ using namespace std;
 enum ConnectionType
 {
     bowedStringBowedString,
+    bowedStringPluckedString,
     bowedStringSympString,
     bowedStringPlate,
+    pluckedStringPluckedString,
+    pluckedStringSympString,
+    pluckedStringPlate,
     sympStringPlate,
     sympStringSympString,
     platePlate
@@ -53,9 +57,9 @@ public:
     
     ConnectionType connectionType;
     
+    void setConnectionType (ObjectType type1, ObjectType type2);
+    
 private:
-    
-    
     
     double width1, width2;  // Width of the connection
     double sx, w0, w1; // Spring constants: damping, linear spring constant, non-linear spring constant

@@ -21,6 +21,15 @@ enum StringInterpolType
     cubic,
 };
 
+
+inline double exp1 (double x) {
+    x = 1.0 + x / 1024;
+    x *= x; x *= x; x *= x; x *= x;
+    x *= x; x *= x; x *= x; x *= x;
+    x *= x; x *= x;
+    return x;
+}
+
 using namespace std;
 //==============================================================================
 /*

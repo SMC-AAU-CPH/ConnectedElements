@@ -12,6 +12,7 @@
 enum ObjectType
 {
     bowedString,
+    pluckedString,
     sympString,
     plate,
 };
