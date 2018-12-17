@@ -48,6 +48,7 @@ void MainComponent::prepareToPlay(int samplesPerBlockExpected, double sampleRate
     {
         sensels.add(new Sensel(i)); // chooses the device in the sensel device list
     }
+    
     chooseInstrument = bowedSitar;
     
     switch(chooseInstrument)
@@ -55,9 +56,26 @@ void MainComponent::prepareToPlay(int samplesPerBlockExpected, double sampleRate
         case twoStringViolin:
         {
             vector<ObjectType> objects{bowedString, bowedString};
-            int stringPlateDivision = appWidth;
-            int bowedSympDivision = appHeight;
+            int stringPlateDivision = appHeight;
+            int bowedSympDivision = appWidth - controlsWidth;
             instruments.add(new Instrument(chooseInstrument, objects, fs, stringPlateDivision, bowedSympDivision));
+            for (int i = 0; i < 2; ++i)
+            {
+                Slider* bowedStringSlider = new Slider();
+                bowedStringSlider->setSliderStyle (Slider::LinearVertical);
+                bowedStringSlider->setTextBoxStyle(Slider::NoTextBox, true, 0, 0);
+                bowedStringSlider->setPopupDisplayEnabled(true, false, this);
+                Label* label = new Label ("Str " + String(i), "Str " + String(i));
+                label->setJustificationType (Justification::centred);
+                addAndMakeVisible (label);
+                labels.add (label);
+                bowedStringSlider->setRange (0.0, 1.0, 0.1);
+                bowedStringSlider->setValue (0.5);
+                instruments[0]->setMix (i, 0.5);
+                bowedStringSlider->addListener (this);
+                addAndMakeVisible (bowedStringSlider);
+                mixSliders.add (bowedStringSlider);
+            }
             break;
         }
         case bowedSitar:
@@ -73,6 +91,25 @@ void MainComponent::prepareToPlay(int samplesPerBlockExpected, double sampleRate
             int stringPlateDivision = 0.75 * appHeight;
             int bowedSympDivision = appHeight;
             instruments.add(new Instrument(chooseInstrument, objects, fs, stringPlateDivision, bowedSympDivision));
+            vector<String> names {"Bow", "Pluck", "Symp", "Plate"};
+            for (int i = 0; i < 4; ++i)
+            {
+                Slider* bowedStringSlider = new Slider();
+                bowedStringSlider->setSliderStyle (Slider::LinearVertical);
+                bowedStringSlider->setTextBoxStyle(Slider::NoTextBox, true, 0, 0);
+                bowedStringSlider->setPopupDisplayEnabled(true, false, this);
+                Label* label = new Label (names[i], names[i]);
+                label->setJustificationType (Justification::centred);
+                addAndMakeVisible (label);
+                labels.add (label);
+                bowedStringSlider->setRange (0.0, 1.0, 0.1);
+                bowedStringSlider->setValue (0.5);
+                instruments[0]->setMix (i, 0.5);
+                bowedStringSlider->addListener (this);
+                addAndMakeVisible (bowedStringSlider);
+                mixSliders.add (bowedStringSlider);
+            }
+            
             break;
         }
             
@@ -413,7 +450,7 @@ void MainComponent::senselMappingSitarPlucked()
                     {
                         if (!instruments[0]->getStrings()[i + bowedStringsAmount]->isPicking())
                         {
-                            instruments[0]->getStrings()[i + bowedStringsAmount]->setRaisedCos(xPositions[i], 5, forces[i] / 2.0);
+                            instruments[0]->getStrings()[i + bowedStringsAmount]->setRaisedCos(xPositions[i], 5, forces[i] / 10.0);
                             instruments[0]->getStrings()[i + bowedStringsAmount]->pick(true);
                         }
                     }
@@ -681,7 +718,7 @@ void MainComponent::senselMappingDulcimer()
     }
 }
 
-void MainComponent::getNextAudioBlock(const AudioSourceChannelInfo &bufferToFill)
+void MainComponent::getNextAudioBlock (const AudioSourceChannelInfo &bufferToFill)
 {
 
     float *const channelData1 = bufferToFill.buffer->getWritePointer(0, bufferToFill.startSample);
@@ -720,8 +757,19 @@ void MainComponent::resized()
     Rectangle<int> rect = getLocalBounds();
     Rectangle<int> controlsRect = rect.removeFromRight (controlsWidth);
     instruments[0]->setBounds(rect);
+    int sliderWidth = controlsRect.getWidth() / 2;
     
-    Rectangle<int> slidersArea = controlsRect.removeFromTop (150);
+    for (int row = 0; row < (mixSliders.size() + 1) / 2; ++row)
+    {
+        Rectangle<int> slidersArea = controlsRect.removeFromTop (150);
+        Rectangle<int> labelsArea = slidersArea.removeFromTop (20);
+        
+        for (int i = row * 2; i < row * 2 + 2; ++i)
+        {
+            mixSliders[i]->setBounds(slidersArea.removeFromLeft (sliderWidth));
+            labels[i]->setBounds(labelsArea.removeFromLeft (sliderWidth));
+        }
+    }
 }
 
 float MainComponent::clip(float output)
@@ -744,5 +792,12 @@ void MainComponent::timerCallback()
 
 void MainComponent::sliderValueChanged(Slider* slider)
 {
+    for (int i = 0; i < mixSliders.size(); ++i)
+    {
+        if (mixSliders[i] == slider)
+        {
+            instruments[0]->setMix (i, slider->getValue());
+        }
+    }
     
 }

@@ -19,56 +19,70 @@ Instrument::Instrument (InstrumentType instrumentType, vector<ObjectType> object
     
     vector<double> frequencyInHz;
     
-    if (instrumentType == bowedSitar)
+    switch (instrumentType)
     {
-        frequencyInHz = {110.0,
-                         110.0 * pow(2, 7.0 / 12.0),
-            
-                         110.0 * pow(2, 12.0 / 12.0),
-                         110.0 * pow(2, 14.0 / 12.0),
-                         110.0 * pow(2, 16.0 / 12.0),
-                         110.0 * pow(2, 17.0 / 12.0),
-                         110.0 * pow(2, 19.0 / 12.0),
-            
-                         110.0 * pow(2, 12.0 / 12.0),
-                         110.0 * pow(2, 12.0 / 12.0),
-                         110.0 * pow(2, 11.0 / 12.0),
-                         110.0 * pow(2, 12.0 / 12.0),
-                         110.0 * pow(2, 14.0 / 12.0),
-                         110.0 * pow(2, 16.0 / 12.0),
-                         110.0 * pow(2, 17.0 / 12.0),
-                         110.0 * pow(2, 19.0 / 12.0),
-                         110.0 * pow(2, 21.0 / 12.0),
-                         110.0 * pow(2, 23.0 / 12.0),
-                         110.0 * pow(2, 24.0 / 12.0),
-                         110.0 * pow(2, 26.0 / 12.0),
-                         110.0 * pow(2, 28.0 / 12.0)
-        };
-    }
-    else if (instrumentType == sitar)
-    {
-        frequencyInHz = {
-            
-            110.0 * pow(2, 12.0 / 12.0),
-            110.0 * pow(2, 14.0 / 12.0),
-            110.0 * pow(2, 16.0 / 12.0),
-            110.0 * pow(2, 17.0 / 12.0),
-            110.0 * pow(2, 19.0 / 12.0),
-            
-            110.0 * pow(2, 12.0 / 12.0),
-            110.0 * pow(2, 12.0 / 12.0),
-            110.0 * pow(2, 11.0 / 12.0),
-            110.0 * pow(2, 12.0 / 12.0),
-            110.0 * pow(2, 14.0 / 12.0),
-            110.0 * pow(2, 16.0 / 12.0),
-            110.0 * pow(2, 17.0 / 12.0),
-            110.0 * pow(2, 19.0 / 12.0),
-            110.0 * pow(2, 21.0 / 12.0),
-            110.0 * pow(2, 23.0 / 12.0),
-            110.0 * pow(2, 24.0 / 12.0),
-            110.0 * pow(2, 26.0 / 12.0),
-            110.0 * pow(2, 28.0 / 12.0)
-        };
+        case twoStringViolin:
+            frequencyInHz = {110.0,
+                             110.0 * pow(2, 7.0 / 12.0)};
+            mix.resize (2, 0.5);
+            break;
+        case bowedSitar:
+            frequencyInHz = {110.0,
+                             110.0 * pow(2, 7.0 / 12.0),
+                
+                             110.0 * pow(2, 12.0 / 12.0),
+                             110.0 * pow(2, 14.0 / 12.0),
+                             110.0 * pow(2, 16.0 / 12.0),
+                             110.0 * pow(2, 17.0 / 12.0),
+                             110.0 * pow(2, 19.0 / 12.0),
+                
+                             110.0 * pow(2, 12.0 / 12.0),
+                             110.0 * pow(2, 12.0 / 12.0),
+                             110.0 * pow(2, 11.0 / 12.0),
+                             110.0 * pow(2, 12.0 / 12.0),
+                             110.0 * pow(2, 14.0 / 12.0),
+                             110.0 * pow(2, 16.0 / 12.0),
+                             110.0 * pow(2, 17.0 / 12.0),
+                             110.0 * pow(2, 19.0 / 12.0),
+                             110.0 * pow(2, 21.0 / 12.0),
+                             110.0 * pow(2, 23.0 / 12.0),
+                             110.0 * pow(2, 24.0 / 12.0),
+                             110.0 * pow(2, 26.0 / 12.0),
+                             110.0 * pow(2, 28.0 / 12.0)
+            };
+            mix.resize (4, 0.5);
+            break;
+        case sitar:
+            frequencyInHz = {
+                
+                110.0 * pow(2, 12.0 / 12.0),
+                110.0 * pow(2, 14.0 / 12.0),
+                110.0 * pow(2, 16.0 / 12.0),
+                110.0 * pow(2, 17.0 / 12.0),
+                110.0 * pow(2, 19.0 / 12.0),
+                
+                110.0 * pow(2, 12.0 / 12.0),
+                110.0 * pow(2, 12.0 / 12.0),
+                110.0 * pow(2, 11.0 / 12.0),
+                110.0 * pow(2, 12.0 / 12.0),
+                110.0 * pow(2, 14.0 / 12.0),
+                110.0 * pow(2, 16.0 / 12.0),
+                110.0 * pow(2, 17.0 / 12.0),
+                110.0 * pow(2, 19.0 / 12.0),
+                110.0 * pow(2, 21.0 / 12.0),
+                110.0 * pow(2, 23.0 / 12.0),
+                110.0 * pow(2, 24.0 / 12.0),
+                110.0 * pow(2, 26.0 / 12.0),
+                110.0 * pow(2, 28.0 / 12.0)
+            };
+             mix.resize (4, 0.5);
+            break;
+        case hurdyGurdy:
+             mix.resize (4, 0.5);
+            break;
+        case dulcimer:
+             mix.resize (4, 0.5);
+            break;
     }
     
     for (int i = 0; i < objectTypes.size(); ++i)
@@ -381,14 +395,25 @@ vector<double> Instrument::calculateOutput()
         plate->updateUVectors();
     
     
-    for (int i = 0; i < violinStrings.size(); i++)
+    for (int i = 0; i < numBowedStrings; i++)
     {
-        float volume = 1;
-        //volume *= 5;
-        output[0] +=  violinStrings[i]->getOutput(0.75) * 800 * volume;
+        output[0] +=  violinStrings[i]->getOutput(0.75) * 800 * (instrumentType == twoStringViolin ? mix[i] : mix[0]);
     }
-    
-//    output[0] += plates[0]->getOutput(0.5, 0.4) * 3;
+    if (instrumentType != twoStringViolin)
+    {
+        for (int i = numBowedStrings; i < numBowedStrings + numPluckedStrings; ++i)
+        {
+            output[0] +=  violinStrings[i]->getOutput(0.75) * 800 * mix[1];
+        }
+        for (int i = numBowedStrings + numPluckedStrings; i < numBowedStrings + numPluckedStrings + numSympStrings; i++)
+        {
+            output[0] +=  violinStrings[i]->getOutput(0.75) * 2000 * mix[2];
+        }
+        for (int i = 0; i < numPlates; i++)
+        {
+            output[0] += plates[0]->getOutput(0.5, 0.4) * 30 * mix[3];
+        }
+    }
     output[1] = output[0];
     
     //output[0] = violinStrings[2]->getOutput(0.75) * 600 + 0.1 * plates[0]->getOutput(0.3, 0.4) * 3;

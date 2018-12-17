@@ -79,9 +79,10 @@ private:
     
     int appWidth = 1440;
     int appHeight = 800;
-    int controlsWidth = 80;
+    int controlsWidth = 100;
     
     
     OwnedArray<Slider> mixSliders;
+    OwnedArray<Label> labels;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MainComponent)
 };

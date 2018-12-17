@@ -49,6 +49,8 @@ public:
     int getTotNumStrings() { return numBowedStrings + numPluckedStrings + numSympStrings; };
     int getNumPlates() { return numPlates; };
     
+    void setMix (int idx, double val) { mix[idx] = val; };
+    
 private:
     OwnedArray<ViolinString> violinStrings;
     OwnedArray<Plate> plates;
@@ -66,5 +68,6 @@ private:
     
     InstrumentType instrumentType;
     
+    vector<double> mix {0.0, 0.0};
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Instrument)
 };
