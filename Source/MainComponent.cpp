@@ -48,14 +48,14 @@ void MainComponent::prepareToPlay(int samplesPerBlockExpected, double sampleRate
     {
         sensels.add(new Sensel(i)); // chooses the device in the sensel device list
     }
-    chooseInstrument = bowedSitar;
+    chooseInstrument = sitar;
     
     if (chooseInstrument == twoStringViolin)
     {
         vector<ObjectType> objects{bowedString, bowedString};
         int stringPlateDivision = appWidth;
         int bowedSympDivision = appHeight;
-        instruments.add(new Instrument (chooseInstrument, objects, fs, stringPlateDivision, bowedSympDivision));
+        instruments.add (new Instrument (chooseInstrument, objects, fs, stringPlateDivision, bowedSympDivision));
     }
     else if (chooseInstrument == bowedSitar)
     {
@@ -69,7 +69,21 @@ void MainComponent::prepareToPlay(int samplesPerBlockExpected, double sampleRate
 
         int stringPlateDivision = 0.75 * appHeight;
         int bowedSympDivision = appHeight;
-        instruments.add(new Instrument (chooseInstrument, objects, fs, stringPlateDivision, bowedSympDivision));
+        instruments.add (new Instrument (chooseInstrument, objects, fs, stringPlateDivision, bowedSympDivision));
+    }
+    
+    else if (chooseInstrument == sitar)
+    {
+        vector<ObjectType> objects{pluckedString, pluckedString, pluckedString, pluckedString, pluckedString,
+                                    sympString, sympString, sympString, sympString,
+                                    sympString, sympString, sympString, sympString,
+                                    sympString, sympString, sympString, sympString,
+                                    sympString,
+                                    plate};
+        
+        int stringPlateDivision = 0.75 * appHeight;
+        int bowedSympDivision = 0;
+        instruments.add (new Instrument (chooseInstrument, objects, fs, stringPlateDivision, bowedSympDivision));
     }
 
     addAndMakeVisible(instruments[0]);
