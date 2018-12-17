@@ -94,21 +94,30 @@ void MainComponent::prepareToPlay(int samplesPerBlockExpected, double sampleRate
             vector<String> names {"Bow", "Pluck", "Symp", "Plate"};
             for (int i = 0; i < 4; ++i)
             {
-                Slider* bowedStringSlider = new Slider();
-                bowedStringSlider->setSliderStyle (Slider::LinearVertical);
-                bowedStringSlider->setTextBoxStyle(Slider::NoTextBox, true, 0, 0);
+                Slider* bowedStringSlider = new Slider (Slider::LinearVertical, Slider::NoTextBox);
                 bowedStringSlider->setPopupDisplayEnabled(true, false, this);
                 Label* label = new Label (names[i], names[i]);
                 label->setJustificationType (Justification::centred);
                 addAndMakeVisible (label);
                 labels.add (label);
-                bowedStringSlider->setRange (0.0, 1.0, 0.1);
+                bowedStringSlider->setRange (0.0, 1.0, 0.01);
                 bowedStringSlider->setValue (0.5);
                 instruments[0]->setMix (i, 0.5);
                 bowedStringSlider->addListener (this);
                 addAndMakeVisible (bowedStringSlider);
                 mixSliders.add (bowedStringSlider);
             }
+            plateStiffness = new Slider (Slider::RotaryVerticalDrag, Slider::NoTextBox);
+            plateStiffness->setPopupDisplayEnabled (true, false, this);
+            plateStiffness->setRange(30, 1300, 1);
+            plateStiffness->setValue(100);
+            plateStiffness->addListener (this);
+            addAndMakeVisible (plateStiffness);
+            
+            plateLabel = new Label ("Plate Stiffness", "Plate Stiffness");
+            plateLabel->setJustificationType (Justification::centred);
+            addAndMakeVisible (plateLabel);
+            
             if (amountOfSensels == 2)
             {
                 
@@ -796,7 +805,6 @@ void MainComponent::getNextAudioBlock (const AudioSourceChannelInfo &bufferToFil
             output = instruments[j]->calculateOutput();
         }
         output[0] = dist.getOutput(output[0]);
-
         channelData1[i] = output[0];
         channelData2[i] = output[0];
     }
@@ -820,6 +828,7 @@ void MainComponent::resized()
     Rectangle<int> rect = getLocalBounds();
     Rectangle<int> controlsRect = rect.removeFromRight (controlsWidth);
     instruments[0]->setBounds(rect);
+    
     int sliderWidth = controlsRect.getWidth() / 2;
     
     for (int row = 0; row < (mixSliders.size() + 1) / 2; ++row)
@@ -833,6 +842,10 @@ void MainComponent::resized()
             labels[i]->setBounds(labelsArea.removeFromLeft (sliderWidth));
         }
     }
+    
+    plateLabel->setBounds(controlsRect.removeFromTop(20));
+    plateStiffness->setBounds(controlsRect.removeFromTop(controlsRect.getWidth()));
+    
 }
 
 float MainComponent::clip(float output)
@@ -862,5 +875,8 @@ void MainComponent::sliderValueChanged(Slider* slider)
             instruments[0]->setMix (i, slider->getValue());
         }
     }
-    
+    if (slider == plateStiffness)
+    {
+        instruments[0]->getPlates()[0]->setFrequency (slider->getValue());
+    }
 }

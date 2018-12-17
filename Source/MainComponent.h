@@ -83,6 +83,8 @@ private:
     
     
     OwnedArray<Slider> mixSliders;
+    Slider* plateStiffness;
     OwnedArray<Label> labels;
+    Label* plateLabel;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MainComponent)
 };

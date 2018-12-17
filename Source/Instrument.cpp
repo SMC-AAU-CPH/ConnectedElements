@@ -194,17 +194,12 @@ Instrument::Instrument (InstrumentType instrumentType, vector<ObjectType> object
 
         for (int i = 0; i < numBowedStrings; ++i)
         {
-            double massRatio;
-            if (violinStrings[i]->getStringType() == bowedString || violinStrings[i]->getStringType() == pluckedString)
-                massRatio = 800;
-            else
-                massRatio = 1 / 800.0;
             connections.push_back(Connection (violinStrings[i], plates[0],
                                             (violinStrings[i]->getNumPoints() - 5) / static_cast<double>(violinStrings[i]->getNumPoints()),
                                               0.5, (0.3 + i * 0.3),
                                               1, 1,
                                               0, 10000, 1,
-                                              massRatio, fs));
+                                              800, fs));
         }
         int numUnbowedStrings = numPluckedStrings + numSympStrings;
         for (int i = numBowedStrings; i < numBowedStrings + numPluckedStrings; ++i)
@@ -216,29 +211,29 @@ Instrument::Instrument (InstrumentType instrumentType, vector<ObjectType> object
             double x = (i - (halfFlag ? numUnbowedStrings / 2 : 0)) / static_cast<double>(plates[0]->getNumXPoints());
             double y = (halfFlag ? 0.5 : 0.4);
             connections.push_back(Connection (violinStrings[i], plates[0],
-                                              (violinStrings[i]->getNumPoints() - 5) / static_cast<double>(violinStrings[i]->getNumPoints()),
+                                              (violinStrings[i]->getNumPoints() - 10) / static_cast<double>(violinStrings[i]->getNumPoints()),
                                               x + 0.1,
                                               y,
                                               1, 1,
                                               1, 10000, 1,
-                                              violinStrings[i]->getStringType() == bowedString ? 1 : 1, fs));
-        }
+                                              800, fs));
+//        }
         
-        for (int i = numBowedStrings + numPluckedStrings; i < getTotNumStrings(); ++i)
-        {
-            double halfFlag = false;
-            if ((i - numBowedStrings > (numUnbowedStrings / 2)) && !halfFlag)
-                halfFlag = true;
-            
-            double x = (i - (halfFlag ? numUnbowedStrings / 2 : 0)) / static_cast<double>(plates[0]->getNumXPoints());
-            double y = (halfFlag ? 0.5 : 0.4);
-            connections.push_back(Connection (violinStrings[i], plates[0],
-                                              (violinStrings[i]->getNumPoints() - 5) / static_cast<double>(violinStrings[i]->getNumPoints()),
-                                              x + 0.1,
-                                              y,
-                                              1, 1,
-                                              1, 10000, 1,
-                                              violinStrings[i]->getStringType() == bowedString ? 1 : 1, fs));
+//        for (int i = numBowedStrings + numPluckedStrings; i < getTotNumStrings(); ++i)
+//        {
+//            double halfFlag = false;
+//            if ((i - numBowedStrings > (numUnbowedStrings / 2)) && !halfFlag)
+//                halfFlag = true;
+//
+//            double x = (i - (halfFlag ? numUnbowedStrings / 2 : 0)) / static_cast<double>(plates[0]->getNumXPoints());
+//            double y = (halfFlag ? 0.5 : 0.4);
+//            connections.push_back(Connection (violinStrings[i], plates[0],
+//                                              (violinStrings[i]->getNumPoints() - 5) / static_cast<double>(violinStrings[i]->getNumPoints()),
+//                                              x + 0.1,
+//                                              y,
+//                                              1, 1,
+//                                              1, 10000, 1,
+//                                              0.25, fs));
         }
     }
 //    connections.push_back(Connection (violinStrings[0], violinStrings[1],
@@ -422,19 +417,26 @@ vector<double> Instrument::calculateOutput()
         switch (connections[c].connectionType)
         {
             case bowedStringBowedString:
+            case bowedStringPluckedString:
             case bowedStringSympString:
+            case pluckedStringPluckedString:
+            case pluckedStringSympString:
             case sympStringSympString:
                 connections[c].violinStrings[0]->addJFc(connections[c].getJFc()[0], connections[c].violinStrings[0]->getCP(connections[c].connID[0]));
                 connections[c].violinStrings[1]->addJFc(connections[c].getJFc()[1], connections[c].violinStrings[1]->getCP(connections[c].connID[1]));
                 break;
             case bowedStringPlate:
+            case pluckedStringPlate:
             case sympStringPlate:
                 connections[c].violinStrings[0]->addJFc(connections[c].getJFc()[0], connections[c].violinStrings[0]->getCP(connections[c].connID[0]));
                 connections[c].plates[0]->addJFc (connections[c].getJFc()[1], connections[c].plates[0]->getCP(connections[c].connID[1]));
                 break;
             case platePlate:
+            {
                 connections[c].plates[0]->addJFc(connections[c].getJFc()[0], connections[c].plates[0]->getCP(connections[c].connID[0]));
                 connections[c].plates[1]->addJFc (connections[c].getJFc()[1], connections[c].plates[1]->getCP(connections[c].connID[1]));
+                break;
+            }
         }
     }
     

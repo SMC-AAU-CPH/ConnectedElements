@@ -129,7 +129,7 @@ void Plate::setFrequency (float f)
 {
     frequency = clamp(f, 30, 1300); // not really precise frequency here yet
     
-    kappaSq = double(frequency * (27.15 / 110) * 4); // Stiffness of plate
+    kappaSq = static_cast<double>(frequency * (27.15 / 110)); // Stiffness of plate
     
     d = 1.0f / (1.0f + sigma0 * k);
     B1 = -(kappaSq * k * k) / (h * h * h * h) * d;

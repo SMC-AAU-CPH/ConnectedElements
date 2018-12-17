@@ -40,7 +40,7 @@ Connection::Connection (ViolinString* object1, Plate* object2,
                                     double cp1, double cp2x, double cp2y,
                                     double width1, double width2,
                                     double sx, double w0, double w1,
-                                    double massRatio, double fs) : width1(width1), width2(width2), sx(sx), w0(w0), w1(w1), massRatio(massRatio), k(1.0 / fs)
+                                    double massRatio, double fs) : width1(width1), width2(width2), sx(sx), w0(w0), w1(w1), massRatio(massRatio), k (1.0 / fs)
 {
     violinStrings.push_back(object1);
     plates.push_back(object2);
