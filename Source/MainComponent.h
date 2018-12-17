@@ -21,7 +21,8 @@
 
 class MainComponent : public AudioAppComponent,
                       public HighResolutionTimer,
-                      public Timer
+                      public Timer,
+                      public Slider::Listener
 {
 public:
     //==============================================================================
@@ -41,6 +42,8 @@ public:
     void timerCallback() override;
 
     float clip(float output);
+    
+    void sliderValueChanged (Slider* slider) override;
     
 private:
     //==============================================================================
@@ -71,5 +74,9 @@ private:
     
     int appWidth = 1440;
     int appHeight = 800;
+    int controlsWidth = 80;
+    
+    
+    OwnedArray<Slider> mixSliders;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MainComponent)
 };

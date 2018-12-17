@@ -182,8 +182,8 @@ double Plate::clamp (double in, double min, double max)
 void Plate::paint (Graphics& g)
 {
 
-    int stateWidth = getWidth() / static_cast<double> (Nx - 4);
-    int stateHeight = getHeight() / static_cast<double> (Ny - 4);
+    float stateWidth = getWidth() / static_cast<double> (Nx - 4);
+    float stateHeight = getHeight() / static_cast<double> (Ny - 4);
     int scaling = 10000;
     
     for (int x = 2; x < Nx - 2; ++x)

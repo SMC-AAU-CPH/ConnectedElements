@@ -48,14 +48,20 @@ void MainComponent::prepareToPlay(int samplesPerBlockExpected, double sampleRate
     {
         sensels.add(new Sensel(i)); // chooses the device in the sensel device list
     }
-    chooseInstrument = sitar;
     
+    chooseInstrument = bowedSitar;
     if (chooseInstrument == twoStringViolin)
     {
         vector<ObjectType> objects{bowedString, bowedString};
-        int stringPlateDivision = appWidth;
-        int bowedSympDivision = appHeight;
+        int stringPlateDivision = appHeight;
+        int bowedSympDivision = appWidth - controlsWidth;
         instruments.add (new Instrument (chooseInstrument, objects, fs, stringPlateDivision, bowedSympDivision));
+        
+//        for (int i = 0; i < 2 ++i)
+//        {
+//            Slider bowedString1;
+//            mixSliders.add(new Slider());
+//        }
     }
     else if (chooseInstrument == bowedSitar)
     {
@@ -68,7 +74,7 @@ void MainComponent::prepareToPlay(int samplesPerBlockExpected, double sampleRate
                                    plate};
 
         int stringPlateDivision = 0.75 * appHeight;
-        int bowedSympDivision = appHeight;
+        int bowedSympDivision = appWidth / 2 - controlsWidth;
         instruments.add (new Instrument (chooseInstrument, objects, fs, stringPlateDivision, bowedSympDivision));
     }
     
@@ -305,7 +311,11 @@ void MainComponent::paint(Graphics &g)
 
 void MainComponent::resized()
 {
-    instruments[0]->setBounds(getLocalBounds());
+    Rectangle<int> rect = getLocalBounds();
+    Rectangle<int> controlsRect = rect.removeFromRight (controlsWidth);
+    instruments[0]->setBounds(rect);
+    
+    Rectangle<int> slidersArea = controlsRect.removeFromTop (150);
 }
 
 float MainComponent::clip(float output)
@@ -324,4 +334,9 @@ float MainComponent::clip(float output)
 void MainComponent::timerCallback()
 {
     repaint();
+}
+
+void MainComponent::sliderValueChanged(Slider* slider)
+{
+    
 }
