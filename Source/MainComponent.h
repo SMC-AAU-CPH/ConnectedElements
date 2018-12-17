@@ -46,6 +46,11 @@ public:
     void sliderValueChanged (Slider* slider) override;
     
 private:
+    void senselMappingTwoStrings();
+    void senselMappingSitarBowed();
+    void senselMappingSitarPlucked();
+    void senselMappingHurdyGurdy();
+    void senselMappingDulcimer();
     //==============================================================================
     double fs;
     double bufferSize;
