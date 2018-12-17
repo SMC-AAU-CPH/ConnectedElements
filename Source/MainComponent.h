@@ -67,6 +67,9 @@ private:
     // array<float, amountOfSensels> connectionPoint = {0.0};
     // array<bool, amountOfSensels> state = {0};
     Distortion dist {DiodeClipper}; 
-    int chooseInstrument;
+    InstrumentType chooseInstrument;
+    
+    int appWidth = 1440;
+    int appHeight = 800;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MainComponent)
 };

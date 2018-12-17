@@ -12,37 +12,39 @@
 #include "Instrument.h"
 
 //==============================================================================
-Instrument::Instrument (vector<ObjectType> objectTypes, double fs, int stringPlateDivision, int bowedSympDivision) : fs (fs),
-                                                                                              stringPlateDivision (stringPlateDivision),
-                                                                                              bowedSympDivision (bowedSympDivision)
+Instrument::Instrument (InstrumentType instrumentType, vector<ObjectType> objectTypes, double fs, int stringPlateDivision, int bowedSympDivision)
+: fs (fs), instrumentType (instrumentType), stringPlateDivision (stringPlateDivision), bowedSympDivision (bowedSympDivision)
 {
     
-    vector<double> frequencyInHz = {110.0,
-                                    110.0 * pow(2, 7.0 / 12.0),
-        
-                                    110.0 * pow(2, 12.0 / 12.0),
-                                    110.0 * pow(2, 14.0 / 12.0),
-                                    110.0 * pow(2, 16.0 / 12.0),
-                                    110.0 * pow(2, 17.0 / 12.0),
-                                    110.0 * pow(2, 19.0 / 12.0),
-                                    110.0 * pow(2, 21.0 / 12.0),
-                                    110.0 * pow(2, 23.0 / 12.0),
-                                    110.0 * pow(2, 24.0 / 12.0),
-        
-                                    110.0 * pow(2, 12.0 / 12.0),
-                                    110.0 * pow(2, 12.0 / 12.0),
-                                    110.0 * pow(2, 11.0 / 12.0),
-                                    110.0 * pow(2, 12.0 / 12.0),
-                                    110.0 * pow(2, 14.0 / 12.0),
-                                    110.0 * pow(2, 16.0 / 12.0),
-                                    110.0 * pow(2, 17.0 / 12.0),
-                                    110.0 * pow(2, 19.0 / 12.0),
-                                    110.0 * pow(2, 21.0 / 12.0),
-                                    110.0 * pow(2, 23.0 / 12.0),
-                                    110.0 * pow(2, 24.0 / 12.0),
-                                    110.0 * pow(2, 26.0 / 12.0),
-                                    110.0 * pow(2, 28.0 / 12.0)
-    };
+    
+    vector<double> frequencyInHz;
+    
+    if (instrumentType == bowedSitar)
+    {
+        frequencyInHz = {110.0,
+                         110.0 * pow(2, 7.0 / 12.0),
+            
+                         110.0 * pow(2, 12.0 / 12.0),
+                         110.0 * pow(2, 14.0 / 12.0),
+                         110.0 * pow(2, 16.0 / 12.0),
+                         110.0 * pow(2, 17.0 / 12.0),
+                         110.0 * pow(2, 19.0 / 12.0),
+            
+                         110.0 * pow(2, 12.0 / 12.0),
+                         110.0 * pow(2, 12.0 / 12.0),
+                         110.0 * pow(2, 11.0 / 12.0),
+                         110.0 * pow(2, 12.0 / 12.0),
+                         110.0 * pow(2, 14.0 / 12.0),
+                         110.0 * pow(2, 16.0 / 12.0),
+                         110.0 * pow(2, 17.0 / 12.0),
+                         110.0 * pow(2, 19.0 / 12.0),
+                         110.0 * pow(2, 21.0 / 12.0),
+                         110.0 * pow(2, 23.0 / 12.0),
+                         110.0 * pow(2, 24.0 / 12.0),
+                         110.0 * pow(2, 26.0 / 12.0),
+                         110.0 * pow(2, 28.0 / 12.0)
+        };
+    }
     
     for (int i = 0; i < objectTypes.size(); ++i)
     {
@@ -107,7 +109,7 @@ Instrument::Instrument (vector<ObjectType> objectTypes, double fs, int stringPla
             if (violinStrings[i]->getStringType() == bowedString || violinStrings[i]->getStringType() == pluckedString)
                 massRatio = 800;
             else
-                massRatio = 800;
+                massRatio = 1 / 800.0;
             connections.push_back(Connection (violinStrings[i], plates[0],
                                             (violinStrings[i]->getNumPoints() - 5) / static_cast<double>(violinStrings[i]->getNumPoints()),
                                               0.5, (0.3 + i * 0.3),

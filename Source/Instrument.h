@@ -17,10 +17,19 @@
 /*
 */
 
+enum InstrumentType
+{
+    twoStringViolin,
+    sitar,
+    bowedSitar,
+    hurdyGurdy,
+    dulcimer,
+};
+
 class Instrument    : public Component
 {
 public:
-    Instrument (vector<ObjectType> objectTypes, double fs, int stringPlateDivision, int bowedSympDivision);
+    Instrument (InstrumentType instrumentType, vector<ObjectType> objectTypes, double fs, int stringPlateDivision, int bowedSympDivision);
     ~Instrument();
 
     void paint (Graphics&) override;
@@ -54,6 +63,8 @@ private:
     int bowedSympDivision;
     int totBowedStringHeight;
     int totSympStringHeight;
+    
+    InstrumentType instrumentType;
     
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Instrument)
 };

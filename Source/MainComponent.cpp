@@ -48,28 +48,28 @@ void MainComponent::prepareToPlay(int samplesPerBlockExpected, double sampleRate
     {
         sensels.add(new Sensel(i)); // chooses the device in the sensel device list
     }
-    chooseInstrument = 1;
-    if (chooseInstrument == 0)
+    chooseInstrument = bowedSitar;
+    
+    if (chooseInstrument == twoStringViolin)
     {
         vector<ObjectType> objects{bowedString, bowedString};
-        int stringPlateDivision = 800;
-        int bowedSympDivision = 1440;
-        instruments.add(new Instrument(objects, fs, stringPlateDivision, bowedSympDivision));
+        int stringPlateDivision = appWidth;
+        int bowedSympDivision = appHeight;
+        instruments.add(new Instrument (chooseInstrument, objects, fs, stringPlateDivision, bowedSympDivision));
     }
-    else if (chooseInstrument == 1)
+    else if (chooseInstrument == bowedSitar)
     {
         vector<ObjectType> objects{bowedString, bowedString,
-                                   pluckedString, pluckedString, pluckedString, pluckedString,
-                                   pluckedString, pluckedString, pluckedString, pluckedString,
+                                   pluckedString, pluckedString, pluckedString, pluckedString, pluckedString,
                                    sympString, sympString, sympString, sympString,
                                    sympString, sympString, sympString, sympString,
                                    sympString, sympString, sympString, sympString,
                                    sympString,
                                    plate};
 
-        int stringPlateDivision = 3 * 800 / 4.0;
-        int bowedSympDivision = 800;
-        instruments.add(new Instrument(objects, fs, stringPlateDivision, bowedSympDivision));
+        int stringPlateDivision = 0.75 * appHeight;
+        int bowedSympDivision = appHeight;
+        instruments.add(new Instrument (chooseInstrument, objects, fs, stringPlateDivision, bowedSympDivision));
     }
 
     addAndMakeVisible(instruments[0]);
@@ -91,7 +91,7 @@ void MainComponent::prepareToPlay(int samplesPerBlockExpected, double sampleRate
     // start the hi-res timer
     HighResolutionTimer::startTimer(1000.0 / 150.0);
     Timer::startTimerHz(15);
-    setSize(1440, 800);
+    setSize(appWidth, appHeight);
 }
 
 void MainComponent::hiResTimerCallback()
