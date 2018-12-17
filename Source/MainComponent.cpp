@@ -754,7 +754,6 @@ void MainComponent::getNextAudioBlock (const AudioSourceChannelInfo &bufferToFil
             output = instruments[j]->calculateOutput();
         }
         output[0] = dist.getOutput(output[0]);
-
         channelData1[i] = output[0];
         channelData2[i] = output[0];
     }
