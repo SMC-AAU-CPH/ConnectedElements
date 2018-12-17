@@ -109,6 +109,18 @@ void MainComponent::prepareToPlay(int samplesPerBlockExpected, double sampleRate
                 addAndMakeVisible (bowedStringSlider);
                 mixSliders.add (bowedStringSlider);
             }
+            if (amountOfSensels == 2)
+            {
+                
+                int pluckedStringsAmount = instruments[0]->getNumPluckedStrings();
+                
+                float range = 1.0 / static_cast<float>(pluckedStringsAmount);
+                
+                for (int i = 0; i < pluckedStringsAmount; i++)
+                {
+                    sensels[1]->addLEDBrightness(range * i, 1);
+                }
+            }
             
             break;
         }
