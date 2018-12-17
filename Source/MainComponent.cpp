@@ -49,7 +49,7 @@ void MainComponent::prepareToPlay(int samplesPerBlockExpected, double sampleRate
         sensels.add(new Sensel(i)); // chooses the device in the sensel device list
     }
     
-    chooseInstrument = bowedSitar;
+    chooseInstrument = dulcimer;
     
     switch(chooseInstrument)
     {
@@ -141,9 +141,60 @@ void MainComponent::prepareToPlay(int samplesPerBlockExpected, double sampleRate
         }
             
         case hurdyGurdy:
+        {
+            vector<ObjectType> objects{bowedString, bowedString,
+                pluckedString, pluckedString, pluckedString, pluckedString, pluckedString,
+                sympString, sympString, sympString, sympString,
+                sympString, sympString, sympString, sympString,
+                sympString, sympString, sympString, sympString,
+                sympString,
+                plate};
+            
+            int stringPlateDivision = 0.75 * appHeight;
+            int bowedSympDivision = appHeight;
+            instruments.add(new Instrument(chooseInstrument, objects, fs, stringPlateDivision, bowedSympDivision));
+            vector<String> names {"Bow", "Pluck", "Symp", "Plate"};
+            for (int i = 0; i < 4; ++i)
+            {
+                Slider* bowedStringSlider = new Slider();
+                bowedStringSlider->setSliderStyle (Slider::LinearVertical);
+                bowedStringSlider->setTextBoxStyle(Slider::NoTextBox, true, 0, 0);
+                bowedStringSlider->setPopupDisplayEnabled(true, false, this);
+                Label* label = new Label (names[i], names[i]);
+                label->setJustificationType (Justification::centred);
+                addAndMakeVisible (label);
+                labels.add (label);
+                bowedStringSlider->setRange (0.0, 1.0, 0.1);
+                bowedStringSlider->setValue (0.5);
+                instruments[0]->setMix (i, 0.5);
+                bowedStringSlider->addListener (this);
+                addAndMakeVisible (bowedStringSlider);
+                mixSliders.add (bowedStringSlider);
+            }
             break;
+        }
         case dulcimer:
+        {
+            vector<ObjectType> objects{
+                pluckedString, pluckedString,
+                pluckedString, pluckedString,
+                pluckedString, pluckedString,
+                pluckedString, pluckedString,
+                pluckedString, pluckedString,
+                pluckedString, pluckedString,
+                pluckedString, pluckedString,
+                pluckedString, pluckedString,
+                pluckedString, pluckedString,
+                pluckedString, pluckedString,
+                pluckedString, pluckedString,
+                pluckedString, pluckedString,
+                plate};
+            
+            int stringPlateDivision = 0.75 * appHeight;
+            int bowedSympDivision = 0;
+            instruments.add(new Instrument(chooseInstrument, objects, fs, stringPlateDivision, bowedSympDivision));
             break;
+        }
     }
   
     addAndMakeVisible(instruments[0]);

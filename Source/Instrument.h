@@ -69,5 +69,7 @@ private:
     InstrumentType instrumentType;
     
     vector<double> mix {0.0, 0.0};
+
+    Random r; 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Instrument)
 };

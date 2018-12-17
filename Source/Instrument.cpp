@@ -78,9 +78,59 @@ Instrument::Instrument (InstrumentType instrumentType, vector<ObjectType> object
              mix.resize (4, 0.5);
             break;
         case hurdyGurdy:
+
              mix.resize (4, 0.5);
             break;
         case dulcimer:
+
+
+            frequencyInHz = {
+                
+                110.0 * pow(2, 12.0 / 12.0),
+                110.0 * pow(2, 12.0 / 12.0),
+
+                110.0 * pow(2, 14.0 / 12.0),
+                110.0 * pow(2, 14.0 / 12.0),
+
+                110.0 * pow(2, 16.0 / 12.0),
+                110.0 * pow(2, 16.0 / 12.0),
+
+                110.0 * pow(2, 17.0 / 12.0),
+                110.0 * pow(2, 17.0 / 12.0),
+
+                110.0 * pow(2, 19.0 / 12.0),
+                110.0 * pow(2, 19.0 / 12.0),
+
+                110.0 * pow(2, 21.0 / 12.0),
+                110.0 * pow(2, 21.0 / 12.0),
+
+                110.0 * pow(2, 23.0 / 12.0),
+                110.0 * pow(2, 23.0 / 12.0),
+
+                110.0 * pow(2, 24.0 / 12.0),
+                110.0 * pow(2, 24.0 / 12.0),
+                
+                110.0 * pow(2, 26.0 / 12.0),
+                110.0 * pow(2, 26.0 / 12.0),
+
+                110.0 * pow(2, 28.0 / 12.0),
+                110.0 * pow(2, 28.0 / 12.0),
+                
+                110.0 * pow(2, 29.0 / 12.0),
+                110.0 * pow(2, 29.0 / 12.0),
+                
+                110.0 * pow(2, 31.0 / 12.0),
+                110.0 * pow(2, 31.0 / 12.0)
+            };
+            // slightly detune
+            for (int i = 0; i < frequencyInHz.size(); i++)
+            {
+                if (r.nextFloat() > 0.5)
+                    frequencyInHz[i] += r.nextFloat() * i;
+                else 
+                    frequencyInHz[i] -= r.nextFloat() * i;
+            }
+
              mix.resize (4, 0.5);
             break;
     }
