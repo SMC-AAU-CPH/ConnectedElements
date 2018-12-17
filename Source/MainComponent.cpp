@@ -73,6 +73,20 @@ void MainComponent::prepareToPlay(int samplesPerBlockExpected, double sampleRate
             int stringPlateDivision = 0.75 * appHeight;
             int bowedSympDivision = appHeight;
             instruments.add(new Instrument(chooseInstrument, objects, fs, stringPlateDivision, bowedSympDivision));
+            
+            if (amountOfSensels == 2)
+            {
+                
+                int pluckedStringsAmount = instruments[0]->getNumPluckedStrings();
+                
+                float range = 1.0 / static_cast<float>(pluckedStringsAmount);
+                
+                for (int i = 0; i < pluckedStringsAmount; i++)
+                {
+                    sensels[1]->addLEDBrightness(range * i, 1);
+                }
+            }
+            
             break;
         }
             
