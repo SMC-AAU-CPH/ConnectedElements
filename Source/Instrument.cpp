@@ -15,8 +15,6 @@
 Instrument::Instrument (InstrumentType instrumentType, vector<ObjectType> objectTypes, double fs, int stringPlateDivision, int bowedSympDivision)
 : fs (fs), stringPlateDivision (stringPlateDivision), instrumentType (instrumentType), bowedSympDivision (bowedSympDivision)
 {
-    
-    
     vector<double> frequencyInHz;
     
     switch (instrumentType)
@@ -129,7 +127,7 @@ Instrument::Instrument (InstrumentType instrumentType, vector<ObjectType> object
                     frequencyInHz[i] -= r.nextFloat() * i;
             }
 
-             mix.resize (4, 0.5);
+            mix.resize (4, 0.5);
             break;
     }
     
@@ -177,19 +175,6 @@ Instrument::Instrument (InstrumentType instrumentType, vector<ObjectType> object
 
     if (numPlates != 0)
     {
-//        connections.push_back(Connection (violinStrings[0], plates[0],
-//                                          (violinStrings[0]->getNumPoints() - 5) / static_cast<double>(violinStrings[0]->getNumPoints()),
-//                                          (6) / static_cast<double>(plates[0]->getNumXPoints()), 0.4,
-//                                          1, 1,
-//                                          1, 10000, 1,
-//                                          violinStrings[0]->getStringType() == bowedString ? 1 : 1, fs));
-//        connections.push_back(Connection (violinStrings[1], plates[0],
-//                                          (violinStrings[1]->getNumPoints() - 5) / static_cast<double>(violinStrings[1]->getNumPoints()),
-//                                          (5) / static_cast<double>(plates[0]->getNumXPoints()), 0.4,
-//                                          1, 1,
-//                                          1, 10000, 1,
-//                                          violinStrings[1]->getStringType() == bowedString ? 1 : 1, fs));
-
         for (int i = 0; i < numBowedStrings; ++i)
         {
             connections.push_back(Connection (violinStrings[i], plates[0],
@@ -215,56 +200,8 @@ Instrument::Instrument (InstrumentType instrumentType, vector<ObjectType> object
                                               1, 1,
                                               1, 10000, 1,
                                               violinStrings[i]->getStringType() == pluckedString ? 800 : 0.25, fs));
-//        }
-        
-//        for (int i = numBowedStrings + numPluckedStrings; i < getTotNumStrings(); ++i)
-//        {
-//            double halfFlag = false;
-//            if ((i - numBowedStrings > (numUnbowedStrings / 2)) && !halfFlag)
-//                halfFlag = true;
-//
-//            double x = (i - (halfFlag ? numUnbowedStrings / 2 : 0)) / static_cast<double>(plates[0]->getNumXPoints());
-//            double y = (halfFlag ? 0.5 : 0.4);
-//            connections.push_back(Connection (violinStrings[i], plates[0],
-//                                              (violinStrings[i]->getNumPoints() - 5) / static_cast<double>(violinStrings[i]->getNumPoints()),
-//                                              x + 0.1,
-//                                              y,
-//                                              1, 1,
-//                                              1, 10000, 1,
-//                                              0.25, fs));
         }
     }
-//    connections.push_back(Connection (violinStrings[0], violinStrings[1],
-//                                      0.5, 0.5,
-//                                      1, 1,
-//                                      1, 1000, 100,
-//                                      1, fs));
-////
-//    connections.push_back(Connection (violinStrings[1], violinStrings[2],
-//                                      0.1, 0.5,
-//                                      1, 1,
-//                                      1, 1000, 100,
-//                                      1, fs));
-//
-//    connections.push_back(Connection (violinStrings[2], violinStrings[3],
-//                                      0.1, 0.5,
-//                                      1, 1,
-//                                      1, 1000, 100,
-//                                      1, fs));
-//
-//     connections.push_back(Connection (violinStrings[1], violinStrings[3],
-//                                       0.1, 0.5,
-//                                       1, 1,
-//                                       1, 10000, 100,
-//                                       1, fs));
-//
-//    connections.push_back(Connection (violinStrings[numStrings-1], plates[0],
-//                                      0.1, 0.3, 0.3,
-//                                      1, 1,
-//                                      1, 10000, 4000,
-//                                      0.25, fs));
-//    totBowedStringHeight = stringPlateDivision - (numSympStrings * sympStringHeight);
-//    totSympStringHeight = sympStringHeight * numSympStrings;
     totBowedStringHeight = stringPlateDivision;
     totSympStringHeight = stringPlateDivision;
 }
