@@ -184,80 +184,80 @@ void MainComponent::prepareToPlay(int samplesPerBlockExpected, double sampleRate
         plateLabel = new Label("Plate Stiffness", "Plate Stiffness");
         plateLabel->setJustificationType(Justification::centred);
         addAndMakeVisible(plateLabel);
-
-        switch (chooseInstrument)
-        {
-        case twoStringViolin:
-        {
-
-            break;
-        }
-        case bowedSitar:
-        {
-            if (amountOfSensels == 2)
-            {
-
-                int pluckedStringsAmount = instruments[0]->getNumPluckedStrings();
-
-                float range = 1.0 / static_cast<float>(pluckedStringsAmount);
-
-                for (int i = 0; i < pluckedStringsAmount; i++)
-                {
-                    sensels[1]->addLEDBrightness(range * i, 1);
-                }
-            }
-            break;
-        }
-
-        case sitar:
-        {
-            if (amountOfSensels == 2)
-            {
-
-                int pluckedStringsAmount = instruments[0]->getNumPluckedStrings();
-
-                float range = 1.0 / static_cast<float>(pluckedStringsAmount);
-
-                for (int i = 0; i < pluckedStringsAmount; i++)
-                {
-                    sensels[1]->addLEDBrightness(range * i, 1);
-                }
-            }
-            break;
-        }
-
-        case hurdyGurdy:
-        {
-        }
-        case dulcimer:
-        {
-            if (amountOfSensels == 2)
-            {
-
-                int pluckedStringsAmount = instruments[0]->getNumPluckedStrings();
-
-                float range = 1.0 / static_cast<float>(pluckedStringsAmount);
-                for (auto sensel : sensels)
-                {
-                    for (int i = 0; i < pluckedStringsAmount; i += 2)
-                    {
-                        sensel->addLEDBrightness(range * i, 1);
-                    }
-                }
-            }
-            break;
-        }
-        }
-
-        addAndMakeVisible(instruments[0]);
-
-        numInstruments = instruments.size();
-
-        // start the hi-res timer
-        HighResolutionTimer::startTimer(1000.0 / 150.0);
-        Timer::startTimerHz(15);
-        setSize(appWidth, appHeight);
+        break;
     }
+    addAndMakeVisible(instruments[0]);
+
+    switch (chooseInstrument)
+    {
+    case twoStringViolin:
+    {
+
+        break;
+    }
+    case bowedSitar:
+    {
+        if (amountOfSensels == 2)
+        {
+
+            int pluckedStringsAmount = instruments[0]->getNumPluckedStrings();
+
+            float range = 1.0 / static_cast<float>(pluckedStringsAmount);
+
+            for (int i = 0; i < pluckedStringsAmount; i++)
+            {
+                sensels[1]->addLEDBrightness(range * i, 1);
+            }
+        }
+        break;
+    }
+
+    case sitar:
+    {
+        if (amountOfSensels == 2)
+        {
+
+            int pluckedStringsAmount = instruments[0]->getNumPluckedStrings();
+
+            float range = 1.0 / static_cast<float>(pluckedStringsAmount);
+
+            for (int i = 0; i < pluckedStringsAmount; i++)
+            {
+                sensels[1]->addLEDBrightness(range * i, 1);
+            }
+        }
+        break;
+    }
+
+    case hurdyGurdy:
+    {
+    }
+    case dulcimer:
+    {
+        if (amountOfSensels == 2)
+        {
+
+            int pluckedStringsAmount = instruments[0]->getNumPluckedStrings();
+
+            float range = 1.0 / static_cast<float>(pluckedStringsAmount);
+            for (auto sensel : sensels)
+            {
+                for (int i = 0; i < pluckedStringsAmount; i += 2)
+                {
+                    sensel->addLEDBrightness(range * i, 1);
+                }
+            }
+        }
+        break;
+    }
+    }
+
+    numInstruments = instruments.size();
+
+    // start the hi-res timer
+    HighResolutionTimer::startTimer(1000.0 / 150.0);
+    Timer::startTimerHz(15);
+    setSize(appWidth, appHeight);
 }
 void MainComponent::hiResTimerCallback()
 {
@@ -723,7 +723,7 @@ void MainComponent::senselMappingDulcimer()
                         instruments[0]->getStrings()[i]->pick(false);
                 }
                 int pluckedStringsAmount = instruments[0]->getNumPluckedStrings();
-             
+
                 vector<bool> pickAString(pluckedStringsAmount, false);
                 vector<double> forces(pluckedStringsAmount, 0);
                 vector<double> xPositions(pluckedStringsAmount, 0);
@@ -745,16 +745,16 @@ void MainComponent::senselMappingDulcimer()
                             pickAString[j] = true;
                             forces[j] = Fb;
                             xPositions[j] = y;
-                            pickAString[j+1] = true;
-                            forces[j+1] = Fb;
-                            xPositions[j+1] = y;
+                            pickAString[j + 1] = true;
+                            forces[j + 1] = Fb;
+                            xPositions[j + 1] = y;
                         }
                 }
                 for (int i = 0; i < pluckedStringsAmount; i += 2)
                 {
-                    if (pickAString[i] || pickAString[i+1])
+                    if (pickAString[i] || pickAString[i + 1])
                     {
-                        if (!instruments[0]->getStrings()[i]->isPicking() && !instruments[0]->getStrings()[i+1]->isPicking())
+                        if (!instruments[0]->getStrings()[i]->isPicking() && !instruments[0]->getStrings()[i + 1]->isPicking())
                         {
                             instruments[0]->getStrings()[i]->setRaisedCos(xPositions[i], 5, forces[i] / 10.0);
                             instruments[0]->getStrings()[i]->pick(true);

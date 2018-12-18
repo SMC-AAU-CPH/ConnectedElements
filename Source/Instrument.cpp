@@ -158,7 +158,7 @@ Instrument::Instrument (InstrumentType instrumentType, vector<ObjectType> object
                     frequencyInHz[i] -= frequencyInHz[i]*0.01 * r.nextFloat();
             }
 
-            mix.resize (4, 0.5);
+            mix.resize (2, 0.5);
             break;
     }
     
@@ -225,7 +225,7 @@ Instrument::Instrument (InstrumentType instrumentType, vector<ObjectType> object
             double x = (i - (halfFlag ? numUnbowedStrings / 2 : 0)) / static_cast<double>(plates[0]->getNumXPoints());
             double y = (halfFlag ? 0.5 : 0.4);
             connections.push_back(Connection (violinStrings[i], plates[0],
-                                              (violinStrings[i]->getNumPoints() - 5) / static_cast<double>(violinStrings[i]->getNumPoints()),
+                                              (violinStrings[i]->getNumPoints() - 3) / static_cast<double>(violinStrings[i]->getNumPoints()),
                                               x + 0.1,
                                               y,
                                               1, 1,
@@ -423,23 +423,57 @@ vector<double> Instrument::calculateOutput()
     }
     if (instrumentType != twoStringViolin)
     {
+        // plucked strings
         for (int i = numBowedStrings; i < numBowedStrings + numPluckedStrings; ++i)
         {
-            output[0] +=  violinStrings[i]->getOutput(0.75) * 800 * mix[1];
+            switch (instrumentType)
+            {
+                case bowedSitar:
+                case hurdyGurdy:
+                    mixVal = mix[1];
+                    break;
+                case sitar:
+                case dulcimer:
+                    mixVal = mix[0];
+                    break;
+            }
+            output[0] +=  violinStrings[i]->getOutput(0.75) * 800 * mixVal;
         }
+        // sympathetic strings
         for (int i = numBowedStrings + numPluckedStrings; i < numBowedStrings + numPluckedStrings + numSympStrings; i++)
         {
-            output[0] +=  violinStrings[i]->getOutput(0.75) * 2000 * mix[2];
+            switch (instrumentType)
+            {
+                case bowedSitar:
+                case hurdyGurdy:
+                    mixVal = mix[2];
+                    break;
+                case sitar:
+                    mixVal = mix[1];
+                case dulcimer:
+                    mixVal = 0;
+                    break;
+            }
+            output[0] +=  violinStrings[i]->getOutput(0.75) * 2000 * mixVal;
         }
         for (int i = 0; i < numPlates; i++)
         {
-            output[0] += plates[0]->getOutput(0.5, 0.4) * 30 * mix[3];
+            switch (instrumentType)
+            {
+                case bowedSitar:
+                case hurdyGurdy:
+                    mixVal = mix[3];
+                    break;
+                case sitar:
+                    mixVal = mix[2];
+                case dulcimer:
+                    mixVal = mix[1];
+                    break;
+            }
+            output[0] += plates[0]->getOutput(0.8, 0.4) * 30 * mixVal;
         }
     }
     output[1] = output[0];
-    
-    //output[0] = violinStrings[2]->getOutput(0.75) * 600 + 0.1 * plates[0]->getOutput(0.3, 0.4) * 3;
-    //output[1] = violinStrings[3]->getOutput(0.75) * 600 + 0.1 * plates[0]->getOutput(0.7, 0.4) * 3;
     
     return output;
 }
