@@ -13,7 +13,7 @@
 
 //==============================================================================
 Instrument::Instrument (InstrumentType instrumentType, vector<ObjectType> objectTypes, double fs, int stringPlateDivision, int bowedSympDivision)
-: fs (fs), instrumentType (instrumentType), stringPlateDivision (stringPlateDivision), bowedSympDivision (bowedSympDivision)
+: fs (fs), stringPlateDivision (stringPlateDivision), instrumentType (instrumentType), bowedSympDivision (bowedSympDivision)
 {
     
     

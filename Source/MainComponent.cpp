@@ -49,7 +49,7 @@ void MainComponent::prepareToPlay(int samplesPerBlockExpected, double sampleRate
         sensels.add(new Sensel(i)); // chooses the device in the sensel device list
     }
     
-    chooseInstrument = dulcimer;
+    chooseInstrument = bowedSitar;
     
     switch(chooseInstrument)
     {
