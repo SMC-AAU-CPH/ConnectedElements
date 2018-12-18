@@ -260,7 +260,10 @@ void MainComponent::prepareToPlay(int samplesPerBlockExpected, double sampleRate
     numInstruments = instruments.size();
 
     // start the hi-res timer
-    HighResolutionTimer::startTimer(1000.0 / 150.0);
+    if (sensels[0]->senselDetected)
+    {
+        HighResolutionTimer::startTimer(1000.0 / 150.0);
+    }
     Timer::startTimerHz(15);
     setSize(appWidth, appHeight);
 }
