@@ -241,7 +241,7 @@ Instrument::Instrument (InstrumentType instrumentType, vector<ObjectType> object
                 int j = 0;
                 for (int i = 0; i < numPluckedStrings; i = i + 2)
                 {
-                    connections.push_back(Connection (violinStrings[i], violinStrings[i+1],
+                    connections.push_back (Connection (violinStrings[i], violinStrings[i+1],
                                                       4 / static_cast<double>(violinStrings[i]->getNumPoints()),
                                                       4 / static_cast<double>(violinStrings[i+1]->getNumPoints()),
                                                       1, 1,
@@ -255,7 +255,7 @@ Instrument::Instrument (InstrumentType instrumentType, vector<ObjectType> object
                     double x = (j - (halfFlag ? numPluckedStrings / 4 : 0)) / static_cast<double>(plates[0]->getNumXPoints());
                     double y = (halfFlag ? 0.5 : 0.4);
                     
-                    connections.push_back(Connection (violinStrings[i], plates[0],
+                    connections.push_back (Connection (violinStrings[i], plates[0],
                                                       (violinStrings[i]->getNumPoints() - 4) / static_cast<double>(violinStrings[i]->getNumPoints()),
                                                       x + 0.2,
                                                       y,
@@ -331,9 +331,11 @@ void Instrument::paint (Graphics& g)
                 
                 int sympStringID1 = string1->getStringID() - numBowedStrings;
                 int sympStringID2 = string2->getStringID() - numBowedStrings;
-                Line<float> connectionLine (ceil(cpX1 * getWidth() / string1->getNumPoints()),totBowedStringHeight +  (numPluckedStrings + sympStringID1) * totSympStringHeight / static_cast<double>(numSympStrings) + y1,
-                                            ceil(cpX2 * getWidth() / string2->getNumPoints()), totBowedStringHeight + (numPluckedStrings + sympStringID2) * totSympStringHeight / static_cast<double>(numSympStrings) + y2);
-                g.drawDashedLine(connectionLine, dashPattern, 2, dashPattern[0], 0);
+                Line<float> connectionLine (ceil(cpX1 * getWidth() / string1->getNumPoints()),
+                                            (sympStringID1 * totSympStringHeight) / static_cast<double>(numSympStrings + numPluckedStrings) + y1,
+                                            ceil(cpX2 * getWidth() / string2->getNumPoints()),
+                                            (sympStringID2 * totSympStringHeight) / static_cast<double>(numSympStrings + numPluckedStrings) + y2);
+                g.drawDashedLine (connectionLine, dashPattern, 2, dashPattern[0], 0);
                 break;
             }
             case bowedStringPlate:
