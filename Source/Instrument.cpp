@@ -122,9 +122,9 @@ Instrument::Instrument (InstrumentType instrumentType, vector<ObjectType> object
             for (int i = 0; i < frequencyInHz.size(); i++)
             {
                 if (r.nextFloat() > 0.5)
-                    frequencyInHz[i] += r.nextFloat() * i;
+                    frequencyInHz[i] += frequencyInHz[i]*0.02 * r.nextFloat();
                 else 
-                    frequencyInHz[i] -= r.nextFloat() * i;
+                    frequencyInHz[i] -= frequencyInHz[i]*0.02 * r.nextFloat();
             }
 
             mix.resize (4, 0.5);
