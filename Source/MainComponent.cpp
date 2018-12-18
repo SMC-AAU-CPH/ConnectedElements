@@ -34,6 +34,8 @@ MainComponent::~MainComponent()
         }
     }
     shutdownAudio();
+    delete plateStiffness;
+    delete plateLabel;
 }
 
 //==============================================================================
@@ -347,8 +349,6 @@ void MainComponent::senselMappingSitarBowed()
                 int pluckedStringsAmount = instruments[0]->getNumPluckedStrings();
                 int sympStringsAmount = instruments[0]->getNumSympStrings();
 
-                int totalStringsAmount = bowedStringsAmount + pluckedStringsAmount + sympStringsAmount;
-
                 vector<bool> pickAString(sympStringsAmount, false);
                 vector<double> forces(sympStringsAmount, 0);
                 vector<double> xPositions(sympStringsAmount, 0);
@@ -357,13 +357,10 @@ void MainComponent::senselMappingSitarBowed()
 
                 for (int f = 0; f < fingerCount; f++)
                 {
-                    bool state = sensel->fingers[f].state;
                     float x = sensel->fingers[f].x;
                     float y = sensel->fingers[f].y;
-                    float Vb = sensel->fingers[f].delta_y * maxVb;
                     float Fb = sensel->fingers[f].force;
-                    int fingerID = sensel->fingers[f].fingerID;
-
+                    
                     for (int j = 0; j < pluckedStringsAmount; ++j)
                         if (x > (range * j) && x < range * (j + 1))
                         {

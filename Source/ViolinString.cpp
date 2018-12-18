@@ -403,7 +403,7 @@ void ViolinString::mouseDown(const MouseEvent &e)
     {
         setBow(true);
     } else {
-        setRaisedCos(e.x / static_cast<double>(N), 5, 1000);
+        setRaisedCos(e.x / static_cast<double>(getWidth()), 5, 0.05);
         pick(true);
     }
     if (e.y >= (getHeight() / 2.0) - cpMR && e.y <= (getHeight() / 2.0) + cpMR && ModifierKeys::getCurrentModifiers() == ModifierKeys::altModifier + ModifierKeys::leftButtonModifier)
