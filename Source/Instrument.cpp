@@ -82,8 +82,6 @@ Instrument::Instrument (InstrumentType instrumentType, vector<ObjectType> object
              mix.resize (4, 0.5);
             break;
         case dulcimer:
-
-
             frequencyInHz = {
                 
                 110.0 * pow(2, 12.0 / 12.0),
