@@ -343,7 +343,7 @@ void MainComponent::senselMappingSitarBowed()
                     {
                         if (!instruments[0]->getStrings()[i + bowedStringsAmount]->isPicking())
                         {
-                            instruments[0]->getStrings()[i + bowedStringsAmount]->setRaisedCos(xPositions[i], 5, forces[i] / 2.0);
+                            instruments[0]->getStrings()[i + bowedStringsAmount]->setRaisedCos(xPositions[i], 5, forces[i] / 10.0);
                             instruments[0]->getStrings()[i + bowedStringsAmount]->pick(true);
                         }
                     }

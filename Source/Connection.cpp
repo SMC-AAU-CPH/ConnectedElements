@@ -70,7 +70,10 @@ void Connection::calculateCoefs()
     switch (connectionType)
     {
         case bowedStringBowedString:
+        case bowedStringPluckedString:
         case bowedStringSympString:
+        case pluckedStringPluckedString:
+        case pluckedStringSympString:
         case sympStringSympString:
         {
             int cp2 = violinStrings[1]->getCP (connID[1]);
@@ -78,6 +81,7 @@ void Connection::calculateCoefs()
             break;
         }
         case bowedStringPlate:
+        case pluckedStringPlate:
         case sympStringPlate:
         {
             auto cp2 = plates[0]->getCP (connID[1]);
@@ -97,11 +101,15 @@ vector<double> Connection::calculateJFc()
     switch (connectionType)
     {
         case bowedStringBowedString:
+        case bowedStringPluckedString:
         case bowedStringSympString:
+        case pluckedStringPluckedString:
+        case pluckedStringSympString:
         case sympStringSympString:
             bn = hA * violinStrings[0]->getNextStateAt(violinStrings[0]->getCP(connID[0])) - hB * violinStrings[1]->getNextStateAt(violinStrings[1]->getCP(connID[1]));
             break;
         case bowedStringPlate:
+        case pluckedStringPlate:
         case sympStringPlate:
             bn = hA * violinStrings[0]->getNextStateAt(violinStrings[0]->getCP(connID[0])) - hB * plates[0]->getNextStateAt(plates[0]->getCP(connID[1]));
             break;
