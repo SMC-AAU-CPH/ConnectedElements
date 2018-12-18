@@ -51,7 +51,7 @@ void MainComponent::prepareToPlay (int samplesPerBlockExpected, double sampleRat
         sensels.add(new Sensel(i)); // chooses the device in the sensel device list
     }
     
-    chooseInstrument = hurdyGurdy;
+    chooseInstrument = dulcimer;
     
     int stringPlateDivision;
     int bowedSympDivision;
