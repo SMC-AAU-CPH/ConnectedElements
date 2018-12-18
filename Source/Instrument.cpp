@@ -203,7 +203,7 @@ Instrument::Instrument (InstrumentType instrumentType, vector<ObjectType> object
         }
             
     }
-/*
+
     if (numPlates != 0)
     {
         for (int i = 0; i < numBowedStrings; ++i)
@@ -216,24 +216,40 @@ Instrument::Instrument (InstrumentType instrumentType, vector<ObjectType> object
                                               800, fs));
         }
         int numUnbowedStrings = numPluckedStrings + numSympStrings;
-        for (int i = numBowedStrings; i < getTotNumStrings(); ++i)
+        switch (instrumentType)
         {
-            double halfFlag = false;
-            if ((i - numBowedStrings > (numUnbowedStrings / 2)) && !halfFlag)
-                halfFlag = true;
-                                    
-            double x = (i - (halfFlag ? numUnbowedStrings / 2 : 0)) / static_cast<double>(plates[0]->getNumXPoints());
-            double y = (halfFlag ? 0.5 : 0.4);
-            connections.push_back(Connection (violinStrings[i], plates[0],
-                                              (violinStrings[i]->getNumPoints() - 3) / static_cast<double>(violinStrings[i]->getNumPoints()),
-                                              x + 0.1,
-                                              y,
-                                              1, 1,
-                                              1, 10000, 1,
-                                              violinStrings[i]->getStringType() == pluckedString ? 800 : 0.25, fs));
+            case bowedSitar:
+            case sitar:
+                for (int i = numBowedStrings; i < getTotNumStrings(); ++i)
+                {
+                    double halfFlag = false;
+                    if ((i - numBowedStrings > (numUnbowedStrings / 2)) && !halfFlag)
+                        halfFlag = true;
+                    
+                    double x = (i - (halfFlag ? numUnbowedStrings / 2 : 0)) / static_cast<double>(plates[0]->getNumXPoints());
+                    double y = (halfFlag ? 0.5 : 0.4);
+                    connections.push_back(Connection (violinStrings[i], plates[0],
+                                                      (violinStrings[i]->getNumPoints() - 3) / static_cast<double>(violinStrings[i]->getNumPoints()),
+                                                      x + 0.1,
+                                                      y,
+                                                      1, 1,
+                                                      1, 10000, 1,
+                                                      violinStrings[i]->getStringType() == pluckedString ? 800 : 0.25, fs));
+                }
+                break;
+            case dulcimer:
+                for (int i = 0; i < numPluckedStrings; i = i + 2)
+                {
+                    connections.push_back(Connection (violinStrings[i], violinStrings[i+1],
+                                  (violinStrings[i]->getNumPoints() - 3) / static_cast<double>(violinStrings[i]->getNumPoints()),
+                                  (violinStrings[i+1]->getNumPoints() - 3) / static_cast<double>(violinStrings[i+1]->getNumPoints()),
+                                  1, 1,
+                                  1, 10000, 1,
+                                  1, fs));
+                }
+                break;
         }
     }
-    */
     totBowedStringHeight = stringPlateDivision;
     totSympStringHeight = stringPlateDivision;
 }

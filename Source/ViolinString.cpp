@@ -36,7 +36,7 @@ ViolinString::ViolinString(double freq, double fs, ObjectType stringType, int st
     N = floor(1.0 / h); // Number of gridpoints
     if (stringType == pluckedString || stringType == sympString)
     {
-        N = 30;
+        N = 28;
     }
     h = 1.0 / N; // Recalculate gridspacing
 
