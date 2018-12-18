@@ -13,7 +13,7 @@
 
 //==============================================================================
 Instrument::Instrument (InstrumentType instrumentType, vector<ObjectType> objectTypes, double fs, int stringPlateDivision, int bowedSympDivision)
-: fs (fs), instrumentType (instrumentType), stringPlateDivision (stringPlateDivision), bowedSympDivision (bowedSympDivision)
+: fs (fs), stringPlateDivision (stringPlateDivision), instrumentType (instrumentType), bowedSympDivision (bowedSympDivision)
 {
     
     
@@ -300,6 +300,7 @@ void Instrument::paint (Graphics& g)
                 g.drawDashedLine(connectionLine, dashPattern, 2, dashPattern[0], 0);
                 break;
             }
+            case bowedStringPluckedString:
             case bowedStringSympString:
             {
                 ViolinString* string1 = connections[i].violinStrings[0];
@@ -315,6 +316,8 @@ void Instrument::paint (Graphics& g)
                 g.drawDashedLine(connectionLine, dashPattern, 2, dashPattern[0], 0);
                 break;
             }
+            case pluckedStringSympString:
+            case pluckedStringPluckedString:
             case sympStringSympString:
             {
                 ViolinString* string1 = connections[i].violinStrings[0];
@@ -368,7 +371,7 @@ void Instrument::paint (Graphics& g)
             }
             case platePlate:
                 break;
-        }
+}
     }
     g.setColour(Colour::greyLevel(0.5f).withAlpha(0.5f));
     g.drawLine(bowedSympDivision, 0, bowedSympDivision, stringPlateDivision);
