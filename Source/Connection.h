@@ -65,6 +65,9 @@ private:
     double sx, w0, w1; // Spring constants: damping, linear spring constant, non-linear spring constant
     double massRatio; // Ratio of mass between object1 and object2
     
+    double a1, b1, powW1;
+
+
     double etaRPrev = 0;
     double hA, hB, s0A, s0B, Fc;
     double etaR, rn, pn, an, bn, jA, jB;

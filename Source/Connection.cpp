@@ -31,6 +31,10 @@ Connection::Connection (ViolinString* object1, ViolinString* object2,
     
     jA = k * k / ((1 + s0A) * k);
     jB = -k * k * massRatio / ((1 + s0B) * k);
+
+    a1 = 2*sx/k - w0*w0;
+    b1 = 2.0*sx/k + w0*w0;
+    powW1 = pow(w1,4);
     
     setConnectionType (object1->getStringType(), object2->getStringType());
     
@@ -58,6 +62,10 @@ Connection::Connection (ViolinString* object1, Plate* object2,
     jA = k * k / ((1 + s0A) * k);
     jB = -k * k * massRatio / ((1 + s0B) * k);
     
+    a1 = 2*sx/k - w0*w0;
+    b1 = 2.0*sx/k + w0*w0;
+    powW1 = pow(w1,4);
+
     setConnectionType (object1->getStringType(), plate);
 }
 
@@ -91,9 +99,15 @@ void Connection::calculateCoefs()
         case platePlate:
             break;
     }
-    
-    rn = (2*sx/k - w0*w0 - pow(w1,4) * etaR*etaR) / (2.0*sx/k + w0*w0 + pow(w1,4) * etaR*etaR);
-    pn = -2.0/(2.0*sx/k + w0*w0 + pow(w1,4)*etaR*etaR);
+    //a1 = 2*sx/k - w0*w0;
+    //b1 = 2.0*sx/k + w0*w0;
+    //powW1 = pow(w1,4);
+    double etaSq = etaR*etaR;
+    //double b2 = 2.0*sx/k + w0*w0 + pow(w1,4);
+    //rn = (2*sx/k - w0*w0 - pow(w1,4) * etaR*etaR) / (2.0*sx/k + w0*w0 + pow(w1,4) * etaR*etaR);
+    //pn = -2.0/(2.0*sx/k + w0*w0 + pow(w1,4)*etaR*etaR);
+    rn = (a1 - powW1 * etaSq) / (b1 + powW1 *etaSq);
+    pn = -2.0/(b1 + powW1 * etaSq);
 }
 
 vector<double> Connection::calculateJFc()
