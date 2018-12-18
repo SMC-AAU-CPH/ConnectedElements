@@ -151,7 +151,7 @@ void MainComponent::prepareToPlay (int samplesPerBlockExpected, double sampleRat
         }
             
         // Everything except for the twoStringViolin will execute this code
-        instruments.add(new Instrument(chooseInstrument, objects, fs, stringPlateDivision, bowedSympDivision));
+        instruments.add (new Instrument(chooseInstrument, objects, fs, stringPlateDivision, bowedSympDivision));
         for (int i = 0; i < names.size(); ++i)
         {
             Slider* bowedStringSlider = new Slider();
