@@ -51,12 +51,13 @@ void MainComponent::prepareToPlay (int samplesPerBlockExpected, double sampleRat
         sensels.add(new Sensel(i)); // chooses the device in the sensel device list
     }
     
-    chooseInstrument = dulcimer;
+    chooseInstrument = hurdyGurdy;
     
     int stringPlateDivision;
     int bowedSympDivision;
     vector<ObjectType> objects;
-    switch(chooseInstrument)
+    vector<String> names;
+    switch (chooseInstrument)
     {
         case twoStringViolin:
         {
@@ -96,6 +97,7 @@ void MainComponent::prepareToPlay (int samplesPerBlockExpected, double sampleRat
             objects = preObjects;
             stringPlateDivision = 0.75 * appHeight;
             bowedSympDivision = appHeight;
+            names = {"Bow", "Pluck", "Symp", "Plate"};
         }
             
         case sitar:
@@ -109,6 +111,7 @@ void MainComponent::prepareToPlay (int samplesPerBlockExpected, double sampleRat
             objects = preObjects;
             stringPlateDivision = 0.75 * appHeight;
             bowedSympDivision = 0;
+            names = {"Pluck", "Symp", "Plate"};
         }
             
         case hurdyGurdy:
@@ -123,6 +126,7 @@ void MainComponent::prepareToPlay (int samplesPerBlockExpected, double sampleRat
             objects = preObjects;
             stringPlateDivision = 0.75 * appHeight;
             bowedSympDivision = appHeight;
+            names = {"Bow", "Pluck", "Symp", "Plate"};
         }
         case dulcimer:
         {
@@ -143,12 +147,12 @@ void MainComponent::prepareToPlay (int samplesPerBlockExpected, double sampleRat
             objects = preObjects;
             stringPlateDivision = 0.75 * appHeight;
             bowedSympDivision = 0;
+            names = {"Pluck", "Plate"};
         }
             
         // Everything except for the twoStringViolin will execute this code
         instruments.add(new Instrument(chooseInstrument, objects, fs, stringPlateDivision, bowedSympDivision));
-        vector<String> names {"Bow", "Pluck", "Symp", "Plate"};
-        for (int i = 0; i < 4; ++i)
+        for (int i = 0; i < names.size(); ++i)
         {
             Slider* bowedStringSlider = new Slider();
             bowedStringSlider->setSliderStyle (Slider::LinearVertical);
@@ -179,7 +183,6 @@ void MainComponent::prepareToPlay (int samplesPerBlockExpected, double sampleRat
         
         if (amountOfSensels == 2)
         {
-            
             int pluckedStringsAmount = instruments[0]->getNumPluckedStrings();
             
             float range = 1.0 / static_cast<float>(pluckedStringsAmount);
