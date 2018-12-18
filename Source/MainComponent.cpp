@@ -660,63 +660,7 @@ void MainComponent::senselMappingDulcimer()
             
             if (index == 0)
             {
-                /*for (int f = 0; f < fingerCount; f++)
-                {
-                    
-                    bool state = sensel->fingers[f].state;
-                    float x = sensel->fingers[f].x;
-                    float y = sensel->fingers[f].y;
-                    float Vb = sensel->fingers[f].delta_y * maxVb;
-                    float Fb = sensel->fingers[f].force * 1000;
-                    int fingerID = sensel->fingers[f].fingerID;
-                    
-                    float range = 1.0 / static_cast<float>(instruments[0]->getNumBowedStrings());
-                    if (f == 0 && state) //fingerID == 0)
-                    {
-                        unsigned int pickAString = 0;
-                        for (int j = 0; j < instruments[0]->getNumBowedStrings(); ++j)
-                            if (y > (range * j) && y < range * (j + 1))
-                                pickAString = j;
-                        
-                        for (int ps = 0; ps < instruments[0]->getNumBowedStrings(); ps++)
-                        {
-                            if (ps == pickAString)
-                            {
-                                instruments[0]->getStrings()[ps]->setBow(state);
-                                instruments[0]->getStrings()[ps]->setVb(Vb);
-                                instruments[0]->getStrings()[ps]->setFb(Fb);
-                                instruments[0]->getStrings()[ps]->setBowPos(x, y);
-                            }
-                            else
-                                instruments[0]->getStrings()[ps]->setBow(false);
-                        }
-                        //instruments[0]->getStrings()[f]->setFingerPoint(fp[index]);
-                    }
-                    else if (fingerID > 0)
-                    {
-                        unsigned int pickAString = 0;
-                        for (int j = 0; j < instruments[0]->getNumBowedStrings(); ++j)
-                            if (y > (range * j) && y < range * (j + 1))
-                                pickAString = j;
-                        
-                        for (int ps = 0; ps < instruments[0]->getNumBowedStrings(); ps++)
-                        {
-                            if (ps == pickAString)
-                            {
-                                instruments[0]->getStrings()[ps]->setFingerPosition(x);
-                            }
-                            //else
-                            //instruments[0]->getStrings()[ps]->setFingerPosition(0);;
-                        }
-                    }
-                }
-                
-                if (fingerCount == 0)
-                {
-                    for (auto violinString : instruments[0]->getStrings())
-                        violinString->setBow(false);
-                }
-                */
+               
             }
             
             if (index == 1)
