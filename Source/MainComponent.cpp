@@ -660,7 +660,7 @@ void MainComponent::senselMappingDulcimer()
             
             if (index == 0)
             {
-                for (int f = 0; f < fingerCount; f++)
+                /*for (int f = 0; f < fingerCount; f++)
                 {
                     
                     bool state = sensel->fingers[f].state;
@@ -716,6 +716,7 @@ void MainComponent::senselMappingDulcimer()
                     for (auto violinString : instruments[0]->getStrings())
                         violinString->setBow(false);
                 }
+                */
             }
             
             if (index == 1)
@@ -725,15 +726,15 @@ void MainComponent::senselMappingDulcimer()
                     for (int i = instruments[0]->getNumBowedStrings(); i < instruments[0]->getNumBowedStrings() + instruments[0]->getNumSympStrings(); ++i)
                         instruments[0]->getStrings()[i]->pick(false);
                 }
-                int bowedStringsAmount = instruments[0]->getNumBowedStrings();
+                //int bowedStringsAmount = instruments[0]->getNumBowedStrings();
                 int pluckedStringsAmount = instruments[0]->getNumPluckedStrings();
-                int sympStringsAmount = instruments[0]->getNumSympStrings();
+                //int sympStringsAmount = instruments[0]->getNumSympStrings();
                 
-                int totalStringsAmount = bowedStringsAmount + pluckedStringsAmount + sympStringsAmount;
+                //int totalStringsAmount = bowedStringsAmount + pluckedStringsAmount + sympStringsAmount;
                 
-                vector<bool> pickAString(sympStringsAmount, false);
-                vector<double> forces(sympStringsAmount, 0);
-                vector<double> xPositions(sympStringsAmount, 0);
+                vector<bool> pickAString(pluckedStringsAmount, false);
+                vector<double> forces(pluckedStringsAmount, 0);
+                vector<double> xPositions(pluckedStringsAmount, 0);
                 
                 float range = 1.0 / static_cast<float>(pluckedStringsAmount);
                 
@@ -758,15 +759,15 @@ void MainComponent::senselMappingDulcimer()
                 {
                     if (pickAString[i])
                     {
-                        if (!instruments[0]->getStrings()[i + bowedStringsAmount]->isPicking())
+                        if (!instruments[0]->getStrings()[i]->isPicking())
                         {
-                            instruments[0]->getStrings()[i + bowedStringsAmount]->setRaisedCos(xPositions[i], 5, forces[i] / 2.0);
-                            instruments[0]->getStrings()[i + bowedStringsAmount]->pick(true);
+                            instruments[0]->getStrings()[i]->setRaisedCos(xPositions[i], 5, forces[i] / 2.0);
+                            instruments[0]->getStrings()[i]->pick(true);
                         }
                     }
                     else
                     {
-                        instruments[0]->getStrings()[i + bowedStringsAmount]->pick(false);
+                        instruments[0]->getStrings()[i]->pick(false);
                     }
                 }
             }
