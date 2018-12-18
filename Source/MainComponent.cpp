@@ -37,7 +37,7 @@ MainComponent::~MainComponent()
 }
 
 //==============================================================================
-void MainComponent::prepareToPlay(int samplesPerBlockExpected, double sampleRate)
+void MainComponent::prepareToPlay (int samplesPerBlockExpected, double sampleRate)
 {
     fs = sampleRate;
     bufferSize = samplesPerBlockExpected;
@@ -51,11 +51,15 @@ void MainComponent::prepareToPlay(int samplesPerBlockExpected, double sampleRate
     
     chooseInstrument = dulcimer;
     
+    int stringPlateDivision;
+    int bowedSympDivision;
+    vector<ObjectType> objects;
     switch(chooseInstrument)
     {
         case twoStringViolin:
         {
-            vector<ObjectType> objects{bowedString, bowedString};
+            vector<ObjectType> preObjects = {bowedString, bowedString};
+            objects = preObjects;
             int stringPlateDivision = appHeight;
             int bowedSympDivision = appWidth - controlsWidth;
             instruments.add(new Instrument(chooseInstrument, objects, fs, stringPlateDivision, bowedSympDivision));
@@ -80,111 +84,47 @@ void MainComponent::prepareToPlay(int samplesPerBlockExpected, double sampleRate
         }
         case bowedSitar:
         {
-            vector<ObjectType> objects{bowedString, bowedString,
+            vector<ObjectType> preObjects{bowedString, bowedString,
                 pluckedString, pluckedString, pluckedString, pluckedString, pluckedString,
                 sympString, sympString, sympString, sympString,
                 sympString, sympString, sympString, sympString,
                 sympString, sympString, sympString, sympString,
                 sympString,
                 plate};
-            
-            int stringPlateDivision = 0.75 * appHeight;
-            int bowedSympDivision = appHeight;
-            instruments.add(new Instrument(chooseInstrument, objects, fs, stringPlateDivision, bowedSympDivision));
-            vector<String> names {"Bow", "Pluck", "Symp", "Plate"};
-            for (int i = 0; i < 4; ++i)
-            {
-                Slider* bowedStringSlider = new Slider (Slider::LinearVertical, Slider::NoTextBox);
-                bowedStringSlider->setPopupDisplayEnabled(true, false, this);
-                Label* label = new Label (names[i], names[i]);
-                label->setJustificationType (Justification::centred);
-                addAndMakeVisible (label);
-                labels.add (label);
-                bowedStringSlider->setRange (0.0, 1.0, 0.01);
-                bowedStringSlider->setValue (0.5);
-                instruments[0]->setMix (i, 0.5);
-                bowedStringSlider->addListener (this);
-                addAndMakeVisible (bowedStringSlider);
-                mixSliders.add (bowedStringSlider);
-            }
-            plateStiffness = new Slider (Slider::RotaryVerticalDrag, Slider::NoTextBox);
-            plateStiffness->setPopupDisplayEnabled (true, false, this);
-            plateStiffness->setRange(30, 1300, 1);
-            plateStiffness->setValue(100);
-            plateStiffness->addListener (this);
-            addAndMakeVisible (plateStiffness);
-            
-            plateLabel = new Label ("Plate Stiffness", "Plate Stiffness");
-            plateLabel->setJustificationType (Justification::centred);
-            addAndMakeVisible (plateLabel);
-            
-            if (amountOfSensels == 2)
-            {
-                
-                int pluckedStringsAmount = instruments[0]->getNumPluckedStrings();
-                
-                float range = 1.0 / static_cast<float>(pluckedStringsAmount);
-                
-                for (int i = 0; i < pluckedStringsAmount; i++)
-                {
-                    sensels[1]->addLEDBrightness(range * i, 1);
-                }
-            }
-            
-            break;
+            objects = preObjects;
+            stringPlateDivision = 0.75 * appHeight;
+            bowedSympDivision = appHeight;
         }
             
         case sitar:
         {
-            vector<ObjectType> objects{pluckedString, pluckedString, pluckedString, pluckedString, pluckedString,
+            vector<ObjectType> preObjects{pluckedString, pluckedString, pluckedString, pluckedString, pluckedString,
                 sympString, sympString, sympString, sympString,
                 sympString, sympString, sympString, sympString,
                 sympString, sympString, sympString, sympString,
                 sympString,
                 plate};
-            
-            int stringPlateDivision = 0.75 * appHeight;
-            int bowedSympDivision = 0;
-            instruments.add(new Instrument(chooseInstrument, objects, fs, stringPlateDivision, bowedSympDivision));
-            break;
+            objects = preObjects;
+            stringPlateDivision = 0.75 * appHeight;
+            bowedSympDivision = 0;
         }
             
         case hurdyGurdy:
         {
-            vector<ObjectType> objects{bowedString, bowedString,
+            vector<ObjectType> preObjects{bowedString, bowedString,
                 pluckedString, pluckedString, pluckedString, pluckedString, pluckedString,
                 sympString, sympString, sympString, sympString,
                 sympString, sympString, sympString, sympString,
                 sympString, sympString, sympString, sympString,
                 sympString,
                 plate};
-            
-            int stringPlateDivision = 0.75 * appHeight;
-            int bowedSympDivision = appHeight;
-            instruments.add(new Instrument(chooseInstrument, objects, fs, stringPlateDivision, bowedSympDivision));
-            vector<String> names {"Bow", "Pluck", "Symp", "Plate"};
-            for (int i = 0; i < 4; ++i)
-            {
-                Slider* bowedStringSlider = new Slider();
-                bowedStringSlider->setSliderStyle (Slider::LinearVertical);
-                bowedStringSlider->setTextBoxStyle(Slider::NoTextBox, true, 0, 0);
-                bowedStringSlider->setPopupDisplayEnabled(true, false, this);
-                Label* label = new Label (names[i], names[i]);
-                label->setJustificationType (Justification::centred);
-                addAndMakeVisible (label);
-                labels.add (label);
-                bowedStringSlider->setRange (0.0, 1.0, 0.1);
-                bowedStringSlider->setValue (0.5);
-                instruments[0]->setMix (i, 0.5);
-                bowedStringSlider->addListener (this);
-                addAndMakeVisible (bowedStringSlider);
-                mixSliders.add (bowedStringSlider);
-            }
-            break;
+            objects = preObjects;
+            stringPlateDivision = 0.75 * appHeight;
+            bowedSympDivision = appHeight;
         }
         case dulcimer:
         {
-            vector<ObjectType> objects{
+            vector<ObjectType> preObjects{
                 pluckedString, pluckedString,
                 pluckedString, pluckedString,
                 pluckedString, pluckedString,
@@ -198,12 +138,56 @@ void MainComponent::prepareToPlay(int samplesPerBlockExpected, double sampleRate
                 pluckedString, pluckedString,
                 pluckedString, pluckedString,
                 plate};
-            
-            int stringPlateDivision = 0.75 * appHeight;
-            int bowedSympDivision = 0;
-            instruments.add(new Instrument(chooseInstrument, objects, fs, stringPlateDivision, bowedSympDivision));
-            break;
+            objects = preObjects;
+            stringPlateDivision = 0.75 * appHeight;
+            bowedSympDivision = 0;
         }
+            
+        // Everything except for the twoStringViolin will execute this code
+        instruments.add(new Instrument(chooseInstrument, objects, fs, stringPlateDivision, bowedSympDivision));
+        vector<String> names {"Bow", "Pluck", "Symp", "Plate"};
+        for (int i = 0; i < 4; ++i)
+        {
+            Slider* bowedStringSlider = new Slider();
+            bowedStringSlider->setSliderStyle (Slider::LinearVertical);
+            bowedStringSlider->setTextBoxStyle(Slider::NoTextBox, true, 0, 0);
+            bowedStringSlider->setPopupDisplayEnabled(true, false, this);
+            Label* label = new Label (names[i], names[i]);
+            label->setJustificationType (Justification::centred);
+            addAndMakeVisible (label);
+            labels.add (label);
+            bowedStringSlider->setRange (0.0, 1.0, 0.1);
+            bowedStringSlider->setValue (0.5);
+            instruments[0]->setMix (i, 0.5);
+            bowedStringSlider->addListener (this);
+            addAndMakeVisible (bowedStringSlider);
+            mixSliders.add (bowedStringSlider);
+        }
+            
+        plateStiffness = new Slider (Slider::RotaryVerticalDrag, Slider::NoTextBox);
+        plateStiffness->setPopupDisplayEnabled (true, false, this);
+        plateStiffness->setRange(30, 1300, 1);
+        plateStiffness->setValue(100);
+        plateStiffness->addListener (this);
+        addAndMakeVisible (plateStiffness);
+        
+        plateLabel = new Label ("Plate Stiffness", "Plate Stiffness");
+        plateLabel->setJustificationType (Justification::centred);
+        addAndMakeVisible (plateLabel);
+        
+        if (amountOfSensels == 2)
+        {
+            
+            int pluckedStringsAmount = instruments[0]->getNumPluckedStrings();
+            
+            float range = 1.0 / static_cast<float>(pluckedStringsAmount);
+            
+            for (int i = 0; i < pluckedStringsAmount; i++)
+            {
+                sensels[1]->addLEDBrightness(range * i, 1);
+            }
+        }
+        break;
     }
   
     addAndMakeVisible(instruments[0]);
@@ -394,7 +378,7 @@ void MainComponent::senselMappingSitarBowed()
                     {
                         if (!instruments[0]->getStrings()[i + bowedStringsAmount]->isPicking())
                         {
-                            instruments[0]->getStrings()[i + bowedStringsAmount]->setRaisedCos(xPositions[i], 5, forces[i] / 2.0);
+                            instruments[0]->getStrings()[i + bowedStringsAmount]->setRaisedCos(xPositions[i], 5, forces[i] / 10.0);
                             instruments[0]->getStrings()[i + bowedStringsAmount]->pick(true);
                         }
                     }
@@ -843,8 +827,11 @@ void MainComponent::resized()
         }
     }
     
-    plateLabel->setBounds(controlsRect.removeFromTop(20));
-    plateStiffness->setBounds(controlsRect.removeFromTop(controlsRect.getWidth()));
+    if (instruments[0]->getNumPlates() != 0)
+    {
+        plateLabel->setBounds(controlsRect.removeFromTop(20));
+        plateStiffness->setBounds(controlsRect.removeFromTop(controlsRect.getWidth()));
+    }
     
 }
 

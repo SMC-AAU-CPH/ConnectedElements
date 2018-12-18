@@ -399,9 +399,12 @@ double ViolinString::clamp(double input, double min, double max)
 
 void ViolinString::mouseDown(const MouseEvent &e)
 {
-    if (ModifierKeys::getCurrentModifiers() == ModifierKeys::leftButtonModifier)
+    if (ModifierKeys::getCurrentModifiers() == ModifierKeys::leftButtonModifier && stringType == bowedString)
     {
         setBow(true);
+    } else {
+        setRaisedCos(e.x / static_cast<double>(N), 5, 1000);
+        pick(true);
     }
     if (e.y >= (getHeight() / 2.0) - cpMR && e.y <= (getHeight() / 2.0) + cpMR && ModifierKeys::getCurrentModifiers() == ModifierKeys::altModifier + ModifierKeys::leftButtonModifier)
     {

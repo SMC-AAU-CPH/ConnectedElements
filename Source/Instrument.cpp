@@ -82,8 +82,6 @@ Instrument::Instrument (InstrumentType instrumentType, vector<ObjectType> object
              mix.resize (4, 0.5);
             break;
         case dulcimer:
-
-
             frequencyInHz = {
                 
                 110.0 * pow(2, 12.0 / 12.0),
@@ -202,7 +200,7 @@ Instrument::Instrument (InstrumentType instrumentType, vector<ObjectType> object
                                               800, fs));
         }
         int numUnbowedStrings = numPluckedStrings + numSympStrings;
-        for (int i = numBowedStrings; i < numBowedStrings + numPluckedStrings; ++i)
+        for (int i = numBowedStrings; i < getTotNumStrings(); ++i)
         {
             double halfFlag = false;
             if ((i - numBowedStrings > (numUnbowedStrings / 2)) && !halfFlag)
@@ -211,12 +209,12 @@ Instrument::Instrument (InstrumentType instrumentType, vector<ObjectType> object
             double x = (i - (halfFlag ? numUnbowedStrings / 2 : 0)) / static_cast<double>(plates[0]->getNumXPoints());
             double y = (halfFlag ? 0.5 : 0.4);
             connections.push_back(Connection (violinStrings[i], plates[0],
-                                              (violinStrings[i]->getNumPoints() - 10) / static_cast<double>(violinStrings[i]->getNumPoints()),
+                                              (violinStrings[i]->getNumPoints() - 5) / static_cast<double>(violinStrings[i]->getNumPoints()),
                                               x + 0.1,
                                               y,
                                               1, 1,
                                               1, 10000, 1,
-                                              800, fs));
+                                              violinStrings[i]->getStringType() == pluckedString ? 800 : 0.25, fs));
 //        }
         
 //        for (int i = numBowedStrings + numPluckedStrings; i < getTotNumStrings(); ++i)
