@@ -37,7 +37,7 @@ using namespace std;
 class ViolinString : public Component
 {
 public:
-    ViolinString(double freq, double fs, ObjectType stringType, int stringID);
+    ViolinString(double freq, double fs, ObjectType stringType, int stringID, bool isDulcimer = false);
     ~ViolinString();
     
     void paint(Graphics &) override;
@@ -145,6 +145,8 @@ private:
     double exciterForce = 0;
     
     StringExciter stringExciter;
+    
+    bool isDulcimer = false;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ViolinString)
 };
 

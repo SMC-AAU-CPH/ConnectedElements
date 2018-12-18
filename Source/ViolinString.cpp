@@ -12,8 +12,8 @@
 #include "ViolinString.h"
 
 //==============================================================================
-ViolinString::ViolinString(double freq, double fs, ObjectType stringType, int stringID) : fs(fs), freq(freq), stringType(stringType),
-                                                                                          stringID(stringID)
+ViolinString::ViolinString(double freq, double fs, ObjectType stringType, int stringID, bool isDulcimer) : fs(fs), freq(freq), stringType(stringType),
+                                                                                          stringID(stringID), isDulcimer (isDulcimer)
 {
     // In your constructor, you should add any child components, and
     // initialise any special settings that your component needs.
@@ -150,8 +150,12 @@ void ViolinString::paint(Graphics &g)
         g.setColour(Colour::fromRGBA(255, 255, 0, 127));
         g.drawLine(getWidth() / 2.0, 0, getWidth() / 2.0, getHeight(), 2);
     }
-    g.setColour(Colour::greyLevel(0.5f).withAlpha(0.5f));
-    g.drawLine(0, getHeight() - 1, getWidth(), getHeight() - 1);
+    if (isDulcimer && stringID % 2 == 1)
+    {
+        g.setColour(Colour::greyLevel(0.5f).withAlpha(0.5f));
+        g.drawLine(0, getHeight() - 1, getWidth(), getHeight() - 1);
+    }
+
 }
 
 void ViolinString::resized()
