@@ -177,8 +177,8 @@ Instrument::Instrument (InstrumentType instrumentType, vector<ObjectType> object
             
     }
 
-    if (numPlates != 0)
-    {
+   // if (numPlates != 0)
+   // {
 //        connections.push_back(Connection (violinStrings[0], plates[0],
 //                                          (violinStrings[0]->getNumPoints() - 5) / static_cast<double>(violinStrings[0]->getNumPoints()),
 //                                          (6) / static_cast<double>(plates[0]->getNumXPoints()), 0.4,
@@ -191,7 +191,7 @@ Instrument::Instrument (InstrumentType instrumentType, vector<ObjectType> object
 //                                          1, 1,
 //                                          1, 10000, 1,
 //                                          violinStrings[1]->getStringType() == bowedString ? 1 : 1, fs));
-
+/*
         for (int i = 0; i < numBowedStrings; ++i)
         {
             connections.push_back(Connection (violinStrings[i], plates[0],
@@ -236,6 +236,7 @@ Instrument::Instrument (InstrumentType instrumentType, vector<ObjectType> object
 //                                              0.25, fs));
         }
     }
+    */
 //    connections.push_back(Connection (violinStrings[0], violinStrings[1],
 //                                      0.5, 0.5,
 //                                      1, 1,
@@ -288,6 +289,7 @@ void Instrument::paint (Graphics& g)
         int numUnbowedStrings = numSympStrings + numPluckedStrings;
         switch(connections[i].connectionType)
         {
+            case pluckedStringPluckedString:
             case bowedStringBowedString:
             {
                 ViolinString* string1 = connections[i].violinStrings[0];
