@@ -82,6 +82,27 @@ Instrument::Instrument (InstrumentType instrumentType, vector<ObjectType> object
         case dulcimer:
             frequencyInHz = {
                 
+                110.0 * pow(2, 0.0 / 12.0),
+                110.0 * pow(2, 0.0 / 12.0),
+
+                110.0 * pow(2, 2.0 / 12.0),
+                110.0 * pow(2, 2.0 / 12.0),
+
+                110.0 * pow(2, 4.0 / 12.0),
+                110.0 * pow(2, 4.0 / 12.0),
+
+                110.0 * pow(2, 5.0 / 12.0),
+                110.0 * pow(2, 5.0 / 12.0), 
+
+                110.0 * pow(2, 7.0 / 12.0),
+                110.0 * pow(2, 7.0 / 12.0),
+
+                110.0 * pow(2, 9.0 / 12.0),
+                110.0 * pow(2, 9.0 / 12.0), 
+
+                110.0 * pow(2, 11.0 / 12.0),
+                110.0 * pow(2, 11.0 / 12.0),
+
                 110.0 * pow(2, 12.0 / 12.0),
                 110.0 * pow(2, 12.0 / 12.0),
 
@@ -116,15 +137,25 @@ Instrument::Instrument (InstrumentType instrumentType, vector<ObjectType> object
                 110.0 * pow(2, 29.0 / 12.0),
                 
                 110.0 * pow(2, 31.0 / 12.0),
-                110.0 * pow(2, 31.0 / 12.0)
+                110.0 * pow(2, 31.0 / 12.0),
+
+                110.0 * pow(2, 33.0 / 12.0),
+                110.0 * pow(2, 33.0 / 12.0),
+
+                110.0 * pow(2, 35.0 / 12.0),
+                110.0 * pow(2, 35.0 / 12.0),
+
+                110.0 * pow(2, 36.0 / 12.0),
+                110.0 * pow(2, 36.0 / 12.0),
+
             };
             // slightly detune
             for (int i = 0; i < frequencyInHz.size(); i++)
             {
                 if (r.nextFloat() > 0.5)
-                    frequencyInHz[i] += frequencyInHz[i]*0.02 * r.nextFloat();
+                    frequencyInHz[i] += frequencyInHz[i]*0.01 * r.nextFloat();
                 else 
-                    frequencyInHz[i] -= frequencyInHz[i]*0.02 * r.nextFloat();
+                    frequencyInHz[i] -= frequencyInHz[i]*0.01 * r.nextFloat();
             }
 
             mix.resize (4, 0.5);
@@ -172,7 +203,7 @@ Instrument::Instrument (InstrumentType instrumentType, vector<ObjectType> object
         }
             
     }
-
+/*
     if (numPlates != 0)
     {
         for (int i = 0; i < numBowedStrings; ++i)
@@ -202,6 +233,7 @@ Instrument::Instrument (InstrumentType instrumentType, vector<ObjectType> object
                                               violinStrings[i]->getStringType() == pluckedString ? 800 : 0.25, fs));
         }
     }
+    */
     totBowedStringHeight = stringPlateDivision;
     totSympStringHeight = stringPlateDivision;
 }
