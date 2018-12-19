@@ -51,7 +51,7 @@ void MainComponent::prepareToPlay(int samplesPerBlockExpected, double sampleRate
         sensels.add(new Sensel(i)); // chooses the device in the sensel device list
     }
 
-    chooseInstrument = dulcimer;
+    chooseInstrument = hurdyGurdy;
 
     int stringPlateDivision;
     int bowedSympDivision;
@@ -59,105 +59,112 @@ void MainComponent::prepareToPlay(int samplesPerBlockExpected, double sampleRate
     vector<String> names;
     switch (chooseInstrument)
     {
-    case twoStringViolin:
-    {
-        vector<ObjectType> preObjects = {bowedString, bowedString};
-        objects = preObjects;
-        int stringPlateDivision = appHeight;
-        int bowedSympDivision = appWidth - controlsWidth;
-        instruments.add(new Instrument(chooseInstrument, objects, fs, stringPlateDivision, bowedSympDivision));
-        for (int i = 0; i < 2; ++i)
+        case twoStringViolin:
         {
-            Slider *bowedStringSlider = new Slider();
-            bowedStringSlider->setSliderStyle(Slider::LinearVertical);
-            bowedStringSlider->setTextBoxStyle(Slider::NoTextBox, true, 0, 0);
-            bowedStringSlider->setPopupDisplayEnabled(true, false, this);
-            Label *label = new Label("Str " + String(i), "Str " + String(i));
-            label->setJustificationType(Justification::centred);
-            addAndMakeVisible(label);
-            labels.add(label);
-            bowedStringSlider->setRange(0.0, 1.0, 0.1);
-            bowedStringSlider->setValue(0.5);
-            instruments[0]->setMix(i, 0.5);
-            bowedStringSlider->addListener(this);
-            addAndMakeVisible(bowedStringSlider);
-            mixSliders.add(bowedStringSlider);
+            vector<ObjectType> preObjects = {bowedString, bowedString};
+            objects = preObjects;
+            int stringPlateDivision = appHeight;
+            int bowedSympDivision = appWidth - controlsWidth;
+            instruments.add(new Instrument(chooseInstrument, objects, fs, stringPlateDivision, bowedSympDivision));
+            for (int i = 0; i < 2; ++i)
+            {
+                Slider *bowedStringSlider = new Slider();
+                bowedStringSlider->setSliderStyle(Slider::LinearVertical);
+                bowedStringSlider->setTextBoxStyle(Slider::NoTextBox, true, 0, 0);
+                bowedStringSlider->setPopupDisplayEnabled(true, false, this);
+                Label *label = new Label("Str " + String(i), "Str " + String(i));
+                label->setJustificationType(Justification::centred);
+                addAndMakeVisible(label);
+                labels.add(label);
+                bowedStringSlider->setRange(0.0, 1.0, 0.1);
+                bowedStringSlider->setValue(0.5);
+                instruments[0]->setMix(i, 0.5);
+                bowedStringSlider->addListener(this);
+                addAndMakeVisible(bowedStringSlider);
+                mixSliders.add(bowedStringSlider);
+            }
+            break;
         }
-        break;
-    }
-    case bowedSitar:
-    {
-        vector<ObjectType> preObjects{bowedString, bowedString,
-                                      pluckedString, pluckedString, pluckedString, pluckedString, pluckedString,
-                                      sympString, sympString, sympString, sympString,
-                                      sympString, sympString, sympString, sympString,
-                                      sympString, sympString, sympString, sympString,
-                                      sympString,
-                                      plate};
-        objects = preObjects;
-        stringPlateDivision = 0.75 * appHeight;
-        bowedSympDivision = appHeight;
-        names = {"Bow", "Pluck", "Symp", "Plate"};
+        case bowedSitar:
+        {
+            vector<ObjectType> preObjects{bowedString, bowedString,
+                                          pluckedString, pluckedString, pluckedString, pluckedString, pluckedString,
+                                          sympString, sympString, sympString, sympString,
+                                          sympString, sympString, sympString, sympString,
+                                          sympString, sympString, sympString, sympString,
+                                          sympString,
+                                          plate};
+            objects = preObjects;
+            stringPlateDivision = 0.75 * appHeight;
+            bowedSympDivision = appHeight;
+            names = {"Bow", "Pluck", "Symp", "Plate"};
+            break;
+        }
+
+        case sitar:
+        {
+            vector<ObjectType> preObjects{pluckedString, pluckedString, pluckedString, pluckedString, pluckedString,
+                                          sympString, sympString, sympString, sympString,
+                                          sympString, sympString, sympString, sympString,
+                                          sympString, sympString, sympString, sympString,
+                                          sympString,
+                                          plate};
+            objects = preObjects;
+            stringPlateDivision = 0.75 * appHeight;
+            bowedSympDivision = 0;
+            names = {"Pluck", "Symp", "Plate"};
+            break;
+        }
+
+        case hurdyGurdy:
+        {
+            vector<ObjectType> preObjects{bowedString, bowedString, bowedString,
+                                          sympString, sympString, sympString, sympString,
+                                          sympString, sympString, sympString, sympString,
+                                          sympString, sympString, sympString, sympString,
+                                          sympString,
+                                          plate};
+            objects = preObjects;
+            stringPlateDivision = 0.75 * appHeight;
+            bowedSympDivision = appHeight;
+            names = {"Bow", "Pluck", "Symp", "Plate"};
+            break;
+        }
+        case dulcimer:
+        {
+            vector<ObjectType> preObjects{
+                pluckedString, pluckedString,
+                pluckedString, pluckedString,
+                pluckedString, pluckedString,
+                pluckedString, pluckedString,
+                pluckedString, pluckedString,
+                pluckedString, pluckedString,
+                pluckedString, pluckedString,
+                pluckedString, pluckedString,
+                pluckedString, pluckedString,
+                pluckedString, pluckedString,
+                pluckedString, pluckedString,
+                pluckedString, pluckedString,
+                pluckedString, pluckedString,
+                pluckedString, pluckedString,
+                pluckedString, pluckedString,
+                pluckedString, pluckedString,
+                pluckedString, pluckedString,
+                pluckedString, pluckedString,
+                pluckedString, pluckedString,
+                pluckedString, pluckedString,
+                plate};
+            objects = preObjects;
+            stringPlateDivision = 0.75 * appHeight;
+            bowedSympDivision = 0;
+            names = {"Pluck", "Plate"};
+            break;
+        }
     }
 
-    case sitar:
-    {
-        vector<ObjectType> preObjects{pluckedString, pluckedString, pluckedString, pluckedString, pluckedString,
-                                      sympString, sympString, sympString, sympString,
-                                      sympString, sympString, sympString, sympString,
-                                      sympString, sympString, sympString, sympString,
-                                      sympString,
-                                      plate};
-        objects = preObjects;
-        stringPlateDivision = 0.75 * appHeight;
-        bowedSympDivision = 0;
-        names = {"Pluck", "Symp", "Plate"};
-    }
+    if (chooseInstrument != twoStringViolin)
 
-    case hurdyGurdy:
     {
-        vector<ObjectType> preObjects{bowedString, bowedString,
-                                      pluckedString, pluckedString, pluckedString, pluckedString, pluckedString,
-                                      sympString, sympString, sympString, sympString,
-                                      sympString, sympString, sympString, sympString,
-                                      sympString, sympString, sympString, sympString,
-                                      sympString,
-                                      plate};
-        objects = preObjects;
-        stringPlateDivision = 0.75 * appHeight;
-        bowedSympDivision = appHeight;
-        names = {"Bow", "Pluck", "Symp", "Plate"};
-    }
-    case dulcimer:
-    {
-        vector<ObjectType> preObjects{
-            pluckedString, pluckedString,
-            pluckedString, pluckedString,
-            pluckedString, pluckedString,
-            pluckedString, pluckedString,
-            pluckedString, pluckedString,
-            pluckedString, pluckedString,
-            pluckedString, pluckedString,
-            pluckedString, pluckedString,
-            pluckedString, pluckedString,
-            pluckedString, pluckedString,
-            pluckedString, pluckedString,
-            pluckedString, pluckedString,
-            pluckedString, pluckedString,
-            pluckedString, pluckedString,
-            pluckedString, pluckedString,
-            pluckedString, pluckedString,
-            pluckedString, pluckedString,
-            pluckedString, pluckedString,
-            pluckedString, pluckedString,
-            pluckedString, pluckedString,
-            plate};
-        objects = preObjects;
-        stringPlateDivision = 0.75 * appHeight;
-        bowedSympDivision = 0;
-        names = {"Pluck", "Plate"};
-    }
-
         // Everything except for the twoStringViolin will execute this code
         instruments.add(new Instrument(chooseInstrument, objects, fs, stringPlateDivision, bowedSympDivision));
         for (int i = 0; i < names.size(); ++i)
@@ -177,29 +184,28 @@ void MainComponent::prepareToPlay(int samplesPerBlockExpected, double sampleRate
             addAndMakeVisible(bowedStringSlider);
             mixSliders.add(bowedStringSlider);
         }
-
+        
         plateStiffness = new Slider(Slider::RotaryVerticalDrag, Slider::NoTextBox);
         plateStiffness->setPopupDisplayEnabled(true, false, this);
         plateStiffness->setRange(30, 1300, 1);
         plateStiffness->setValue(100);
         plateStiffness->addListener(this);
         addAndMakeVisible(plateStiffness);
-
+        
         plateLabel = new Label("Plate Stiffness", "Plate Stiffness");
         plateLabel->setJustificationType(Justification::centred);
         addAndMakeVisible(plateLabel);
-        break;
     }
-    addAndMakeVisible(instruments[0]);
-
+    
+    addAndMakeVisible (instruments[0]);
+    
     // sensel stuff
     switch (chooseInstrument)
     {
     case twoStringViolin:
-    {
-
+        {
         break;
-    }
+        }
     case bowedSitar:
     {
         if (amountOfSensels == 2)
@@ -845,6 +851,7 @@ void MainComponent::getNextAudioBlock(const AudioSourceChannelInfo &bufferToFill
             output = instruments[j]->calculateOutput();
         }
         output[0] = dist.getOutput(output[0]);
+//        std::cout << output[0] << std::endl;
         channelData1[i] = output[0];
         channelData2[i] = output[0];
     }

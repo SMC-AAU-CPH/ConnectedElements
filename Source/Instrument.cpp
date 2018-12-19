@@ -73,10 +73,27 @@ Instrument::Instrument (InstrumentType instrumentType, vector<ObjectType> object
                 110.0 * pow(2, 26.0 / 12.0),
                 110.0 * pow(2, 28.0 / 12.0)
             };
-             mix.resize (4, 0.5);
+             mix.resize (3, 0.5);
             break;
         case hurdyGurdy:
-
+            frequencyInHz = {110.0,
+                110.0 * pow(2, 7.0 / 12.0),
+                110.0 * pow(2, 12.0 / 12.0),
+                
+                110.0 * pow(2, 12.0 / 12.0),
+                110.0 * pow(2, 12.0 / 12.0),
+                110.0 * pow(2, 11.0 / 12.0),
+                110.0 * pow(2, 12.0 / 12.0),
+                110.0 * pow(2, 14.0 / 12.0),
+                110.0 * pow(2, 16.0 / 12.0),
+                110.0 * pow(2, 17.0 / 12.0),
+                110.0 * pow(2, 19.0 / 12.0),
+                110.0 * pow(2, 21.0 / 12.0),
+                110.0 * pow(2, 23.0 / 12.0),
+                110.0 * pow(2, 24.0 / 12.0),
+                110.0 * pow(2, 26.0 / 12.0),
+                110.0 * pow(2, 28.0 / 12.0)
+            };
              mix.resize (4, 0.5);
             break;
         case dulcimer:
@@ -150,7 +167,7 @@ Instrument::Instrument (InstrumentType instrumentType, vector<ObjectType> object
 
             };
             // slightly detune
-            for (int i = 0; i < frequencyInHz.size(); i++)
+            for (int i = 0; i < frequencyInHz.size(); i = i + 2)
             {
                 if (r.nextFloat() > 0.5)
                     frequencyInHz[i] += frequencyInHz[i]*0.01 * r.nextFloat();
@@ -170,7 +187,7 @@ Instrument::Instrument (InstrumentType instrumentType, vector<ObjectType> object
             {
                 if (i > frequencyInHz.size() - 1)
                     frequencyInHz.push_back(frequencyInHz[frequencyInHz.size()-1]);
-                violinStrings.add (new ViolinString(frequencyInHz[i], fs, objectTypes[i], i));
+                violinStrings.add (new ViolinString(frequencyInHz[i], fs, objectTypes[i], i, instrumentType));
                 addAndMakeVisible (violinStrings[i]);
                 ++numBowedStrings;
                 break;
@@ -179,7 +196,7 @@ Instrument::Instrument (InstrumentType instrumentType, vector<ObjectType> object
             {
                 if (i > frequencyInHz.size() - 1)
                     frequencyInHz.push_back(frequencyInHz[frequencyInHz.size()-1]);
-                violinStrings.add (new ViolinString(frequencyInHz[i], fs, objectTypes[i], i, instrumentType == dulcimer ? true : false));
+                violinStrings.add (new ViolinString(frequencyInHz[i], fs, objectTypes[i], i, instrumentType));
                 addAndMakeVisible (violinStrings[i]);
                 ++numPluckedStrings;
                 break;
@@ -188,7 +205,7 @@ Instrument::Instrument (InstrumentType instrumentType, vector<ObjectType> object
             {
                 if (i > frequencyInHz.size() - 1)
                     frequencyInHz.push_back(frequencyInHz[frequencyInHz.size()-1]);
-                violinStrings.add (new ViolinString(frequencyInHz[i], fs, objectTypes[i], i));
+                violinStrings.add (new ViolinString(frequencyInHz[i], fs, objectTypes[i], i, instrumentType));
                 addAndMakeVisible (violinStrings[i]);
                 ++numSympStrings;
                 break;
@@ -239,15 +256,15 @@ Instrument::Instrument (InstrumentType instrumentType, vector<ObjectType> object
                 break;
             case dulcimer:
                 int j = 0;
-                for (int i = 0; i < numPluckedStrings; i = i + 2)
+                for (int i = 1; i < numPluckedStrings; i = i + 2)
                 {
-                    connections.push_back (Connection (violinStrings[i], violinStrings[i+1],
-                                                      4 / static_cast<double>(violinStrings[i]->getNumPoints()),
-                                                      4 / static_cast<double>(violinStrings[i+1]->getNumPoints()),
-                                                      1, 1,
-                                                      1, 10000, 1,
-                                                      1, fs));
-                    
+//                    connections.push_back (Connection (violinStrings[i], violinStrings[i+1],
+//                                                      4 / static_cast<double>(violinStrings[i]->getNumPoints()),
+//                                                      4 / static_cast<double>(violinStrings[i+1]->getNumPoints()),
+//                                                      1, 1,
+//                                                      1, 10000, 1,
+//                                                      1, fs));
+//
                     double halfFlag = false;
                     if ((j > (numPluckedStrings / 4)) && !halfFlag)
                         halfFlag = true;

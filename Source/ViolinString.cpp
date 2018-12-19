@@ -12,8 +12,7 @@
 #include "ViolinString.h"
 
 //==============================================================================
-ViolinString::ViolinString(double freq, double fs, ObjectType stringType, int stringID, bool isDulcimer) : fs(fs), freq(freq), stringType(stringType),
-                                                                                          stringID(stringID), isDulcimer (isDulcimer)
+ViolinString::ViolinString(double freq, double fs, ObjectType stringType, int stringID, InstrumentType instrumentType) : fs(fs), freq(freq), stringType(stringType), stringID(stringID), instrumentType (instrumentType)
 {
     // In your constructor, you should add any child components, and
     // initialise any special settings that your component needs.
@@ -31,12 +30,20 @@ ViolinString::ViolinString(double freq, double fs, ObjectType stringType, int st
     //    kappa = sqrt (B) * (gamma / double_Pi); // Stiffness Factor
     kappa = 2;
     // Grid spacing
-    h = sqrt((gamma * gamma * k * k + 4.0 * s1 * k + sqrt(pow(gamma * gamma * k * k + 4.0 * s1 * k, 2.0) + 16.0 * kappa * kappa * k * k)) * 0.5);
-
-    N = floor(1.0 / h); // Number of gridpoints
-    if (stringType == pluckedString || stringType == sympString)
+    
+    if (stringType == pluckedString && instrumentType == dulcimer)
     {
         N = 28;
+    }
+    else if (instrumentType == hurdyGurdy)
+    {
+        if (stringType == bowedString)
+            N = 78;
+        else if (stringType == sympString)
+            N = 28;
+    } else {
+        h = sqrt((gamma * gamma * k * k + 4.0 * s1 * k + sqrt(pow(gamma * gamma * k * k + 4.0 * s1 * k, 2.0) + 16.0 * kappa * kappa * k * k)) * 0.5);
+        N = floor(1.0 / h); // Number of gridpoints
     }
     h = 1.0 / N; // Recalculate gridspacing
 
@@ -150,7 +157,7 @@ void ViolinString::paint(Graphics &g)
         g.setColour(Colour::fromRGBA(255, 255, 0, 127));
         g.drawLine(getWidth() / 2.0, 0, getWidth() / 2.0, getHeight(), 2);
     }
-    if (isDulcimer && stringID % 2 == 1)
+    if (instrumentType == dulcimer && stringID % 2 == 1)
     {
         g.setColour(Colour::greyLevel(0.5f).withAlpha(0.5f));
         g.drawLine(0, getHeight() - 1, getWidth(), getHeight() - 1);

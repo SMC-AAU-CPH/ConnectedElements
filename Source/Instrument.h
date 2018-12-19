@@ -17,15 +17,6 @@
 /*
 */
 
-enum InstrumentType
-{
-    twoStringViolin,
-    sitar,
-    bowedSitar,
-    hurdyGurdy,
-    dulcimer,
-};
-
 class Instrument    : public Component
 {
 public:
