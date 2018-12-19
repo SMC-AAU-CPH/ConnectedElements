@@ -221,7 +221,7 @@ Instrument::Instrument (InstrumentType instrumentType, vector<ObjectType> object
             
     }
 
-    if (numPlates != 0)
+    if (numPlates != 1)
     {
         for (int i = 0; i < numBowedStrings; ++i)
         {

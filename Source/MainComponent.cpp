@@ -10,13 +10,35 @@
 
 //==============================================================================
 
-MainComponent::MainComponent() : minOut(-1.0), maxOut(1.0)
+MainComponent::MainComponent() : minOut(-1.0), maxOut(1.0), keyboardComponent (keyboardState, MidiKeyboardComponent::horizontalKeyboard)
 {
     // Make sure you set the size of the component after
     // you add any child components
 
     //    addAndMakeVisible(conn1);
     setAudioChannels(0, 2);
+    
+    addAndMakeVisible(keyboardComponent);
+    keyboardState.addListener (this);
+    
+    addAndMakeVisible (midiInputList);
+    midiInputList.setTextWhenNoChoicesAvailable ("No MIDI Inputs Enabled");
+    auto midiInputs = MidiInput::getDevices();
+    midiInputList.addItemList (midiInputs, 1);
+    midiInputList.onChange = [this] { setMidiInput (midiInputList.getSelectedItemIndex()); };
+    // find the first enabled device and use that by default
+    for (auto midiInput : midiInputs)
+    {
+        if (deviceManager.isMidiInputEnabled (midiInput))
+        {
+            setMidiInput (midiInputs.indexOf (midiInput));
+            break;
+        }
+    }
+    // if no enabled devices were found just use the first one in the list
+//    if (midiInputList.getSelectedId() == 0)
+    setMidiInput (MidiInput::getDevices().size() - 1);
+    
 }
 
 MainComponent::~MainComponent()
@@ -266,10 +288,10 @@ void MainComponent::prepareToPlay(int samplesPerBlockExpected, double sampleRate
     numInstruments = instruments.size();
 
     // start the hi-res timer
-    if (sensels[0]->senselDetected)
-    {
-        HighResolutionTimer::startTimer(1000.0 / 150.0);
-    }
+    if (sensels.size() != 0)
+        if (sensels[0]->senselDetected)
+            HighResolutionTimer::startTimer(1000.0 / 150.0);
+    
     Timer::startTimerHz(15);
     setSize(appWidth, appHeight);
 }
@@ -927,5 +949,46 @@ void MainComponent::sliderValueChanged(Slider *slider)
     if (slider == plateStiffness)
     {
         instruments[0]->getPlates()[0]->setFrequency(slider->getValue());
+    }
+}
+
+// MIDI
+void MainComponent::setMidiInput(int index)
+{
+    auto list = MidiInput::getDevices();
+    deviceManager.removeMidiInputCallback (list[lastInputIndex], this);
+    auto newInput = list[index];
+    if (! deviceManager.isMidiInputEnabled (newInput))
+        deviceManager.setMidiInputEnabled (newInput, true);
+    deviceManager.addMidiInputCallback (newInput, this);
+    midiInputList.setSelectedId (index + 1, dontSendNotification);
+    lastInputIndex = index;
+}
+
+void MainComponent::handleIncomingMidiMessage(MidiInput *source, const MidiMessage &message)
+{
+    const ScopedValueSetter<bool> scopedInputFlag (isAddingFromMidiInput, true);
+    keyboardState.processNextMidiEvent (message);
+    //    postMessageToList (message, source->getName());
+    
+}
+
+void MainComponent::handleNoteOn(MidiKeyboardState*, int midiChannel, int midiNoteNumber, float velocity)
+{
+    double i = midiNoteNumber - 60;
+    
+    double ratio = (1 - ((pow(2.0, ((12 - i) / 12.0))) - 1)) / 2.0;
+    std::cout << ratio << std::endl;
+    for (int i = 0; i < instruments[0]->getNumBowedStrings(); ++i)
+    {
+        instruments[0]->getStrings()[i]->setFingerPosition (ratio);
+    }
+}
+
+void MainComponent::handleNoteOff(MidiKeyboardState* state, int midiChannel, int midiNoteNumber, float velocity)
+{
+    for (int i = 0; i < instruments[0]->getNumBowedStrings(); ++i)
+    {
+        instruments[0]->getStrings()[i]->setFingerPosition (0);
     }
 }

@@ -22,7 +22,9 @@
 class MainComponent : public AudioAppComponent,
                       public HighResolutionTimer,
                       public Timer,
-                      public Slider::Listener
+                      public Slider::Listener,
+                      private MidiInputCallback,
+                      private MidiKeyboardStateListener
 {
 public:
     //==============================================================================
@@ -45,6 +47,42 @@ public:
     
     void sliderValueChanged (Slider* slider) override;
     
+    // MIDI
+    
+    void setMidiInput (int index);
+    
+    static String getMidiMessageDescription (const MidiMessage& m)
+    {
+        if (m.isNoteOn())           return "Note on "          + MidiMessage::getMidiNoteName (m.getNoteNumber(), true, true, 3);
+        if (m.isNoteOff())          return "Note off "         + MidiMessage::getMidiNoteName (m.getNoteNumber(), true, true, 3);
+        if (m.isProgramChange())    return "Program change "   + String (m.getProgramChangeNumber());
+        if (m.isPitchWheel())       return "Pitch wheel "      + String (m.getPitchWheelValue());
+        if (m.isAftertouch())       return "After touch "      + MidiMessage::getMidiNoteName (m.getNoteNumber(), true, true, 3) +  ": " + String (m.getAfterTouchValue());
+        if (m.isChannelPressure())  return "Channel pressure " + String (m.getChannelPressureValue());
+        if (m.isAllNotesOff())      return "All notes off";
+        if (m.isAllSoundOff())      return "All sound off";
+        if (m.isMetaEvent())        return "Meta event";
+        
+        if (m.isController())
+        {
+            String name (MidiMessage::getControllerName (m.getControllerNumber()));
+            
+            if (name.isEmpty())
+                name = "[" + String (m.getControllerNumber()) + "]";
+            
+            return "Controller " + name + ": " + String (m.getControllerValue());
+        }
+        
+        return String::toHexString (m.getRawData(), m.getRawDataSize());
+    }
+    
+    
+    void handleIncomingMidiMessage (MidiInput* source, const MidiMessage& message) override;
+    
+    void handleNoteOn (MidiKeyboardState*, int midiChannel, int midiNoteNumber, float velocity) override;
+    
+    void handleNoteOff (MidiKeyboardState*, int midiChannel, int midiNoteNumber, float velocity) override;
+    
 private:
     void senselMappingTwoStrings();
     void senselMappingSitarBowed();
@@ -63,17 +101,8 @@ private:
     OwnedArray<Sensel> sensels;
     
     unsigned long stateUpdateCounter = 0;
-    static const unsigned int amountOfSensels = 2;
+    static const unsigned int amountOfSensels = 0;
     
-    // Sensel variables
-    // array<float, amountOfSensels> force = {0.0};
-    // array<float, amountOfSensels> xpos = {0.0};
-    // array<float, amountOfSensels> ypos = {0.0};
-    // array<float, amountOfSensels> Vb = {0.0};
-    // array<float, amountOfSensels> Fb = {0.0};
-    // array<float, amountOfSensels> fp = {0.0};
-    // array<float, amountOfSensels> connectionPoint = {0.0};
-    // array<bool, amountOfSensels> state = {0};
     Distortion dist {None}; 
     InstrumentType chooseInstrument;
     
@@ -86,5 +115,20 @@ private:
     Slider* plateStiffness;
     OwnedArray<Label> labels;
     Label* plateLabel;
+   
+    // MIDI
+    MidiKeyboardState keyboardState;
+    MidiKeyboardComponent keyboardComponent;
+    
+    AudioDeviceManager deviceManager;           // [1]
+    ComboBox midiInputList;                     // [2]
+    Label midiInputListLabel;
+    int lastInputIndex = 0;                     // [3]
+    bool isAddingFromMidiInput = false;         // [4]
+    
+    TextEditor midiMessagesBox;
+    double startTime;
+    
+    
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MainComponent)
 };

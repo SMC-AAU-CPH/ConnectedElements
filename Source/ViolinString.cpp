@@ -173,11 +173,6 @@ void ViolinString::resized()
 
 void ViolinString::bow()
 {
-    if (isnan(u[9]))
-    {
-        reset();
-        return;
-    }
 
     double Fb = _Fb.load();
     bowPos = clamp(_bpX.load() * N, 2, N - 3);
@@ -265,6 +260,11 @@ void ViolinString::bow()
         uNext[fingerPos - 1] = 0;
         uNext[fingerPos] = uNext[fingerPos] * (alphaFP + (1-scale));
         uNext[fingerPos + 1] = uNext[fingerPos + 1] * (1 - alphaFP);
+    }
+    if (isnan(uNext[static_cast<int>(N*0.5)]))
+    {
+        reset();
+        return;
     }
 }
 
