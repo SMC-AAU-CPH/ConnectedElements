@@ -67,12 +67,14 @@ public:
     void setBowPos(double bpX, double bpY) { _bpX = bpX; _bpY = bpY; };
     void setFingerOn (bool val) { fingerOn = val; };
     
+    double getOGFreq() { return ogFreq; };
+    void setFrequency (double freq);
+    
     double getNumPoints() { return N; };
     double getPrevStateAt (int idx) { return uPrev[idx]; };
     double getStateAt (int idx) { return u[idx]; };
     double getNextStateAt (int idx) { return uNext[idx]; };
     
-//    vector<double>& getState() { return u; };
     double getGridSpacing() { return h; };
     double getS0() { return s0; };
     
@@ -103,12 +105,13 @@ public:
     int getStringID() { return stringID; };
     
 private:
-    double fs, freq, gamma, k, s0, s1, B, kappa, h, N, lambdaSq, muSq, kOh, gOh, a, BM, tol, q, qPrev, b, eps, fp, A1, A2, A3, A4, A5, D, E;
+    double fs, freq, gamma, k, s0, s1, B, kappa, h, N, muSq, kOh, gOh, a, BM, tol, q, qPrev, b, eps, fp, B1, B2, b1, b2, A1, A2, A3, A4, A5, D, E;
     double ff = 0.7;
+    atomic<double> lambdaSq;
     atomic<double> _Vb, _Fb, _bpX, _bpY;
     
-    double bowPos;
-    
+    atomic<double> bowPos;
+    double ogFreq;
     vector<int> cx;
     vector<int> cy;
     vector<int> cpIdx;

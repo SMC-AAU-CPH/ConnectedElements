@@ -7,7 +7,7 @@
 */
 
 #include "MainComponent.h"
-
+#include <algorithm>
 //==============================================================================
 
 MainComponent::MainComponent() : minOut(-1.0), maxOut(1.0), keyboardComponent (keyboardState, MidiKeyboardComponent::horizontalKeyboard)
@@ -39,6 +39,7 @@ MainComponent::MainComponent() : minOut(-1.0), maxOut(1.0), keyboardComponent (k
 //    if (midiInputList.getSelectedId() == 0)
     setMidiInput (MidiInput::getDevices().size() - 1);
     
+    midiNotesBool.resize(25, false);
 }
 
 MainComponent::~MainComponent()
@@ -140,12 +141,14 @@ void MainComponent::prepareToPlay(int samplesPerBlockExpected, double sampleRate
 
     case hurdyGurdy:
     {
-        vector<ObjectType> preObjects{bowedString, bowedString, bowedString,
+        vector<ObjectType> preObjects{bowedString, bowedString, bowedString, bowedString, bowedString,
                                       sympString, sympString, sympString, sympString,
                                       sympString, sympString, sympString, sympString,
                                       sympString, sympString, sympString, sympString,
                                       sympString,
-                                      plate};
+                                      plate
+            
+        };
         objects = preObjects;
         stringPlateDivision = 0.75 * appHeight;
         bowedSympDivision = appHeight;
@@ -619,16 +622,20 @@ void MainComponent::senselMappingHurdyGurdy()
 
             const unsigned int fingerCount = sensel->contactAmount;
             const int index = sensel->senselIndex;
-
+//            float Vb = 0.0;
             if (index == 0)
             {
                 for (int f = 0; f < fingerCount; f++)
                 {
 
                     const bool state = sensel->fingers[f].state;
+                    
+//                    if(state && f == 0)
+//                        Vb = sensel->fingers[f].force * maxVb * 10;
+                    
                     const float x = sensel->fingers[f].x;
                     const float y = sensel->fingers[f].y;
-                    const float Vb = sensel->fingers[f].force * maxVb;
+                    const float Vb = sensel->fingers[f].force * maxVb * 15;
                     const float Fb = sensel->fingers[f].force * 1000;
                     const int fingerID = sensel->fingers[f].fingerID;
 
@@ -642,20 +649,21 @@ void MainComponent::senselMappingHurdyGurdy()
                     if (state) //fingerID == 0)
                     {
 
-                        instruments[0]->getStrings()[pickAString]->setBow(state);
-                        instruments[0]->getStrings()[pickAString]->setVb(Vb);
-                        instruments[0]->getStrings()[pickAString]->setFb(Fb);
-                        instruments[0]->getStrings()[pickAString]->setBowPos(x, y);
+                        instruments[0]->getStrings()[pickAString]->setBow (state);
+                        instruments[0]->getStrings()[pickAString]->setVb (pickAString < 2 ? 0.13 : clamp (Vb, 0.1, 1.5));
+                        instruments[0]->getStrings()[pickAString]->setFb (pickAString < 2 ? 10 : 50);
+                        instruments[0]->getStrings()[pickAString]->setBowPos (x, y);
                     }
                     else
-                        instruments[0]->getStrings()[pickAString]->setBow(false);
+                        instruments[0]->getStrings()[pickAString]->setVb(0);
+//                        instruments[0]->getStrings()[pickAString]->setBow(false);
                 }
             }
 
             if (fingerCount == 0)
             {
                 for (auto violinString : instruments[0]->getStrings())
-                    violinString->setBow(false);
+                    violinString->setVb(0);
             }
         }
     }
@@ -843,6 +851,7 @@ void MainComponent::resized()
         plateLabel->setBounds(controlsRect.removeFromTop(20));
         plateStiffness->setBounds(controlsRect.removeFromTop(controlsRect.getWidth()));
     }
+    midiInputList.setBounds (controlsRect.removeFromTop (36));
 }
 
 float MainComponent::clip(float output)
@@ -896,25 +905,58 @@ void MainComponent::handleIncomingMidiMessage(MidiInput *source, const MidiMessa
     const ScopedValueSetter<bool> scopedInputFlag (isAddingFromMidiInput, true);
     keyboardState.processNextMidiEvent (message);
     //    postMessageToList (message, source->getName());
-    
+    if (message.isPitchWheel())
+    {
+        if (message.getPitchWheelValue() >= 8500)
+            pitchOffset =  (clamp (message.getPitchWheelValue(), 8500, 9000) - 8500) / 250.0;
+        else
+            pitchOffset = 0;
+        
+        setPitch();
+    }
 }
 
 void MainComponent::handleNoteOn(MidiKeyboardState*, int midiChannel, int midiNoteNumber, float velocity)
 {
-    double i = midiNoteNumber - 60;
-    
-    double ratio = (1 - ((pow(2.0, ((12 - i) / 12.0))) - 1)) / 2.0;
-    std::cout << ratio << std::endl;
-    for (int i = 0; i < instruments[0]->getNumBowedStrings(); ++i)
-    {
-        instruments[0]->getStrings()[i]->setFingerPosition (ratio);
-    }
+    midiNotesBool[clamp(midiNoteNumber, 60, 80) - 60] = true;
+    setPitch();
 }
 
 void MainComponent::handleNoteOff(MidiKeyboardState* state, int midiChannel, int midiNoteNumber, float velocity)
 {
-    for (int i = 0; i < instruments[0]->getNumBowedStrings(); ++i)
+    midiNotesBool[clamp(midiNoteNumber, 60, 80) - 60] = false;
+    setPitch();
+}
+
+void MainComponent::setPitch()
+{
+    int idxOn = 0;
+    bool isNoteOn = false;
+    for (int i = 0; i < 25; ++i)
     {
-        instruments[0]->getStrings()[i]->setFingerPosition (0);
+        if (midiNotesBool[i])
+        {
+            idxOn = i;
+            isNoteOn = true;
+        }
     }
+    //    double ratio = (1 - ((pow(2.0, ((12 - idxOn) / 12.0))) - 1)) / 2.0;
+    double freqMultiplier = pow(2.0, idxOn / 12.0);
+    if (!isNoteOn)
+        pitchOffset = 0;
+    
+    for (int i = numDroneStrings; i < instruments[0]->getNumBowedStrings(); ++i)
+    {
+        instruments[0]->getStrings()[i]->setFrequency (freqMultiplier * (1 + 0.05 * pitchOffset) * instruments[0]->getStrings()[i]->getOGFreq());
+    }
+}
+
+double MainComponent::clamp (double input, double min, double max)
+{
+    if (input > max)
+        return max;
+    else if (input < min)
+        return min;
+    else
+        return input;
 }

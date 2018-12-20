@@ -12,7 +12,7 @@
 #include "ViolinString.h"
 
 //==============================================================================
-ViolinString::ViolinString(double freq, double fs, ObjectType stringType, int stringID, InstrumentType instrumentType) : fs(fs), freq(freq), stringType(stringType), stringID(stringID), instrumentType (instrumentType)
+ViolinString::ViolinString(double freq, double fs, ObjectType stringType, int stringID, InstrumentType instrumentType) : fs(fs), ogFreq(freq), stringType(stringType), stringID(stringID), instrumentType (instrumentType)
 {
     // In your constructor, you should add any child components, and
     // initialise any special settings that your component needs.
@@ -20,7 +20,7 @@ ViolinString::ViolinString(double freq, double fs, ObjectType stringType, int st
     _bpX = 0.25;
     _bpY = 0;
 
-    gamma = freq * 2; // Wave speed
+    gamma = ogFreq * 2; // Wave speed
     k = 1 / fs;       // Time-step
 
     s0 = 1;     // Frequency-independent damping
@@ -28,19 +28,20 @@ ViolinString::ViolinString(double freq, double fs, ObjectType stringType, int st
 
     //    B = 0.0001;                             // Inharmonicity coefficient
     //    kappa = sqrt (B) * (gamma / double_Pi); // Stiffness Factor
-    kappa = 2;
+    kappa = 2.0;
     // Grid spacing
     
     if (stringType == pluckedString && instrumentType == dulcimer)
     {
         N = 28;
     }
-    else if (instrumentType == hurdyGurdy)
+    else if (instrumentType == hurdyGurdy && stringType == bowedString && stringID >= 2)
     {
-        if (stringType == bowedString)
-            N = 78;
-        else if (stringType == sympString)
-            N = 28;
+        N = 28;
+    }
+    else if (instrumentType == hurdyGurdy && stringType == sympString)
+    {
+        N = 28;
     } else {
         h = sqrt((gamma * gamma * k * k + 4.0 * s1 * k + sqrt(pow(gamma * gamma * k * k + 4.0 * s1 * k, 2.0) + 16.0 * kappa * kappa * k * k)) * 0.5);
         N = floor(1.0 / h); // Number of gridpoints
@@ -77,9 +78,12 @@ ViolinString::ViolinString(double freq, double fs, ObjectType stringType, int st
 
     fp = 0;
     
-    double B1 = s0 * k;
-    double B2 = (2 * s1 * k) / (h * h);
+    B1 = s0 * k;
+    B2 = (2 * s1 * k) / (h * h);
     
+    b1 = 2.0 / (k * k);
+    b2 = (2 * s1) / (k * h * h);
+
     D = 1.0 / (1.0 + s0 * k);
     
     A1 = 2 - 2 * lambdaSq - 6 * muSq - 2 * B2;
@@ -100,7 +104,9 @@ ViolinString::ViolinString(double freq, double fs, ObjectType stringType, int st
 void ViolinString::reset()
 {
     for (int i = 0; i < 3; ++i)
-        fill(uVecs[i].begin(), uVecs[i].end(), 0.0);
+        for (int j = 0; j < N; ++j)
+             uVecs[i][j] = 0.0;
+    qPrev = 0;
 }
 
 ViolinString::~ViolinString()
@@ -175,8 +181,8 @@ void ViolinString::bow()
 {
 
     double Fb = _Fb.load();
-    bowPos = clamp(_bpX.load() * N, 2, N - 3);
-    int bp = floor(bowPos);
+    bowPos.store(clamp(_bpX.load() * N, 2, N - 3));
+    int bp = floor(bowPos.load());
     bool isBowing = _isBowing;
 
     if (isBowing)
@@ -251,15 +257,18 @@ void ViolinString::bow()
         ///////// heuristic interpolation
         int fingerPos = floor(fp * N - 1);
         double scale = 1;
-        //pow((cos(double_Pi + (fp * N - 1 - fingerPos) * double_Pi) + 1) * 0.5, 4);
-        double alphaFP = pow(fp * N - 1 - fingerPos, 6) * scale;
-    //    if (t % 1000 == 0 && stringID == 0)
-    //        std::cout << alphaFP << std::endl;
-    //    ++t;
-//        uNext[fingerPos - 2] = 0;
-        uNext[fingerPos - 1] = 0;
-        uNext[fingerPos] = uNext[fingerPos] * (alphaFP + (1-scale));
-        uNext[fingerPos + 1] = uNext[fingerPos + 1] * (1 - alphaFP);
+        double alphaFP = pow(fp * N - 1 - fingerPos, 7) * scale;
+//        std::cout << alphaFP << std::endl;
+        if (t % 10000 == 0 && stringID == 0)
+            std::cout << alphaFP << std::endl;
+            ++t;
+        uNext[fingerPos] *= 0;
+        uNext[fingerPos] *= 0;
+
+//        uNext[fingerPos] = uNext[fingerPos] * (alphaFP + (1-scale));
+//        uNext[fingerPos + 1] = uNext[fingerPos + 1] * (1 - alphaFP);
+//        uNext[fingerPos] *= 0;
+//        uNext[fingerPos + 1] *= 0.6;
     }
     if (isnan(uNext[static_cast<int>(N*0.5)]))
     {
@@ -272,8 +281,8 @@ void ViolinString::newtonRaphson()
 {
     double Vb = _Vb.load();
     double Fb = _Fb.load();
-    int bp = floor(bowPos);
-    double alpha = bowPos - bp;
+    int bp = floor(bowPos.load());
+    double alpha = bowPos.load() - bp;
     
     if (interpolation == noStringInterpol)
     {
@@ -309,7 +318,7 @@ void ViolinString::newtonRaphson()
         uIPrevM1 = cubicInterpolation(uPrev, bp - 1, alpha);
     }
 
-    b = 2.0 / k * Vb - (2.0 / (k * k)) * (uI - uIPrev) - gOh * (uI1 - 2 * uI + uIM1) + kOh * (uI2 - 4 * uI1 + 6 * uI - 4 * uIM1 + uIM2) + 2 * s0 * Vb - (2 * s1 / (k * h * h)) * ((uI1 - 2 * uI + uIM1) - (uIPrev1 - 2 * uIPrev + uIPrevM1));
+    b = 2.0 / k * Vb - b1 * (uI - uIPrev) - gOh * (uI1 - 2 * uI + uIM1) + kOh * (uI2 - 4 * uI1 + 6 * uI - 4 * uIM1 + uIM2) + 2 * s0 * Vb - b2 * ((uI1 - 2 * uI + uIM1) - (uIPrev1 - 2 * uIPrev + uIPrevM1));
     eps = 1;
     int i = 0;
     while (eps > tol)
@@ -363,7 +372,9 @@ Path ViolinString::generateStringPathAdvanced()
 
     for (int y = 0; y < N; y++)
     {
-        const float newY = uNext[y] * 50000 + stringBounds;
+        float newY = uNext[y] * 50000 + stringBounds;
+        if (isnan(newY))
+            newY = 0;
         stringPath.lineTo(x, newY);
         for (int c = 0; c < cpIdx.size(); ++c)
         {
@@ -384,6 +395,14 @@ Path ViolinString::generateStringPathAdvanced()
     return stringPath;
 }
 
+void ViolinString::setFrequency (double freq)
+{
+    gamma = 2 * freq;
+    lambdaSq = (gamma * gamma * k * k) / (h * h);
+    A1 = 2 - 2 * lambdaSq - 6 * muSq - 2 * B2;
+    A2 = lambdaSq + 4 * muSq + B2;
+}
+
 void ViolinString::setConnection(int idx, double cp)
 {
     if (cpIdx.size())
@@ -398,7 +417,7 @@ int ViolinString::addConnection(double cp)
     return static_cast<int>(cpIdx.size()) - 1;
 }
 
-double ViolinString::clamp(double input, double min, double max)
+double ViolinString::clamp (double input, double min, double max)
 {
     if (input > max)
         return max;

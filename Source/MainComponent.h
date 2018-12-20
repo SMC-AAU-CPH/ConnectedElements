@@ -83,6 +83,10 @@ public:
     
     void handleNoteOff (MidiKeyboardState*, int midiChannel, int midiNoteNumber, float velocity) override;
     
+    void setPitch();
+    
+    double clamp (double input, double min, double max);
+    
 private:
     void senselMappingTwoStrings();
     void senselMappingSitarBowed();
@@ -101,7 +105,7 @@ private:
     OwnedArray<Sensel> sensels;
     
     unsigned long stateUpdateCounter = 0;
-    static const unsigned int amountOfSensels = 0;
+    static const unsigned int amountOfSensels = 1;
     
     Distortion dist {None}; 
     InstrumentType chooseInstrument;
@@ -129,6 +133,8 @@ private:
     TextEditor midiMessagesBox;
     double startTime;
     
-    
+    vector<bool> midiNotesBool;
+    double pitchOffset = 0;
+    int numDroneStrings = 2;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MainComponent)
 };
