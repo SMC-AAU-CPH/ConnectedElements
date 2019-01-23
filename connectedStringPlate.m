@@ -30,7 +30,7 @@ kappaS = 5;
 objectVars{1, 2} = [gamma, kappaS, 1e99, 0];
 
 objectVars{2, 1} = "plate";
-objectVars{2, 2} = [3, 1, 0.05, 1e99, 0];
+objectVars{2, 2} = [1, 0.5, 0.01, 1e99, 0];
 
 %initialise cells/vectors depending on the number of objects
 Bpre = cell(2, 1);
@@ -48,21 +48,11 @@ s1 = zeros(2, 1);
 
 whatExciter = "raisedCos";
 
-if objectVars{1, 1} == "bar"
-        [Bpre{1}, Cpre{1}, N(1), h(1), s0(1)] = createBar(objectVars{1, 2}, fs);
-    elseif objectVars{1, 1} == "string"
-        [Bpre{1}, Cpre{1}, N(1), h(1), s0(1)] = createString(objectVars{1, 2}, fs);
-    elseif objectVars{1, 1} == "bowedString"
-        whatExciter = "bowed";
-        [Bpre{1}, Cpre{1}, bB{1}, bC{1}, N(1), h(1), s0(1)] = createBowedString(objectVars{1, 2}, fs);
-end
-       
-    
+[Bpre{1}, Cpre{1}, N(1), h(1), s0(1)] = createString(objectVars{1, 2}, fs);  
 [Bpre{2}, Cpre{2}, N(2), s0(2), Nx, Ny, h(2), kappaP] = createPlate (objectVars{2, 2}, fs);
 Nx = Nx - 1;
 Ny = Ny - 1;
 Ntot = sum(N);
-
 vec = cell(2, 1);
 matIdx(2) = N(1) + 1;
 
@@ -83,11 +73,13 @@ end
 %% Initialise state vectors
 u = zeros(Ntot, 1);
 excitePlate = true;
+exciteString = true;
 
+%% Excite
 if excitePlate
     exciterPosX = 0.5;
     exciterPosY = 0.5;
-    rcW = 4;
+    rcW = 2;
     excitationMat = zeros(rcW+1, rcW+1);
     scaler = (1-cos(2*pi*(0:rcW)/rcW)) * 0.5;
     for x = 1:rcW+1
@@ -96,50 +88,23 @@ if excitePlate
     startIdxX = floor(Nx * exciterPosX - rcW/2) - 1;
     startIdxY = floor(Ny * exciterPosY - rcW/2) - 1;
     for i = 1 : rcW 
-       u(N(1) + (startIdxY + i) * Ny + startIdxX : N(1) + (startIdxY + i) * Ny + startIdxX + rcW) = ...  
+       u(N(1) + (startIdxY + i) * Nx + startIdxX : N(1) + (startIdxY + i) * Nx + startIdxX + rcW) = ...  
             excitationMat(i,:);
         %         u(N(1) + startIdxX * (Nx-1) * i + startIdxY : N(1)+ startIdxX * (Nx-1) * i + startIdxY + rcW) = ...
 
-    end
-    
-else
+    end  
+end
+if exciteString
     exciterPos = 0.45;
-    rcW = 10;
+    rcW = 2;
     u(matIdx(1) + floor(exciterPos*N(1)-rcW/2):matIdx(1) + floor(exciterPos*N(1)+rcW/2)) = (1-cos(2*pi*(0:rcW)/rcW)) * 0.5;
 end
 uPrev = u;
 uNext = u;
 
 %% Length of the sound
-lengthSound = fs;
+lengthSound = fs / 10;
 
-%% Exciter
-if whatExciter == "bowed"
-    %Bow Model
-    a = 100;                % free parameter
-    BM = sqrt(2*a)*exp(1/2);
-    Fb = 50;
-    Vb = 0.2;
-    Ee = zeros(Ntot, 1);
-    Ee(N(1) + floor(N(2)/4)) = 1;
-    K = k^2 * Ee / (1 + s0(2)*k);
-    vrelPrev = 0;
-    tol = 1e-4;
-else
-    Fmax = 500;
-    exciterLength = floor(1e-3 * fs);
-    v = 2; 
-    Fe = Fmax/2*(1-cos(v*pi*(0:exciterLength)/exciterLength));
-    exciter = [Fe, zeros(1,lengthSound-exciterLength - 1)];
-
-    OTE = 2; % Object To Excite
-    exciterPos = 1/2;
-    rcW = 3;
-
-    Ee = zeros(Ntot, 1);
-    Ee (matIdx(OTE) + exciterPos*N(OTE)-floor(rcW/2):matIdx(OTE) + exciterPos*N(OTE)+ceil(rcW/2)) = 1-cos(v*pi*(0:rcW)/rcW);
-    K = k^2 * Ee / (1 + s0(OTE)*k);
-end
 %% Connections
 
 %{ 
@@ -173,26 +138,47 @@ connected = false;
 
 stringVec = vec{1}(2:N(1)-1);
 plateVec = vec{2};
+phVec = 2:(Nx+1);
+% pvVec = (1+Nx):(Nx - 2):(Nx-2)*(Ny-2);
+pvVec = 2:(Ny+1);
 
-plateVecHor = 2:(Nx+1);
-plateVecVert = (1+Nx):(Nx + 2):(Nx+2)*(Ny+2);
-k = 1;
-indices = zeros(Nx * Ny, 1);
-for i = 1:Ny
-    for j = 1:Nx
-        indices(k) = plateVecVert(i) + plateVecHor(j);
-        k = k + 1;
-    end
-end
+% k = 1;
+% indices = zeros(Nx-2 * Ny-2, 1);
+% for i = 1:Ny
+%     for j = 1:Nx
+%         indices(k) = plateVecVert(i) + plateVecHor(j);
+%         k = k + 1;
+%     end
+% end
+
+% lm = 1 : N(2);
+% l1m = lm(Ny+1:end);
+% lneg1m = lm(1:end-Ny);
+% lm1 = lm;
+% lm1(mod(lm-1,Ny) == 0) = [];
+% lmneg1 = lm;
+% lmneg1(mod(lm-Ny,Ny) == 0) = [];
+% 
+% lm = lm + N(1);
+% l1m = l1m + N(1);
+% lneg1m = lneg1m + N(1);
+% lm1 = lm1 + N(1);
+% lmneg1 = lmneg1 + N(1);
+
 potEnergyString = zeros(lengthSound, 1);
 kinEnergyString = zeros(lengthSound, 1);
 potEnergyPlate = zeros(lengthSound, 1);
 kinEnergyPlate = zeros(lengthSound, 1);
-testMatZeros = zeros(Nx + 2, Ny + 2);
-testMatZerosPrev = zeros(Nx + 2, Ny + 2);
-uE = zeros((Nx + 2) * (Ny + 2), 1);
-uEPrev = zeros((Nx + 2) * (Ny + 2), 1);
-
+uE = zeros(Nx + 2, Ny + 2);
+uEPrev = zeros(Nx + 2, Ny + 2);
+% uE = zeros((Nx + 2) * (Ny + 2), 1);
+% uEPrev = zeros((Nx + 2) * (Ny + 2), 1);
+NxZeros = zeros(Nx, 1);
+NyZeros = zeros(Ny, 1);
+ulm1 = zeros(N(2),1);
+ulmneg1 = zeros(N(2),1);
+ulm1Prev = zeros(N(2),1);
+ulmneg1Prev = zeros(N(2),1);
 for n = 1 : lengthSound
     
     % calculate relative displacement
@@ -205,28 +191,8 @@ for n = 1 : lengthSound
     Rn = eye(1).*rn; 
     Pn = eye(1).*pn; 
     
-    if whatExciter == "bowed"
-        % Newton-Raphson
-        b = 2/k * Vb + 2 * s0(2) * Vb + Ee(vec{2})' * bB{2} * u(vec{2}) + Ee(vec{2})' * bC{2} * uPrev(vec{2});
-        eps = 1;
-        i = 0;
-        while eps>tol
-            vrel=vrelPrev-(Fb*BM*vrelPrev*exp(-a*vrelPrev^2)+2*vrelPrev/k+2*s0(2)*vrelPrev+b)/...
-             (Fb*BM*(1-2*a*vrelPrev^2)*exp(-a*vrelPrev^2)+2/k+2*s0(2));
-            eps = abs(vrel-vrelPrev);
-            vrelPrev = vrel;
-            i = i + 1;
-            if i > 10000
-                disp('Nope');
-            end
-        end
-        vrelSave(n) = vrel;
-        excitation = k^2*Ee'*1/h(2)*Fb*BM*vrel*exp(-a*vrel^2);
-        uTemp = B * u + C * uPrev - excitation';
-    else
-        % temporary value for the next u (without the spring forces)
-        uTemp = B * u + C * uPrev; % + K*exciter(n);
-    end 
+    uTemp = B * u + C * uPrev;
+    
     % find Fc
     if connected
         bn = L * uTemp; 
@@ -238,67 +204,97 @@ for n = 1 : lengthSound
         JFc = 0;
     end
     uNext = uTemp + JFc;
+    
+    
     for q = 0:Nx-1
         testmat(q+1, 1:Ny) = u(N(1)+1+q*Ny:N(1)+(q+1)*Ny);
         testmatPrev(q+1, 1:Ny) = uPrev(N(1)+1+q*Ny:N(1)+(q+1)*Ny);
     end
-    testMatZeros(2:end-1, 2:end-1) = testmat;
-    testMatZerosPrev(2:end-1, 2:end-1) = testmatPrev;
-        
-    for i = 1:Ny
-        uE(1 + (i-1) * (Nx + 2) : i * (Nx + 2)) = testMatZeros(:,i); 
-        uEPrev(1 + (i-1) * (Nx + 2) : i * (Nx + 2)) = testMatZerosPrev(:,i); 
-    end
-    % energystuff
+    uE(2:end-1, 2:end-1) = testmat;
+    uEPrev(2:end-1, 2:end-1) = testmatPrev;
+
     potEnergyString(n) = gamma^2 / 2 * sum (1 / h(1) * (u(stringVec + 1) - u(stringVec)) .* (uPrev(stringVec + 1) - uPrev(stringVec))) ...
         + kappaS^2 / 2 * 1/h(1)^3 * sum((u(stringVec + 1) - 2 * u(stringVec) + u(stringVec - 1)) ...
         .* (uPrev(stringVec + 1) - 2 * uPrev(stringVec) + uPrev(stringVec - 1)));
     kinEnergyString(n) = 1 / 2 * sum (h(1) * ((1 / k * (u(stringVec) - uPrev(stringVec))).^2));
     
-    kinEnergyPlate(n) = 1 / 2 * h(2)^2 * sum(1/k^2 * (u(plateVec) - uPrev(plateVec)).^2);
-    potEnergyPlate(n) = kappaP / (2 * h(2)^2) * sum(uE(indices + 1)...
-        + uE(indices - 1) + uE(indices + (Nx + 2)) + uE(indices - (Nx + 2)) - 4 * uE(indices))...
-        * sum (uEPrev(indices + 1) + uEPrev(indices - 1)...
-        + uEPrev(indices + (Nx + 2)) + uEPrev(indices - (Nx + 2)) - 4 * uEPrev(indices));
-
-%     potEnergyPlate(n) = kappaP / (2 * h(2)^2) * sum(u(indices + 1)...
-%         + u(indices - 1) + u(indices + Nx) + u(indices - Nx) - 4 * u(indices))...
-%         * sum (uPrev(indices + 1) + uPrev(indices - 1)...
-%         + uPrev(indices + Nx) + uPrev(indices - Nx) - 4 * uPrev(indices))...
-%         +...%edges
-%         + (u(indices(2)) + u(indices((Nx-2) + 1)) - 4 * u(indices(1)))...
-%         * (uPrev(indices(2)) + uPrev(indices((Nx-2)+ 1)) - 4 * uPrev(indices(1)))...
-%         + (u(indices(2)) + u(indices((Nx-2) + 1)) - 4 * u(indices(1)))...
-%         * (uPrev(indices(2)) + uPrev(indices((Nx-2)+ 1)) - 4 * uPrev(indices(1)))...
-%         ; %corners
-%     potEnergyPlate(n) = kappaP / (2 * h(2)^2) * sum(
-%     for x = 1:Nx
-
-%         for y = 1:Ny
-%             if x == 1
-%                 if y == 1 || y == Ny % in a corner
-%                     potEnergyPlate(n) = potEnergyPlate(n) + 
-%                 end
-%             elseif x == Nx - 1
-%             end
-%             if 
-%             end
+    kinEnergyPlate(n) = 1 / 2 * h(2)^2 * sum(sum(1/k^2 * (uE - uEPrev).^2));
+    potEnergyPlate(n) = kappaP^2 / (2 * h(2)^2) * sum(sum(...
+        (uE(phVec + 1, pvVec)...
+        + uE(phVec - 1, pvVec) + uE(phVec, pvVec + 1) + uE(phVec, pvVec - 1) ...
+        - 4 * uE(phVec, pvVec)) ...
+        .* (uEPrev(phVec + 1, pvVec)...
+        + uEPrev(phVec - 1, pvVec) + uEPrev(phVec, pvVec + 1) + uEPrev(phVec, pvVec - 1) ...
+        - 4 * uEPrev(phVec, pvVec))));
+%     u = 1:length(u);
+%     for i = 1:Nx
+%         if i == 23
+%             
 %         end
+%         ulm1(2+(Ny+1)*(i-1):(Ny+1)*i) = u(N(1)+1+(i-1)*Ny:N(1)+(i)*Ny);
+% %         ulmneg1(2+(Ny+2)*(i-1):(Ny+2)*i-1) = u(N(1)+1+(i-1)*Ny:N(1)+(i)*Ny);
 %     end
+%     ulm1 = u(N(1)+1:end);
+%     ulm1(mod(lm -  N(1) - 1, Ny) == 0) = 0;
+%     ulmneg1 = u(N(1)+1:end);
+%     ulmneg1(mod(lm -  N(1) - Ny, Ny) == 0) = 0;
+
+%     ulm1(lm1 - N(1)) = u(lm1);
+%     ulm1Prev(lm1 - N(1)) = uPrev(lm1);
+    
+%     ulm1Prev = u(N(1)+1:end);
+%     ulm1Prev(mod(lm -  N(1) - 1, Ny) == 0) = 0;
+%     ulmneg1Prev = u(N(1)+1:end);
+%     ulmneg1Prev(mod(lm -  N(1) - Ny, Ny) == 0) = 0;
+
+%     ulmneg1(lmneg1 - N(1)) = u(lmneg1);
+%     ulmneg1Prev(lmneg1 - N(1)) = uPrev(lmneg1);
+    
+%     potEnergyPlate(n) = kappaP^2 / (2 * h(2)^2) * sum(([NyZeros; u(l1m)] + [u(lneg1m); NyZeros] + ulm1 + ulmneg1 - 4 * u(lm)) ...
+%         .* ([NyZeros; uPrev(l1m)] + [uPrev(lneg1m); NyZeros] + ulm1Prev + ulmneg1Prev - 4 * uPrev(lm)));
+%     clf
+% %     plot(kinEnergyPlate(1:n))
+% %     hold on;
+%     plot(potEnergyPlate(1:n))
+%     surf(uE)
+%     drawnow;
     out(n) = uNext(floor(N(1)/2));
     out2(n) = u(round(Ntot - 15));
     if mod(n,1) == 0 && drawBar == true
-        subplot(2,1,1)
-        plot(u(vec{1}))
-%         u = ones(length(u),1);
-        subplot(2,1,2)
-%         plot(u(vec{2}))
+        uE = u;
+        uE(lm) = 0;
         for q = 0:Nx-1
-            testmat(q+1, 1:Ny) = u(N(1)+1+q*Ny:N(1)+(q+1)*Ny);
+            testmat(q+1, 1:Ny) = uE(N(1)+1+q*Ny:N(1)+(q+1)*Ny);
         end
-        testMatZeros(2:end-1, 2:end-1) = testmat;
-        mesh(testMatZeros);
+        subplot(2,2,1)
+        imagesc(testmat)
+%         plot(u(vec{1}))
+%         u = ones(length(u),1);
+        uE = u;
+        uE(lm1) = 0;
+        for q = 0:Nx-1
+            testmat(q+1, 1:Ny) = uE(N(1)+1+q*Ny:N(1)+(q+1)*Ny);
+        end
+        subplot(2,2,2)
+        imagesc(testmat)
+       
+        uE = u;
+        uE(lmneg1) = 0;
+        for q = 0:Nx-1
+            testmat(q+1, 1:Ny) = uE(N(1)+1+q*Ny:N(1)+(q+1)*Ny);
+        end
+        subplot(2,2,3)
+        imagesc(testmat)
+        
+        uE = u;
+        for q = 0:Nx-1
+            testmat(q+1, 1:Ny) = uE(N(1)+1+q*Ny:N(1)+(q+1)*Ny);
+        end
+        subplot(2,2,4)
+        imagesc(testmat)
+        
         drawnow;
+        pause;
     end
     uPrev = u;
     u = uNext;
@@ -313,3 +309,7 @@ figure;
 totEnergyString = kinEnergyString + potEnergyString;
 totEnergyString = (totEnergyString-totEnergyString(1))/totEnergyString(1);
 plot(totEnergyString)
+
+totEnergyPlate = kinEnergyPlate + potEnergyPlate;
+totEnergyPlate = (totEnergyPlate-totEnergyPlate(1))/totEnergyPlate(1);
+plot(totEnergyPlate)
