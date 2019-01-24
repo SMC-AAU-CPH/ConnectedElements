@@ -1,4 +1,4 @@
-function [B, C, N, h, Dxx] = newCreateString(c, kappa, L, s0, s1, k)
+function [B, C, N, h, Dxx, Dxxxx] = newCreateString(c, kappa, L, s0, s1, k)
    
     h = sqrt((c^2*k^2 + 4 * s1 * k + sqrt((c^2 * k^2 + 4 * s1 * k)^2 + 16 * kappa^2 * k^2)) / 2);
     N = floor(1/h); % Number of gridpoints
@@ -24,6 +24,10 @@ function [B, C, N, h, Dxx] = newCreateString(c, kappa, L, s0, s1, k)
     Dxx2 = zeros(N);
     Dxx2(2:end-1, 2:end-1) = Dxx;
     Dxx = Dxx2;
+    
+    Dxxxx2 = zeros(N);
+    Dxxxx2(2:end-1, 2:end-1) = Dxxxx;
+    Dxxxx = Dxxxx2;
     
     B2 = zeros(N);
     B2(3:end-2, 3:end-2) = B;

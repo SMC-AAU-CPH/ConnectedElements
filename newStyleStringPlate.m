@@ -8,23 +8,25 @@ k = 1 / fs;     % Time step
 %% String
 rhoS = 7850; % Material density string [kg/m^3]
 % A = 2.5e-7; % Cross-sectional area string [m^2]
-r = 0.001;
+r = 0.003;
 A = r^2 * pi;
 T = 1000; % Tension of the string [N]
 L = 1; % Length of the string [m]
 s0S = 0; % Frequency independent damping coefficient
 s1S = 0; % Frequency dependent damping coefficient
-kappaS = 0; % needs E and I to be fully correct
+ES = 2e11; % Young's modulus plate [kg m^-1  s^-2]
+I = pi/2 * r^4; % NEED TO CHECK
+kappaS = sqrt(ES*I / (rhoS * A)); % needs E and I to be fully correct
 c = sqrt(T / (rhoS * A));
 
-[BS, CS, NS, hS, DS] = newCreateString (c, kappaS, L, s0S, s1S, k);
+[BS, CS, NS, hS, DS, DS4] = newCreateString (c, kappaS, L, s0S, s1S, k);
 
 %% Plate
 rhoP = 7850; % Material density plate [kg/m^3]
-H = 0.002; % Plate thickness [m];
-E = 2E11; % Young's modulus plate [kg m^-1  s^-2]
+H = 0.005; % Plate thickness [m];
+EP = 2E11; % Young's modulus plate [kg m^-1  s^-2]
 nu = 0.3; % Poissons ratio [unitless]
-D = (2E11 * H^3) / (12 * (1-nu^2));
+D = (EP * H^3) / (12 * (1-nu^2));
 Lx = 1;
 Ly = 1;
 s0P = 0;
@@ -47,8 +49,8 @@ C(NS+1:NS+NP, NS+1:NS+NP) = CP;
 
 %% Initialise state vectors
 u = zeros(Ntot, 1);
-excitePlate = true;
-exciteString = false;
+excitePlate = false;
+exciteString = true;
 
 %% Excite
 if excitePlate
@@ -69,7 +71,7 @@ if excitePlate
 end
 if exciteString
     exciterPos = 0.25;
-    rcW = 10;
+    rcW = 5;
     u(1 + floor(exciterPos*NS-rcW/2):1 + floor(exciterPos*NS+rcW/2)) = (1-cos(2*pi*(0:rcW)/rcW)) * 0.5;
 end
 uPrev = u;
@@ -113,6 +115,7 @@ for n = 1 : lengthSound
     % find Fc
     if connected
         Fc = -(c^2 * k^2 * I(1:NS)' * DS * u(1:NS) ...
+            - kappaS^2 * k^2 * I(1:NS)' * DS4 * u(1:NS) ...
             - kappaP^2 * k^2 * I(NS+1:end)' * DP * u(NS+1:end))...
             / (I(1:NS)' * J(1:NS) + I(NS+1:end)' * J(NS+1:end));
         
@@ -146,18 +149,17 @@ for n = 1 : lengthSound
 %     drawnow;
     
     
-%     out(n) = uNext(floor(N(1)/2));
+%     out(n) = uNext(floor(NS/2));
 %     out2(n) = u(round(Ntot - 15));
     if mod(n,1) == 0 && drawBar == true
         for q = 0:Nx-1
             testmat(q+1, 1:Ny) = u(NS+1+q*Ny:NS+(q+1)*Ny);
             testmatPrev(q+1, 1:Ny) = uPrev(NS+1+q*Ny:NS+(q+1)*Ny);
         end
-%         subplot(2,2,4)
-%         imagesc(testmat)
+
         plot(u(1:NS))
         drawnow;
-%         pause;
+
     end
     uPrev = u;
     u = uNext;
