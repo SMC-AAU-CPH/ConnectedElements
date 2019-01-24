@@ -7,7 +7,9 @@ k = 1 / fs;     % Time step
 
 %% String
 rhoS = 7850; % Material density string [kg/m^3]
-A = 2.5e-7; % Cross-sectional area string [m^2]
+% A = 2.5e-7; % Cross-sectional area string [m^2]
+r = 0.001;
+A = r^2 * pi;
 T = 1000; % Tension of the string [N]
 L = 1; % Length of the string [m]
 s0S = 0; % Frequency independent damping coefficient
@@ -19,7 +21,7 @@ c = sqrt(T / (rhoS * A));
 
 %% Plate
 rhoP = 7850; % Material density plate [kg/m^3]
-H = 0.05; % Plate thickness [m];
+H = 0.002; % Plate thickness [m];
 E = 2E11; % Young's modulus plate [kg m^-1  s^-2]
 nu = 0.3; % Poissons ratio [unitless]
 D = (2E11 * H^3) / (12 * (1-nu^2));
@@ -46,13 +48,13 @@ C(NS+1:NS+NP, NS+1:NS+NP) = CP;
 %% Initialise state vectors
 u = zeros(Ntot, 1);
 excitePlate = true;
-exciteString = true;
+exciteString = false;
 
 %% Excite
 if excitePlate
-    exciterPosX = 0.5;
-    exciterPosY = 0.5;
-    rcW = floor(min(Nx,Ny) / 2);
+    exciterPosX = 0.75;
+    exciterPosY = 0.75;
+    rcW = floor(min(Nx,Ny) / 10);
     excitationMat = zeros(rcW+1, rcW+1);
     scaler = (1-cos(2*pi*(0:rcW)/rcW)) * 0.5;
     for x = 1:rcW+1
@@ -67,7 +69,7 @@ if excitePlate
 end
 if exciteString
     exciterPos = 0.25;
-    rcW = 5;
+    rcW = 10;
     u(1 + floor(exciterPos*NS-rcW/2):1 + floor(exciterPos*NS+rcW/2)) = (1-cos(2*pi*(0:rcW)/rcW)) * 0.5;
 end
 uPrev = u;
@@ -79,7 +81,7 @@ connP = 0.5;
 
 I = zeros(Ntot, 1);
 I(floor(1+connS * NS)) = 1;
-I(floor(1+NS + connP * NP)) = 1;
+I(floor(1+NS + connP * NP)) = -1;
 
 J = zeros(Ntot, 1);
 J(floor(1+connS * NS)) = k^2 / (rhoS * A * hS);
@@ -87,7 +89,7 @@ J(floor(NS + 1 + connP * NP)) = -k^2 / (rhoP * H * hP^2);
 
 
 %% Length of the sound
-lengthSound = fs / 10;
+lengthSound = fs / 50;
 
 potEnergyString = zeros(lengthSound, 1);
 kinEnergyString = zeros(lengthSound, 1);
@@ -111,7 +113,7 @@ for n = 1 : lengthSound
     % find Fc
     if connected
         Fc = -(c^2 * k^2 * I(1:NS)' * DS * u(1:NS) ...
-            + kappaP^2 * k^2 * I(NS+1:end)' * DP * u(NS+1:end))...
+            - kappaP^2 * k^2 * I(NS+1:end)' * DP * u(NS+1:end))...
             / (I(1:NS)' * J(1:NS) + I(NS+1:end)' * J(NS+1:end));
         
         JFc = J*Fc;
@@ -130,14 +132,17 @@ for n = 1 : lengthSound
 %     clf
 %     subplot(2,1,1)
 %     plot(u(1:NS))
-%     hold on;
-%     plot(I(1:NS))
+% %     hold on;
+% %     plot(I(1:NS))
 %     subplot(2,1,2)
-%     totEnergyString = potEnergyString + kinEnergyString;
-%     totEnergyPlate = potEnergyPlate + kinEnergyPlate;
-%     totEnergy = totEnergyString + totEnergyPlate;
-%     totEnergy = (totEnergy-totEnergy(1))/totEnergy(1);
-%     plot(totEnergy(1:n))
+% %     totEnergyString = potEnergyString + kinEnergyString;
+% %     totEnergyPlate = potEnergyPlate + kinEnergyPlate;
+% %     totEnergy = totEnergyString + totEnergyPlate;
+% %     totEnergy = (totEnergy-totEnergy(1))/totEnergy(1);
+% %     plot(totEnergy(1:n))
+%     
+%     surf(reshape(u(NS+1:end), Nx, Ny));
+%     shading interp;
 %     drawnow;
     
     
