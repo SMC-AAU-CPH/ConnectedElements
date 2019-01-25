@@ -16,13 +16,15 @@ using namespace std;
 class StringExciter
 {
 public:
-  StringExciter();
+    StringExciter();
 
-  void excite();
-  void setLength(int L);
-  void setLevel(double level);
-  double getOutput();
-
+    void excite();
+    void setLength(int L);
+    void setLevel(double level);
+    double getOutput();
+    
+    bool isPlaying() { return play; };
+    
 private:
   bool play = false;
   int pos = 0;

@@ -57,8 +57,16 @@ MainComponent::~MainComponent()
         }
     }
     shutdownAudio();
-    delete plateStiffness;
-    delete plateLabel;
+    if (chooseInstrument != twoStringViolin)
+    {
+        delete plateStiffness;
+        delete plateLabel;
+    }
+    if (chooseInstrument == dulcimer)
+    {
+        delete exciterLengthSlider;
+        delete exciterLengthLabel;
+    }
 }
 
 //==============================================================================
@@ -68,13 +76,34 @@ void MainComponent::prepareToPlay(int samplesPerBlockExpected, double sampleRate
     bufferSize = samplesPerBlockExpected;
 
     dist.setSamplingRate(fs);
-
-    for (int i = 0; i < amountOfSensels; i++)
+    
+    if (chooseInstrument == hurdyGurdy)
     {
-        sensels.add(new Sensel(i)); // chooses the device in the sensel device list
+        if (flip)
+        {
+            sensels.add(new Sensel(0)); // chooses the device in the sensel device list
+            std::cout << "Sensel added " << flip << std::endl;
+        } else {
+            sensels.add(new Sensel(1)); // chooses the device in the sensel device list
+            std::cout << "Sensel added " << flip << std::endl;
+        }
+    } else {
+//        if (flip)
+//        {
+//            for (int i = amountOfSensels - 1; i >= 0; --i)
+//            {
+//                sensels.add(new Sensel(i)); // chooses the device in the sensel device list
+//                std::cout << "Sensel added" << std::endl;
+//            }
+//        } else {
+            for (int i = 0; i < amountOfSensels; ++i)
+            {
+                sensels.add(new Sensel(i)); // chooses the device in the sensel device list
+                std::cout << "Sensel added" << std::endl;
+            }
+//        }
     }
 
-    chooseInstrument = hurdyGurdy;
 
     int stringPlateDivision;
     int bowedSympDivision;
@@ -91,17 +120,16 @@ void MainComponent::prepareToPlay(int samplesPerBlockExpected, double sampleRate
         instruments.add(new Instrument(chooseInstrument, objects, fs, stringPlateDivision, bowedSympDivision));
         for (int i = 0; i < 2; ++i)
         {
-            Slider *bowedStringSlider = new Slider();
+            Slider* bowedStringSlider = new Slider();
             bowedStringSlider->setSliderStyle(Slider::LinearVertical);
             bowedStringSlider->setTextBoxStyle(Slider::NoTextBox, true, 0, 0);
             bowedStringSlider->setPopupDisplayEnabled(true, false, this);
-            Label *label = new Label("Str " + String(i), "Str " + String(i));
+            Label* label = new Label("Str " + String(i), "Str " + String(i));
             label->setJustificationType(Justification::centred);
             addAndMakeVisible(label);
             labels.add(label);
             bowedStringSlider->setRange(0.0, 1.0, 0.1);
-            bowedStringSlider->setValue(0.5);
-            instruments[0]->setMix(i, 0.5);
+            bowedStringSlider->setValue(instruments[0]->getMix(i));
             bowedStringSlider->addListener(this);
             addAndMakeVisible(bowedStringSlider);
             mixSliders.add(bowedStringSlider);
@@ -182,6 +210,15 @@ void MainComponent::prepareToPlay(int samplesPerBlockExpected, double sampleRate
         objects = preObjects;
         stringPlateDivision = 0.75 * appHeight;
         bowedSympDivision = 0;
+        exciterLengthSlider = new Slider(Slider::RotaryVerticalDrag, Slider::TextBoxBelow);
+        exciterLengthSlider->setRange(10, 500, 1);
+        exciterLengthSlider->setValue(10);
+        exciterLengthSlider->addListener(this);
+        addAndMakeVisible(exciterLengthSlider);
+        
+        exciterLengthLabel = new Label("Exciter length", "Exciter length");
+        exciterLengthLabel->setJustificationType(Justification::centred);
+        addAndMakeVisible(exciterLengthLabel);
         names = {"Pluck", "Plate"};
         break;
     }
@@ -198,22 +235,22 @@ void MainComponent::prepareToPlay(int samplesPerBlockExpected, double sampleRate
             bowedStringSlider->setSliderStyle(Slider::LinearVertical);
             bowedStringSlider->setTextBoxStyle(Slider::NoTextBox, true, 0, 0);
             bowedStringSlider->setPopupDisplayEnabled(true, false, this);
+            bowedStringSlider->setRange(0.0, 1.0, 0.1);
+            bowedStringSlider->setValue(instruments[0]->getMix(i));
+            bowedStringSlider->addListener(this);
             Label *label = new Label(names[i], names[i]);
             label->setJustificationType(Justification::centred);
             addAndMakeVisible(label);
             labels.add(label);
-            bowedStringSlider->setRange(0.0, 1.0, 0.1);
-            bowedStringSlider->setValue(0.5);
-            instruments[0]->setMix(i, 0.5);
-            bowedStringSlider->addListener(this);
+            
             addAndMakeVisible(bowedStringSlider);
             mixSliders.add(bowedStringSlider);
         }
 
         plateStiffness = new Slider(Slider::RotaryVerticalDrag, Slider::NoTextBox);
         plateStiffness->setPopupDisplayEnabled(true, false, this);
-        plateStiffness->setRange(30, 1300, 1);
-        plateStiffness->setValue(100);
+        plateStiffness->setRange(0.1, 6000, 0.001);
+        plateStiffness->setValue(2);
         plateStiffness->addListener(this);
         addAndMakeVisible(plateStiffness);
 
@@ -233,34 +270,26 @@ void MainComponent::prepareToPlay(int samplesPerBlockExpected, double sampleRate
     }
     case bowedSitar:
     {
-        if (amountOfSensels == 2)
+        int pluckedStringsAmount = instruments[0]->getNumPluckedStrings();
+
+        float range = 1.0 / static_cast<float>(pluckedStringsAmount);
+
+        for (int i = 0; i < pluckedStringsAmount; i++)
         {
-
-            int pluckedStringsAmount = instruments[0]->getNumPluckedStrings();
-
-            float range = 1.0 / static_cast<float>(pluckedStringsAmount);
-
-            for (int i = 0; i < pluckedStringsAmount; i++)
-            {
-                sensels[1]->addLEDBrightness(range * i, 1);
-            }
+            sensels[flip ? 0 : 1]->addLEDBrightness(range * i, 1);
         }
         break;
     }
 
     case sitar:
     {
-        if (amountOfSensels == 2)
+        int pluckedStringsAmount = instruments[0]->getNumPluckedStrings();
+
+        float range = 1.0 / static_cast<float>(pluckedStringsAmount);
+
+        for (int i = 0; i < pluckedStringsAmount; i++)
         {
-
-            int pluckedStringsAmount = instruments[0]->getNumPluckedStrings();
-
-            float range = 1.0 / static_cast<float>(pluckedStringsAmount);
-
-            for (int i = 0; i < pluckedStringsAmount; i++)
-            {
-                sensels[1]->addLEDBrightness(range * i, 1);
-            }
+            sensels[flip ? 0 : 1]->addLEDBrightness(range * i, 1);
         }
         break;
     }
@@ -270,17 +299,25 @@ void MainComponent::prepareToPlay(int samplesPerBlockExpected, double sampleRate
     }
     case dulcimer:
     {
-        if (amountOfSensels == 2)
+
+        int pluckedStringsAmount = instruments[0]->getNumPluckedStrings() / 2;
+        float range = 1.0 / static_cast<float>(pluckedStringsAmount);
+        
+        if (flip)
         {
-
-            int pluckedStringsAmount = instruments[0]->getNumPluckedStrings() / 2;
-
-            float range = 1.0 / static_cast<float>(pluckedStringsAmount);
-            for (auto sensel : sensels)
+            for (int i = amountOfSensels - 1; i >= 0; --i)
             {
-                for (int i = 0; i < pluckedStringsAmount; i += 2)
+                for (int j = 0; j < pluckedStringsAmount; j += 2)
                 {
-                    sensel->addLEDBrightness(range * i, 1);
+                    sensels[i]->addLEDBrightness(range * j, 1);
+                }
+            }
+        } else {
+            for (int i = 0; i < amountOfSensels; ++i)
+            {
+                for (int j = 0; j < pluckedStringsAmount; j += 2)
+                {
+                    sensels[i]->addLEDBrightness(range * j, 1);
                 }
             }
         }
@@ -295,8 +332,8 @@ void MainComponent::prepareToPlay(int samplesPerBlockExpected, double sampleRate
         if (sensels[0]->senselDetected)
             HighResolutionTimer::startTimer(1000.0 / 150.0);
     
-    Timer::startTimerHz(15);
-    setSize(appWidth, appHeight);
+    Timer::startTimerHz (chooseInstrument == twoStringViolin ? 60 : 15);
+    setSize (appWidth, appHeight);
 }
 void MainComponent::hiResTimerCallback()
 {
@@ -325,14 +362,15 @@ void MainComponent::senselMappingTwoStrings()
     double maxVb = 0.5;
     for (auto sensel : sensels)
     {
+        double finger0X = 0;
+        double finger0Y = 0;
         if (sensel->senselDetected)
         {
             sensel->check();
             unsigned int fingerCount = sensel->contactAmount;
-            int index = sensel->senselIndex;
+            int index = flip ? 1 - sensel->senselIndex : sensel->senselIndex;
             for (int f = 0; f < fingerCount; f++)
             {
-
                 bool state = sensel->fingers[f].state;
                 float x = sensel->fingers[f].x;
                 float y = sensel->fingers[f].y;
@@ -342,7 +380,8 @@ void MainComponent::senselMappingTwoStrings()
 
                 if (f == 0 && state) //fingerID == 0)
                 {
-
+                    finger0X = x;
+                    finger0Y = y;
                     instruments[0]->getStrings()[index]->setBow(state);
                     instruments[0]->getStrings()[index]->setVb(Vb);
                     instruments[0]->getStrings()[index]->setFb(Fb);
@@ -350,7 +389,14 @@ void MainComponent::senselMappingTwoStrings()
                 }
                 else if (fingerID > 0)
                 {
-                    instruments[0]->getStrings()[index]->setFingerPosition(x);
+//                    float dist = sqrt ((finger0X - x) * (finger0X - x) + (finger0Y - y) * (finger0Y - y));
+                    float verDist = std::abs(finger0Y - y);
+                    float horDist = std::abs(finger0X - x);
+                    std::cout << horDist << std::endl;
+                    if (!(verDist <= 0.3 && horDist < 0.05))
+                    {
+                        instruments[0]->getStrings()[index]->setFingerPosition(x);
+                    }
                 }
             }
 
@@ -373,11 +419,12 @@ void MainComponent::senselMappingSitarBowed()
             unsigned int fingerCount = sensel->contactAmount;
             int index = sensel->senselIndex;
 
-            if (index == 0)
+            if (index == flip ? 1 : 0)
             {
+                double finger0X = 0;
+                double finger0Y = 0;
                 for (int f = 0; f < fingerCount; f++)
                 {
-
                     bool state = sensel->fingers[f].state;
                     float x = sensel->fingers[f].x;
                     float y = sensel->fingers[f].y;
@@ -385,7 +432,7 @@ void MainComponent::senselMappingSitarBowed()
                     float Fb = sensel->fingers[f].force * 1000;
                     int fingerID = sensel->fingers[f].fingerID;
 
-                    float range = 1.0 / static_cast<float>(instruments[0]->getNumBowedStrings());
+                    float range = 1.0 / static_cast<float> (instruments[0]->getNumBowedStrings());
                     if (f == 0 && state) //fingerID == 0)
                     {
                         unsigned int pickAString = 0;
@@ -403,8 +450,10 @@ void MainComponent::senselMappingSitarBowed()
                                 instruments[0]->getStrings()[ps]->setBowPos(x, y);
                             }
                             else
-                                instruments[0]->getStrings()[ps]->setBow(false);
+                                instruments[0]->getStrings()[ps]->setBow (false);
                         }
+                        finger0X = x;
+                        finger0Y = y;
                         //instruments[0]->getStrings()[f]->setFingerPoint(fp[index]);
                     }
                     else if (fingerID > 0)
@@ -418,7 +467,14 @@ void MainComponent::senselMappingSitarBowed()
                         {
                             if (ps == pickAString)
                             {
-                                instruments[0]->getStrings()[ps]->setFingerPosition(x);
+                                float verDist = std::abs(finger0Y - y);
+                                float horDist = std::abs(finger0X - x);
+                                std::cout << horDist << std::endl;
+                                if (!(verDist <= 0.3 && horDist < 0.05))
+                                {
+                                    instruments[0]->getStrings()[ps]->setFingerPosition(x);
+                                }
+
                             }
                             //else
                             //instruments[0]->getStrings()[ps]->setFingerPosition(0);;
@@ -433,7 +489,7 @@ void MainComponent::senselMappingSitarBowed()
                 }
             }
 
-            if (index == 1)
+            if (index == flip ? 0 : 1)
             {
                 if (fingerCount == 0)
                 {
@@ -622,9 +678,13 @@ void MainComponent::senselMappingHurdyGurdy()
 
             const unsigned int fingerCount = sensel->contactAmount;
             const int index = sensel->senselIndex;
-//            float Vb = 0.0;
-            if (index == 0)
+            float Vb = 0.0;
+            if (index == flip ? 0 : 1)
             {
+                for (int f = 0; f < fingerCount; f++)
+                {
+                    Vb += sensel->fingers[f].force * maxVb * 15 / static_cast<double> (fingerCount);
+                }
                 for (int f = 0; f < fingerCount; f++)
                 {
 
@@ -635,7 +695,6 @@ void MainComponent::senselMappingHurdyGurdy()
                     
                     const float x = sensel->fingers[f].x;
                     const float y = sensel->fingers[f].y;
-                    const float Vb = sensel->fingers[f].force * maxVb * 15;
                     const float Fb = sensel->fingers[f].force * 1000;
                     const int fingerID = sensel->fingers[f].fingerID;
 
@@ -681,7 +740,7 @@ void MainComponent::senselMappingDulcimer()
             unsigned int fingerCount = sensel->contactAmount;
             int index = sensel->senselIndex;
 
-            if (index == 0)
+            if (index == flip ? 1 : 0)
             {
                 int pluckedStringsAmount = instruments[0]->getNumPluckedStrings() / 2;
 
@@ -721,9 +780,9 @@ void MainComponent::senselMappingDulcimer()
 
                         if (!instruments[0]->getStrings()[stringIndex]->isPicking() && !instruments[0]->getStrings()[stringIndex + 1]->isPicking())
                         {
-                            instruments[0]->getStrings()[stringIndex]->setRaisedCos(xPositions[i], 5, forces[i] / 5.0);
+                            instruments[0]->getStrings()[stringIndex]->setRaisedCos(xPositions[i], 5, forces[i] / 10.0);
                             instruments[0]->getStrings()[stringIndex]->pick(true);
-                            instruments[0]->getStrings()[stringIndex + 1]->setRaisedCos(xPositions[i], 5, forces[i] / 5.0);
+                            instruments[0]->getStrings()[stringIndex + 1]->setRaisedCos(xPositions[i], 5, forces[i] / 10.0);
                             instruments[0]->getStrings()[stringIndex + 1]->pick(true);
                         }
                     }
@@ -735,7 +794,7 @@ void MainComponent::senselMappingDulcimer()
                 }
             }
 
-            if (index == 1)
+            if (index == flip ? 0 : 1)
             {
                 int pluckedStringsAmount = instruments[0]->getNumPluckedStrings() / 2;
 
@@ -830,8 +889,8 @@ void MainComponent::resized()
 {
     Rectangle<int> rect = getLocalBounds();
     Rectangle<int> controlsRect = rect.removeFromRight(controlsWidth);
+    int spacing = 20;
     instruments[0]->setBounds(rect);
-
     int sliderWidth = controlsRect.getWidth() / 2;
 
     for (int row = 0; row < (mixSliders.size() + 1) / 2; ++row)
@@ -844,14 +903,27 @@ void MainComponent::resized()
             mixSliders[i]->setBounds(slidersArea.removeFromLeft(sliderWidth));
             labels[i]->setBounds(labelsArea.removeFromLeft(sliderWidth));
         }
+        
     }
-
+    controlsRect.removeFromTop(spacing);
     if (instruments[0]->getNumPlates() != 0)
     {
         plateLabel->setBounds(controlsRect.removeFromTop(20));
         plateStiffness->setBounds(controlsRect.removeFromTop(controlsRect.getWidth()));
     }
-    midiInputList.setBounds (controlsRect.removeFromTop (36));
+    
+    controlsRect.removeFromTop(spacing);
+    if (chooseInstrument == hurdyGurdy)
+    {
+        midiInputList.setBounds (controlsRect.removeFromTop (36));
+        controlsRect.removeFromTop(spacing);
+    }
+    
+    if (chooseInstrument == dulcimer)
+    {
+        exciterLengthLabel->setBounds(controlsRect.removeFromTop(20));
+        exciterLengthSlider->setBounds(controlsRect.removeFromTop(controlsRect.getWidth()));
+    }
 }
 
 float MainComponent::clip(float output)
@@ -884,6 +956,13 @@ void MainComponent::sliderValueChanged(Slider *slider)
     if (slider == plateStiffness)
     {
         instruments[0]->getPlates()[0]->setFrequency(slider->getValue());
+    }
+    if (slider == exciterLengthSlider)
+    {
+        for (auto pluckedString : instruments[0]->getStrings())
+        {
+            pluckedString->setExciterLength (slider->getValue());
+        }
     }
 }
 
@@ -918,13 +997,14 @@ void MainComponent::handleIncomingMidiMessage(MidiInput *source, const MidiMessa
 
 void MainComponent::handleNoteOn(MidiKeyboardState*, int midiChannel, int midiNoteNumber, float velocity)
 {
-    midiNotesBool[clamp(midiNoteNumber, 60, 80) - 60] = true;
+    std::cout << "Note on!" << std::endl;
+    midiNotesBool[clamp(midiNoteNumber, 60, 85) - 60] = true;
     setPitch();
 }
 
 void MainComponent::handleNoteOff(MidiKeyboardState* state, int midiChannel, int midiNoteNumber, float velocity)
 {
-    midiNotesBool[clamp(midiNoteNumber, 60, 80) - 60] = false;
+    midiNotesBool[clamp(midiNoteNumber, 60, 85) - 60] = false;
     setPitch();
 }
 
@@ -944,6 +1024,10 @@ void MainComponent::setPitch()
     double freqMultiplier = pow(2.0, idxOn / 12.0);
     if (!isNoteOn)
         pitchOffset = 0;
+    if (idxOn == 24)
+    {
+        pitchOffset = clamp (pitchOffset, 0, 1);
+    }
     
     for (int i = numDroneStrings; i < instruments[0]->getNumBowedStrings(); ++i)
     {

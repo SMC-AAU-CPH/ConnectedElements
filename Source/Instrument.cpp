@@ -16,39 +16,41 @@ Instrument::Instrument (InstrumentType instrumentType, vector<ObjectType> object
 : fs (fs), stringPlateDivision (stringPlateDivision), instrumentType (instrumentType), bowedSympDivision (bowedSympDivision)
 {
     vector<double> frequencyInHz;
-    double baseFreq = 113.0;
+//    double baseFreq = instrumentType == hurdyGurdy ? 113.0 : 105.0;
+    double baseFreq = 105.0;
+    double tuning = 0.99;
     switch (instrumentType)
     {
         case twoStringViolin:
             frequencyInHz = {baseFreq,
                              baseFreq * pow(2, 7.0 / 12.0)};
-            mix.resize (2, 0.5);
+            mix.resize (2);
             break;
         case bowedSitar:
             frequencyInHz = {baseFreq,
                              baseFreq * pow(2, 7.0 / 12.0),
                 
-                             baseFreq * pow(2, 12.0 / 12.0),
-                             baseFreq * pow(2, 14.0 / 12.0),
-                             baseFreq * pow(2, 16.0 / 12.0),
-                             baseFreq * pow(2, 17.0 / 12.0),
-                             baseFreq * pow(2, 19.0 / 12.0),
+                             baseFreq * tuning * pow(2, 12.0 / 12.0),
+                             baseFreq * tuning * pow(2, 14.0 / 12.0),
+                             baseFreq * tuning * pow(2, 16.0 / 12.0),
+                             baseFreq * tuning * pow(2, 17.0 / 12.0),
+                             baseFreq * tuning * pow(2, 19.0 / 12.0),
                 
-                             baseFreq * pow(2, 12.0 / 12.0),
-                             baseFreq * pow(2, 12.0 / 12.0),
-                             baseFreq * pow(2, 11.0 / 12.0),
-                             baseFreq * pow(2, 12.0 / 12.0),
-                             baseFreq * pow(2, 14.0 / 12.0),
-                             baseFreq * pow(2, 16.0 / 12.0),
-                             baseFreq * pow(2, 17.0 / 12.0),
-                             baseFreq * pow(2, 19.0 / 12.0),
-                             baseFreq * pow(2, 21.0 / 12.0),
-                             baseFreq * pow(2, 23.0 / 12.0),
-                             baseFreq * pow(2, 24.0 / 12.0),
-                             baseFreq * pow(2, 26.0 / 12.0),
-                             baseFreq * pow(2, 28.0 / 12.0)
+                             baseFreq * tuning * pow(2, 12.0 / 12.0),
+                             baseFreq * tuning * pow(2, 12.0 / 12.0),
+                             baseFreq * tuning * pow(2, 11.0 / 12.0),
+                             baseFreq * tuning * pow(2, 12.0 / 12.0),
+                             baseFreq * tuning * pow(2, 14.0 / 12.0),
+                             baseFreq * tuning * pow(2, 16.0 / 12.0),
+                             baseFreq * tuning * pow(2, 17.0 / 12.0),
+                             baseFreq * tuning * pow(2, 19.0 / 12.0),
+                             baseFreq * tuning * pow(2, 21.0 / 12.0),
+                             baseFreq * tuning * pow(2, 23.0 / 12.0),
+                             baseFreq * tuning * pow(2, 24.0 / 12.0),
+                             baseFreq * tuning * pow(2, 26.0 / 12.0),
+                             baseFreq * tuning * pow(2, 28.0 / 12.0)
             };
-            mix.resize (4, 0.5);
+            mix.resize (4);
             break;
         case sitar:
             frequencyInHz = {
@@ -73,11 +75,13 @@ Instrument::Instrument (InstrumentType instrumentType, vector<ObjectType> object
                 baseFreq * pow(2, 26.0 / 12.0),
                 baseFreq * pow(2, 28.0 / 12.0)
             };
-             mix.resize (3, 0.5);
+            mix.resize (3);
             break;
         case hurdyGurdy:
-            frequencyInHz = {baseFreq * pow(2, -11.0 / 12.0),
-                baseFreq * pow(2, -4.0 / 12.0),
+            frequencyInHz = {
+                
+                baseFreq * pow(2, -12.0 / 12.0),
+                baseFreq * pow(2, -5.0 / 12.0),
                 baseFreq,
                 baseFreq * pow(2, 7.0 / 12.0),
                 baseFreq * pow(2, 12.0 / 12.0),
@@ -96,7 +100,7 @@ Instrument::Instrument (InstrumentType instrumentType, vector<ObjectType> object
                 baseFreq * pow(2, 26.0 / 12.0),
                 baseFreq * pow(2, 28.0 / 12.0)
             };
-             mix.resize (4, 0.5);
+            mix.resize (4);
             break;
         case dulcimer:
             frequencyInHz = {
@@ -169,17 +173,23 @@ Instrument::Instrument (InstrumentType instrumentType, vector<ObjectType> object
 
             };
             // slightly detune
-            for (int i = 0; i < frequencyInHz.size(); i = i + 2)
-            {
-                if (r.nextFloat() > 0.5)
-                    frequencyInHz[i] += frequencyInHz[i]*0.01 * r.nextFloat();
-                else 
-                    frequencyInHz[i] -= frequencyInHz[i]*0.01 * r.nextFloat();
-            }
+//            for (int i = 0; i < frequencyInHz.size(); i = i + 2)
+//            {
+//                if (r.nextFloat() > 0.5)
+//                    frequencyInHz[i] += frequencyInHz[i] * 0.01 * r.nextFloat();
+//                else 
+//                    frequencyInHz[i] -= frequencyInHz[i] * 0.01 * r.nextFloat();
+//            }
 
-            mix.resize (2, 0.5);
+            mix.resize (2);
             break;
     }
+    for (int i = 0; i < mix.size(); ++i)
+    {
+        mix[i] = 0.5;
+    }
+    if (instrumentType != twoStringViolin)
+        mix[mix.size() - 1] = 0.0;
     
     for (int i = 0; i < objectTypes.size(); ++i)
     {
@@ -253,8 +263,8 @@ Instrument::Instrument (InstrumentType instrumentType, vector<ObjectType> object
                                                       x,
                                                       y,
                                                       1, 1,
-                                                      1, 10000, 1,
-                                                      violinStrings[i]->getStringType() == pluckedString ? 800 : 0.25, fs));
+                                                      1, 1, 10000000000,
+                                                      violinStrings[i]->getStringType() == sympString ? 0.5 : 20, fs));
                 }
                 break;
             case dulcimer:
@@ -422,18 +432,18 @@ vector<double> Instrument::calculateOutput()
 {
     vector<double> output = {0.0, 0.0};
     
-    // calculate coefficients from relative displacements
-    for (int c = 0; c < connections.size(); ++c)
-    {
-        connections[c].calculateCoefs();
-    }
-    
     // Interact with the components
     for (auto violinString : violinStrings)
         violinString->bow();
     
     for (auto plate : plates)
         plate->excite();
+
+    // calculate coefficients from relative displacements
+    for (int c = 0; c < connections.size(); ++c)
+    {
+        connections[c].calculateCoefs();
+    }
     
     // Calculate the connection forces
     for (int c = 0; c < connections.size(); ++c)
@@ -525,7 +535,7 @@ vector<double> Instrument::calculateOutput()
                     mixVal = mix[1];
                     break;
             }
-            output[0] += plates[0]->getOutput(0.8, 0.4) * 30 * mixVal;
+            output[0] += plates[0]->getOutput(0.8, 0.4) * 3 * mixVal;
         }
     }
     output[1] = output[0];

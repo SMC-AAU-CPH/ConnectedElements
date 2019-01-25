@@ -127,7 +127,7 @@ void Plate::setImpactPosition (float xPos, float yPos)
 
 void Plate::setFrequency (float f)
 {
-    frequency = clamp(f, 30, 1300); // not really precise frequency here yet
+    frequency = clamp(f, 0.1, 6000); // not really precise frequency here yet
     
     kappaSq = static_cast<double>(frequency * (27.15 / 110)); // Stiffness of plate
     

@@ -40,6 +40,7 @@ public:
     int getTotNumStrings() { return numBowedStrings + numPluckedStrings + numSympStrings; };
     int getNumPlates() { return numPlates; };
     
+    double getMix (int idx) { return mix[idx]; };
     void setMix (int idx, double val) { mix[idx] = val; };
     
 private:

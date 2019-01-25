@@ -15,7 +15,7 @@ StringExciter::StringExciter()
   Fe.resize(maxLength);
 
   for (int i = 0; i < exciterLength; i++)
-    Fe[i] = Fmax / 2.0f * (1 - cos(2 * M_PI * i / exciterLength));
+    Fe[i] = Fmax / 2.0f * (1 - cos(q * M_PI * i / exciterLength));
 }
 
 void StringExciter::excite()
@@ -36,7 +36,9 @@ void StringExciter::setLength(int L)
 void StringExciter::setLevel(double level)
 {
   for (int i = 0; i < exciterLength; i++)
+  {
     Fe[i] = Fmax * 0.5f * (1.0f - cos(q * M_PI * i / exciterLength));
+  }
 }
 
 double StringExciter::getOutput()

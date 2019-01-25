@@ -29,8 +29,8 @@ Connection::Connection (ViolinString* object1, ViolinString* object2,
     
     JFc.resize(2);
     
-    jA = k * k / ((1 + s0A) * k);
-    jB = -k * k * massRatio / ((1 + s0B) * k);
+    jA = k * k / (1 + s0A * k);
+    jB = -k * k * massRatio / (1 + s0B * k);
 
     a1 = 2*sx/k - w0*w0;
     b1 = 2.0*sx/k + w0*w0;
@@ -59,8 +59,8 @@ Connection::Connection (ViolinString* object1, Plate* object2,
     
     JFc.resize(2);
     
-    jA = k * k / ((1 + s0A) * k);
-    jB = -k * k * massRatio / ((1 + s0B) * k);
+    jA = k * k / (1 + s0A * k);
+    jB = -k * k * massRatio / (1 + s0B * k);
     
     a1 = 2*sx/k - w0*w0;
     b1 = 2.0*sx/k + w0*w0;
@@ -93,7 +93,7 @@ void Connection::calculateCoefs()
         case sympStringPlate:
         {
             auto cp2 = plates[0]->getCP (connID[1]);
-            etaR = hA * violinStrings[0]->getStateAt(cp1) - hB * plates[0]->getStateAt(cp2);
+            etaR = hA * violinStrings[0]->getStateAt(cp1) - hB * hB * plates[0]->getStateAt(cp2);
             break;
         }
         case platePlate:
@@ -102,12 +102,12 @@ void Connection::calculateCoefs()
     //a1 = 2*sx/k - w0*w0;
     //b1 = 2.0*sx/k + w0*w0;
     //powW1 = pow(w1,4);
-    double etaSq = etaR*etaR;
+    double W1etaSq = etaR*etaR;
     //double b2 = 2.0*sx/k + w0*w0 + pow(w1,4);
     //rn = (2*sx/k - w0*w0 - pow(w1,4) * etaR*etaR) / (2.0*sx/k + w0*w0 + pow(w1,4) * etaR*etaR);
     //pn = -2.0/(2.0*sx/k + w0*w0 + pow(w1,4)*etaR*etaR);
-    rn = (a1 - powW1 * etaSq) / (b1 + powW1 *etaSq);
-    pn = -2.0/(b1 + powW1 * etaSq);
+    rn = (a1 - W1etaSq) / (b1 + W1etaSq);
+    pn = -2.0 / (b1 + W1etaSq);
 }
 
 vector<double> Connection::calculateJFc()
@@ -125,7 +125,7 @@ vector<double> Connection::calculateJFc()
         case bowedStringPlate:
         case pluckedStringPlate:
         case sympStringPlate:
-            bn = hA * violinStrings[0]->getNextStateAt(violinStrings[0]->getCP(connID[0])) - hB * plates[0]->getNextStateAt(plates[0]->getCP(connID[1]));
+            bn = hA * violinStrings[0]->getNextStateAt(violinStrings[0]->getCP(connID[0])) - hB * hB * plates[0]->getNextStateAt(plates[0]->getCP(connID[1]));
             break;
         case platePlate:
             break;
@@ -133,7 +133,10 @@ vector<double> Connection::calculateJFc()
     an = rn * etaRPrev;
     
     etaRPrev = etaR;
-    Fc = (an - bn) / ((hA * jA - hB * jB) - pn);
+    if (plates.size() == 0)
+        Fc = (an - bn) / ((hA * jA - hB * jB) - pn);
+    else
+        Fc = (an - bn) / ((hA * jA - hB * hB * jB) - pn);
     
     JFc[0] = jA * Fc;
     JFc[1] = jB * Fc;

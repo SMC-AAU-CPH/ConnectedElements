@@ -1,4 +1,4 @@
-function [j, l, E] = createConnection(connection, N, k, h, massRatio, s0, matIdx)
+function [j, l, E] = createConnectionStringPlate(connection, N, k, h, massRatio, s0, matIdx)
     
     EcA = zeros(N(1), 1);
     connPoint = floor(connection(3) * N(1));

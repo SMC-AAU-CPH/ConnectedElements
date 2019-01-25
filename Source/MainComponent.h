@@ -105,10 +105,10 @@ private:
     OwnedArray<Sensel> sensels;
     
     unsigned long stateUpdateCounter = 0;
-    static const unsigned int amountOfSensels = 1;
+    static const InstrumentType chooseInstrument = twoStringViolin;
+    static const unsigned int amountOfSensels = (chooseInstrument == hurdyGurdy) ? 1 : 2;
     
-    Distortion dist {None}; 
-    InstrumentType chooseInstrument;
+    Distortion dist {None};
     
     int appWidth = 1440;
     int appHeight = 800;
@@ -119,7 +119,9 @@ private:
     Slider* plateStiffness;
     OwnedArray<Label> labels;
     Label* plateLabel;
-   
+    Slider* exciterLengthSlider;
+    Label* exciterLengthLabel;
+    
     // MIDI
     MidiKeyboardState keyboardState;
     MidiKeyboardComponent keyboardComponent;
@@ -136,5 +138,9 @@ private:
     vector<bool> midiNotesBool;
     double pitchOffset = 0;
     int numDroneStrings = 2;
+    
+    //flip sensels
+    bool flip = (chooseInstrument == twoStringViolin || chooseInstrument == bowedSitar) ? false : true;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MainComponent)
 };
+

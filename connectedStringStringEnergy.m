@@ -26,13 +26,14 @@ k = 1 / fs;     % Time step
 objectVars{1, 1} = "string";
 freq1 = 110.0;
 gamma = freq1 * 2;
-kappaS = 0;
-objectVars{1, 2} = [gamma, kappaS, 1e99, 0];
+kappaS1 = 0;
+objectVars{1, 2} = [gamma, kappaS1, 1e99, 0];
 
-objectVars{2, 1} = "plate";
-rho = 7850;
-H = 0.01;
-objectVars{2, 2} = [1, 1, H, rho, 1e99, 0];
+objectVars{2, 1} = "string";
+freq2 = 110.0;
+gamma = freq2 * 2;
+kappaS2 = 0;
+objectVars{2, 2} = [gamma, kappaS2, 1e99, 0];
 
 %initialise cells/vectors depending on the number of objects
 Bpre = cell(2, 1);
@@ -50,17 +51,16 @@ s1 = zeros(2, 1);
 
 whatExciter = "raisedCos";
 
-[Bpre{1}, Cpre{1}, N(1), h(1), s0(1)] = createString(objectVars{1, 2}, fs);  
-[Bpre{2}, Cpre{2}, N(2), s0(2), Nx, Ny, h(2), kappaP, D] = createPlate (objectVars{2, 2}, fs);
-Nx = Nx - 1;
-Ny = Ny - 1;
+[Bpre{1}, Cpre{1}, N(1), h(1), s0(1)] = createString (objectVars{1, 2}, fs);  
+[Bpre{2}, Cpre{2}, N(2), h(2), s0(2)] = createString (objectVars{2, 2}, fs);
+
 Ntot = sum(N);
-vec = cell(2, 1);
-matIdx(2) = N(1) + 1;
 
 for q = 1:2
     vec{q} = matIdx(q):matIdx(q)+N(q)-1;
 end
+
+matIdx(2) = N(1) + 1;
 
 %% Create full matrices
 B = zeros(Ntot);
@@ -116,13 +116,13 @@ lengthSound = fs / 10;
     y-location of plate connection,
     1st, 2nd width of connection
 %}
-conn = [1, 2, 0.2, 0.4, 0.4, 1, 1];
+conn = [1, 2, 0.2, 0.2, 1, 1];
 
 J = zeros(Ntot, 1); % second term is the amount of connections
 massRatio = 1;
 
 L = zeros(1, Ntot);
-[J(:,1), L(1,:), E] = createConnectionStringPlate(conn, [N(conn(1)) N(conn(2)) Ntot], k, [h(1) h(2)], massRatio, [s0(conn(1)) s0(conn(2))], [matIdx(conn(1)) matIdx(conn(2))]);
+[J(:,1), L(1,:), E] = createConnectionStringString(conn, [N(conn(1)) N(conn(2)) Ntot], k, [h(1) h(2)], massRatio, [s0(conn(1)) s0(conn(2))], [matIdx(conn(1)) matIdx(conn(2))]);
 %% Spring coefficients 
 sx = 0;
 w0 = 0; 
@@ -132,16 +132,12 @@ out = zeros(lengthSound, 1);
 out2 = zeros(lengthSound, 1);
 drawBar = false;
 
-etaRPrev = zeros(1, 1); %first term is amount of connections
-testmat = ones(Nx, Ny); %or other way around   
-testmatPrev = ones(Nx, Ny); %or other way around   
+etaRPrev = zeros(1, 1); %first term is amount of connections  
 connected = true;
 
-stringVec = vec{1}(2:N(1)-1);
-plateVec = vec{2};
-phVec = 2:(Nx+1);
-% pvVec = (1+Nx):(Nx - 2):(Nx-2)*(Ny-2);
-pvVec = 2:(Ny+1);
+stringVec1 = vec{1}(2:N(1)-1);
+stringVec2 = vec{2}(N(1)+2:N(2)-2);
+
 
 % k = 1;
 % indices = zeros(Nx-2 * Ny-2, 1);
@@ -152,10 +148,10 @@ pvVec = 2:(Ny+1);
 %     end
 % end
 
-potEnergyString = zeros(lengthSound, 1);
-kinEnergyString = zeros(lengthSound, 1);
-potEnergyPlate = zeros(lengthSound, 1);
-kinEnergyPlate = zeros(lengthSound, 1);
+potEnergyString1 = zeros(lengthSound, 1);
+kinEnergyString1 = zeros(lengthSound, 1);
+potEnergyString2 = zeros(lengthSound, 1);
+kinEnergyString2 = zeros(lengthSound, 1);
 JFc = zeros(length(u), 1);
 
 for n = 1 : lengthSound
@@ -174,14 +170,12 @@ for n = 1 : lengthSound
     
     % find Fc
     if connected
-        Fc = (1/h(1) * uTemp(40) -  1/h(2)^2 * uTemp(450)) / (-1/h(1) - 1/h(2)^2);
+        Fc = (u(40) - u(240)) / (-1/h(1) - 1/h(2));
 %         bn = L * uTemp; 
 %         an = Rn * etaRPrev; 
 %         Fc = (L*J-Pn)\(an - bn);
         JFc(40) = k^2 * Fc * 1/h(1);
-        JFc(450) = -k^2 * Fc * 1/h(2)^2;
-%         plot(JFc);
-%         drawnow;
+        JFc(240) = -k^2 * Fc * 1/h(2);
     else 
         JFc = 0;
     end
@@ -192,31 +186,33 @@ for n = 1 : lengthSound
 %     hold on;
 %     plot(u(N(1)+1:end));
 %     drawnow;
-    for q = 0:Nx-1
-        testmat(q+1, 1:Ny) = u(N(1)+1+q*Ny:N(1)+(q+1)*Ny);
-        testmatPrev(q+1, 1:Ny) = uPrev(N(1)+1+q*Ny:N(1)+(q+1)*Ny);
-    end
+%     for q = 0:Nx-1
+%         testmat(q+1, 1:Ny) = u(N(1)+1+q*Ny:N(1)+(q+1)*Ny);
+%         testmatPrev(q+1, 1:Ny) = uPrev(N(1)+1+q*Ny:N(1)+(q+1)*Ny);
+%     end
 %     uE(2:end-1, 2:end-1) = testmat;
 %     uEPrev(2:end-1, 2:end-1) = testmatPrev;
 
-    potEnergyString(n) = gamma^2 / 2 * sum (1 / h(1) * (u(stringVec + 1) - u(stringVec)) .* (uPrev(stringVec + 1) - uPrev(stringVec))) ...
-        + kappaS^2 / 2 * 1/h(1)^3 * sum((u(stringVec + 1) - 2 * u(stringVec) + u(stringVec - 1)) ...
-        .* (uPrev(stringVec + 1) - 2 * uPrev(stringVec) + uPrev(stringVec - 1)));
-    kinEnergyString(n) = 1 / 2 * sum (h(1) * ((1 / k * (u(stringVec) - uPrev(stringVec))).^2));
-    
-    
-    kinEnergyPlate(n) = 1 / 2 * h(2)^2 * sum(sum(1/k^2 * (u(N(1) + 1 : end) - uPrev(N(1) + 1 : end)).^2));
-    potEnergyPlate(n) = kappaP^2 / (2 * h(2)^2) * sum(D * u(N(1) + 1 : end) .* (D * uPrev(N(1) + 1 : end)));
-
+    potEnergyString1(n) = gamma^2 / 2 * sum (1 / h(1) * (u(stringVec1 + 1) - u(stringVec1)) .* (uPrev(stringVec1 + 1) - uPrev(stringVec1))) ...
+        + kappaS1^2 / 2 * 1/h(1)^3 * sum((u(stringVec1 + 1) - 2 * u(stringVec1) + u(stringVec1 - 1)) ...
+        .* (uPrev(stringVec1 + 1) - 2 * uPrev(stringVec1) + uPrev(stringVec1 - 1)));
+    kinEnergyString1(n) = 1 / 2 * sum (h(1) * ((1 / k * (u(stringVec1) - uPrev(stringVec1))).^2));
+     
+     potEnergyString2(n) = gamma^2 / 2 * sum (1 / h(1) * (u(stringVec2 + 1) - u(stringVec2)) .* (uPrev(stringVec2 + 1) - uPrev(stringVec2))) ...
+        + kappaS2^2 / 2 * 1/h(1)^3 * sum((u(stringVec2 + 1) - 2 * u(stringVec2) + u(stringVec2 - 1)) ...
+        .* (uPrev(stringVec2 + 1) - 2 * uPrev(stringVec2) + uPrev(stringVec2 - 1)));
+    kinEnergyString2(n) = 1 / 2 * sum (h(1) * ((1 / k * (u(stringVec2) - uPrev(stringVec2))).^2));
+   
     clf
     subplot(2,1,1)
     plot(u(1:N(1)))
     hold on;
     plot(E(1:N(1)))
+    plot(u(N(2):end) * 1e10);
     subplot(2,1,2)
-    totEnergyString = potEnergyString + kinEnergyString;
-    totEnergyPlate = potEnergyPlate + kinEnergyPlate;
-    totEnergy = totEnergyString + totEnergyPlate;
+    totEnergyString1 = potEnergyString1 + kinEnergyString1;
+    totEnergyString2 = potEnergyString2 + kinEnergyString2;
+    totEnergy = totEnergyString1 + totEnergyString2;
     totEnergy = (totEnergy-totEnergy(1))/totEnergy(1);
     plot(totEnergy(1:n))
     drawnow;
@@ -244,15 +240,15 @@ subplot(2,1,2)
 plot(out2)
 
 figure;
-totEnergyString = kinEnergyString + potEnergyString;
-totEnergyStringPlot = (totEnergyString-totEnergyString(1))/totEnergyString(1);
+totEnergyString1 = kinEnergyString1 + potEnergyString1;
+totEnergyStringPlot = (totEnergyString1-totEnergyString1(1))/totEnergyString1(1);
 plot(totEnergyStringPlot)
 
 figure;
-totEnergyPlate = kinEnergyPlate + potEnergyPlate;
-totEnergyPlatePlot = (totEnergyPlate-totEnergyPlate(1))/totEnergyPlate(1);
+totEnergyString2 = kinEnergyString2 + potEnergyString2;
+totEnergyPlatePlot = (totEnergyString2-totEnergyString2(1))/totEnergyString2(1);
 plot(totEnergyPlatePlot)
 figure;
-totEnergy = totEnergyString+totEnergyPlate;
+totEnergy = totEnergyString1+totEnergyString2;
 totEnergy = (totEnergy-totEnergy(1))/totEnergy(1);
 plot(totEnergy)

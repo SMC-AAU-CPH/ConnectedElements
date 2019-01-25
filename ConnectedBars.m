@@ -14,12 +14,12 @@ objectVars{1, 1} = "string";
 freq1 = 110.0;
 objectVars{1, 2} = [freq1*2, 2, 1, 0.005];
 
-objectVars{2, 1} = "bowedString";
-freq2 = freq1 * 2^(7/12);
-objectVars{2, 2} = [freq2*2, 2, 1, 0.005];
+% objectVars{2, 1} = "bowedString";
+% freq2 = freq1 * 2^(7/12);
+% objectVars{2, 2} = [freq2*2, 2, 1, 0.005];
 
-% objectVars{3, 1} = "plate";
-% objectVars{3, 2} = [1, 1, 0.005, 4];
+objectVars{2, 1} = "plate";
+objectVars{2, 2} = [1, 1, 0.005, 4];
 
 Q = length(objectVars); % amount of objects
 
@@ -51,7 +51,7 @@ for q = 1:Q
 %         whatExciter = "bowed";
         [Bpre{q}, Cpre{q}, bB{q}, bC{q}, N(q), h(q), s0(q)] = createBowedString(objectVars{q, 2}, fs);
     elseif objectVars{q, 1} == "plate"
-        [Bpre{q}, Cpre{q}, N(q), h(q), s0(q), Nx{q}, Ny{q}] = createPlate(objectVars{q, 2}, fs);
+        [Bpre{q}, Cpre{q}, N(q), h(q), s0(q), Nx, Ny] = createPlate (objectVars{q, 2}, fs);
     end
     matIdx(q) = Ntot + 1;
     Ntot = Ntot + N(q);

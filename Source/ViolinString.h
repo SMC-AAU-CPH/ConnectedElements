@@ -104,6 +104,10 @@ public:
     ObjectType getStringType() { return stringType; };
     int getStringID() { return stringID; };
     
+    StringExciter* getStringExciter() { return &stringExciter; }; 
+    
+    void setExciterLength (int length) { exciterLength = length; stringExciter.setLength (length); };
+    
 private:
     double fs, freq, gamma, k, s0, s1, B, kappa, h, N, muSq, kOh, gOh, a, BM, tol, q, qPrev, b, eps, fp, B1, B2, b1, b2, A1, A2, A3, A4, A5, D, E;
     double ff = 0.7;
@@ -111,7 +115,7 @@ private:
     atomic<double> _Vb, _Fb, _bpX, _bpY;
     
     atomic<double> bowPos;
-    double ogFreq;
+    double ogFreq; //original frequency
     vector<int> cx;
     vector<int> cy;
     vector<int> cpIdx;
@@ -155,10 +159,13 @@ private:
     int exciterStart = 0;
     int exciterEnd = 0;
     double exciterForce = 0;
+    int exciterLength = 10;
     
     StringExciter stringExciter;
     
     InstrumentType instrumentType;
+    
+    
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ViolinString)
 };
 

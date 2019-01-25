@@ -1,34 +1,20 @@
-clear all;
-close all;
-clc;
 
-fs = 44100;      % Sampling rate
-k = 1 / fs;     % Time step
+function [maxTotEnergyDiff] = connectedStringPlateLoop (fs, rhoS, r, T, kappaS, rhoP, H, EP, Lx, Ly)
+
 
 %% String
-rhoS = 7850; % Material density string [kg/m^3]
-% A = 2.5e-7; % Cross-sectional area string [m^2]
-r = 0.003;
+k = 1/fs;
 A = r^2 * pi;
-T = 1000; % Tension of the string [N]
 L = 1; % Length of the string [m]
 s0S = 0; % Frequency independent damping coefficient
 s1S = 0; % Frequency dependent damping coefficient
-ES = 2e11; % Young's modulus string [kg m^-1  s^-2]
-I = pi/2 * r^4; % NEED TO CHECK
-kappaS = sqrt(ES*I / (rhoS * A)); % needs E and I to be fully correct
 c = sqrt(T / (rhoS * A));
 
 [BS, CS, NS, hS, DS, DS4] = newCreateString (c, kappaS, L, s0S, s1S, k);
 
 %% Plate
-rhoP = 7850; % Material density plate [kg/m^3]
-H = 0.005; % Plate thickness [m];
-EP = 2E9; % Young's modulus plate [kg m^-1  s^-2]
 nu = 0.3; % Poissons ratio [unitless]
 D = (EP * H^3) / (12 * (1-nu^2));
-Lx = 1;
-Ly = 1;
 s0P = 0;
 s1P = 0;
 
@@ -49,7 +35,7 @@ C(NS+1:NS+NP, NS+1:NS+NP) = CP;
 
 %% Initialise state vectors
 u = zeros(Ntot, 1);
-excitePlate = true;
+excitePlate = false;
 exciteString = true;
 
 %% Excite
@@ -91,7 +77,7 @@ J(floor(NS + 1 + connP * NP)) = -k^2 / (rhoP * H * hP^2);
 
 
 %% Length of the sound
-lengthSound = fs / 100;
+lengthSound = round(fs / 50);
 
 potEnergyString = zeros(lengthSound, 1);
 kinEnergyString = zeros(lengthSound, 1);
@@ -150,5 +136,5 @@ totEnergyPlate = kinEnergyPlate + potEnergyPlate;
 % figure;
 totEnergy = totEnergyString+totEnergyPlate;
 totEnergy = (totEnergy-totEnergy(1))/totEnergy(1);
-maxTotEnergyDiff = (max(totEnergy) + abs(min(totEnergy)))
+maxTotEnergyDiff = (max(totEnergy) + abs(min(totEnergy)));
 % plot(totEnergy)
