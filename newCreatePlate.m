@@ -1,6 +1,6 @@
 function [B, C, N, Nx, Ny, h, kappa, D] = newCreatePlate (Lx, Ly, rho, H, D, s0, s1, k)
     
-    kappa = sqrt(D / (rho * H))/(Lx*Ly);
+    kappa = sqrt(D / (rho * H));
     LWRatio = Lx/Ly;
     h = 2*sqrt(k*(s1^2+sqrt(kappa^2+s1^2)));
 
