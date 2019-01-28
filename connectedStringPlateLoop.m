@@ -43,7 +43,7 @@ exciteString = true;
 if excitePlate
     exciterPosX = 0.75;
     exciterPosY = 0.75;
-    rcW = floor(min(Nx,Ny) / 10);
+    rcW = floor(min(Nx,Ny) / 5);
     excitationMat = zeros(rcW+1, rcW+1);
     scaler = (1-cos(2*pi*(0:rcW)/rcW)) * 0.5;
     for x = 1:rcW+1
@@ -73,11 +73,17 @@ J = zeros(Ntot, 1);
 
 cWS = 2;
 I(1 + floor(connS*NS-cWS/2):1 + floor(connS*NS+cWS/2)) = (1-cos(2*pi*(0:cWS)/cWS)) * 0.5;
-J(1 + floor(connS*NS-cWS/2):1 + floor(connS*NS+cWS/2)) = (1-cos(2*pi*(0:cWS)/cWS)) * 0.5 * k^2 / (rhoS * A * hS);
+J(1 + floor(connS*NS-cWS/2):1 + floor(connS*NS+cWS/2)) = (1-cos(2*pi*(0:cWS)/cWS)) * 0.5 * k^2 / (rhoS * A * hS * (1 + s0S * k));
 
 cWP = 2;
 startIdxX = floor(Nx * connPX - cWP/2);
+if startIdxX == 0
+    startIdxX = 1;
+end
 startIdxY = floor(Ny * connPY - cWP/2);
+if startIdxY == 0
+    startIdxY = 1;
+end
 
 connMat = zeros(cWP+1, cWP+1);
 scaler = (1-cos(2*pi*(0:cWP)/cWP)) * 0.5;
@@ -91,7 +97,7 @@ Jtest = reshape(J(NS+1:end), Nx, Ny);
 %     J(NS + (startIdxY + i) * Nx + startIdxX : NS + (startIdxY + i) * Nx + startIdxX + cWP) = ...
 %     -connMat(i,:) * k^2 / (rhoP * H * hP^2);
 Itest(startIdxX : startIdxX+cWP, startIdxY : startIdxY+cWP) = -connMat;
-Jtest(startIdxX : startIdxX+cWP, startIdxY : startIdxY+cWP) = -connMat * k^2 / (rhoP * H * hP^2);
+Jtest(startIdxX : startIdxX+cWP, startIdxY : startIdxY+cWP) = -connMat * k^2 / (rhoP * H * hP^2 * (1 + s0P * k));
 I(NS+1 : end) = reshape(Itest, NP, 1);
 J(NS+1 : end) = reshape(Jtest, NP, 1);
 % end  
@@ -102,7 +108,7 @@ J(NS+1 : end) = reshape(Jtest, NP, 1);
 
 
 %% Length of the sound
-lengthSound = round(fs / 50);
+lengthSound = round(fs);
 
 potEnergyString = zeros(lengthSound, 1);
 kinEnergyString = zeros(lengthSound, 1);
@@ -114,7 +120,7 @@ out2 = zeros(lengthSound, 1);
 
 stringVec = 2:NS-1;
 
-connected = true;
+connected = false;
 
 JFc = zeros(Ntot);
 testmat = ones(Nx, Ny);
@@ -126,25 +132,25 @@ idx = find(J~=0);
 cIX = connPX * Nx;
 cIY = connPY * Ny;
 for n = 1 : lengthSound
+    uNext = B * u + C * uPrev; 
     if connected
-        Fc = (c^2 * k^2 * I(1:NS)' * (DS / hS^2) * u(1:NS) ...
-            - kappaS^2 * k^2 * I(1:NS)' * (DS4 / hS^4) * u(1:NS)...
-            - kappaP^2 * k^2 * I(NS+1:end)' * ((DP * DP) / hP^4) * u(NS+1:end))...
-            / -(I' * J);
+%         Fc = (2 * I(1:NS)' * u(1:NS) - I(1:NS)' * uPrev(1:NS) + c^2 * k^2 * I(1:NS)' * (DS / hS^2) * u(1:NS) ...
+%             - kappaS^2 * k^2 * I(1:NS)' * (DS4 / hS^4) * u(1:NS)...
+%             + 2 * I(NS+1:end)' * u(NS+1:end) - I(NS+1:end)' * uPrev(NS+1:end) - kappaP^2 * k^2 * I(NS+1:end)' * ((DP * DP) / hP^4) * u(NS+1:end))...
+%             / -(I' * J);
+         Fc = (I(1:NS)' * uNext(1:NS) + I(NS+1:end)' * uNext(NS+1:end)) / -(I' * J);
 %         testmat = reshape(u(NS+1:end), Ny, Nx);
         JFc = J*Fc;
     else 
         JFc = 0;
     end
-    uNext = B * u + C * uPrev + JFc; 
-
-    I' * u
+    uNext = uNext + JFc;
     
-    kinEnergyString(n) = (rhoS * A) / 2 * sum (hS * ((1 / k * (u(stringVec) - uPrev(stringVec))).^2));
+    kinEnergyString(n) = ((rhoS * A) / 2) * sum (hS * ((1 / k * (u(stringVec) - uPrev(stringVec))).^2));
     potEnergyString(n) = T / 2 * sum (1 / hS * (u(stringVec + 1) - u(stringVec)) .* (uPrev(stringVec + 1) - uPrev(stringVec))) ...
         + (ES * IS) / 2 * 1/hS^3 * sum((DS * u(1:NS)) .* (DS * uPrev(1:NS)));
     
-    kinEnergyPlate(n) = (rhoP * H) / 2 * hP^2 * sum(sum(1/k^2 * (u(NS + 1 : end) - uPrev(NS + 1 : end)).^2));
+    kinEnergyPlate(n) = ((rhoP * H) / 2 - 2 * s0P) * hP^2 * sum(sum(1/k^2 * (u(NS + 1 : end) - uPrev(NS + 1 : end)).^2));
     potEnergyPlate(n) = D / (2 * hP^2) * sum((DP * u(NS + 1 : end)) .* (DP * uPrev(NS + 1 : end)));
 
     clf
@@ -175,10 +181,12 @@ for n = 1 : lengthSound
     plot(totEnergy)
     title("Total Energy")
     drawnow;
-
+    
+    out(n) = u(round(NS / pi));
+    out2(n) = u(round(NS + 1 + NP / pi));
     uPrev = u;
     u = uNext;
-    if drawState% && mod(n, 10) == 0
+    if drawState && mod(n, 100) == 0
         clf
         subplot(2,1,1)
         plot (u(1:NS))
@@ -209,7 +217,7 @@ end
 totEnergyString = kinEnergyString + potEnergyString;
 totEnergyPlate = kinEnergyPlate + potEnergyPlate;
 totEnergy = totEnergyString + totEnergyPlate;
-subplot(3, 1, 2)
+subplot(3, 1, 1)
 plot(totEnergyString);
 title("String")
 subplot(3, 1, 2)
