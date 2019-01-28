@@ -9,7 +9,7 @@ s0S = 0; % Frequency independent damping coefficient
 s1S = 0; % Frequency dependent damping coefficient
 c = sqrt(T / (rhoS * A));
 IS = r^4 * pi/4;
-ES = 0;
+ES = 2e11;
 kappaS = sqrt(ES * IS / (rhoS * A));
 [BS, CS, NS, hS, DS, DS4] = newCreateString (c, kappaS, L, s0S, s1S, k);
 
@@ -128,7 +128,7 @@ cIY = connPY * Ny;
 for n = 1 : lengthSound
     if connected
         Fc = (c^2 * k^2 * I(1:NS)' * (DS / hS^2) * u(1:NS) ...
-            - kappaS^2 * k^2 * I(1:NS)' * (DS4 / hS^2) * u(1:NS)...
+            - kappaS^2 * k^2 * I(1:NS)' * (DS4 / hS^4) * u(1:NS)...
             - kappaP^2 * k^2 * I(NS+1:end)' * ((DP * DP) / hP^4) * u(NS+1:end))...
             / -(I' * J);
 %         testmat = reshape(u(NS+1:end), Ny, Nx);
@@ -138,11 +138,11 @@ for n = 1 : lengthSound
     end
     uNext = B * u + C * uPrev + JFc; 
 
-%     I' * u
+    I' * u
     
+    kinEnergyString(n) = (rhoS * A) / 2 * sum (hS * ((1 / k * (u(stringVec) - uPrev(stringVec))).^2));
     potEnergyString(n) = T / 2 * sum (1 / hS * (u(stringVec + 1) - u(stringVec)) .* (uPrev(stringVec + 1) - uPrev(stringVec))) ...
         + (ES * IS) / 2 * 1/hS^3 * sum((DS * u(1:NS)) .* (DS * uPrev(1:NS)));
-    kinEnergyString(n) = (rhoS * A) / 2 * sum (hS * ((1 / k * (u(stringVec) - uPrev(stringVec))).^2));
     
     kinEnergyPlate(n) = (rhoP * H) / 2 * hP^2 * sum(sum(1/k^2 * (u(NS + 1 : end) - uPrev(NS + 1 : end)).^2));
     potEnergyPlate(n) = D / (2 * hP^2) * sum((DP * u(NS + 1 : end)) .* (DP * uPrev(NS + 1 : end)));
@@ -155,7 +155,7 @@ for n = 1 : lengthSound
     subplot(3,2,2)
     totEnergyString(n) = kinEnergyString(n) + potEnergyString(n);
     totEnergyStringPlot(n) = (totEnergyString(n)-totEnergyString(1))/totEnergyString(1);
-    plot(totEnergyString(1:n))
+    plot(totEnergyStringPlot(1:n))
 
     subplot(3,2,3)
     plot(kinEnergyPlate(1:n))
@@ -165,22 +165,15 @@ for n = 1 : lengthSound
     subplot(3,2,4)
     totEnergyPlate(n) = kinEnergyPlate(n) + potEnergyPlate(n);
     totEnergyPlatePlot(n) = (totEnergyPlate(n)-totEnergyPlate(1))/totEnergyPlate(1);
-    plot(totEnergyPlate(1:n))
+    plot(totEnergyPlatePlot(1:n))
     title("Total Plate Energy")
     
     subplot(3,2,5)
-    totEnergyPre = totEnergyString + totEnergyPlate;
-    totEnergyPre = (totEnergyPre-totEnergyPre(1))/totEnergyPre(1);
-%     maxTotEnergyDiff = (max(totEnergy) + abs(min(totEnergy)));
-    title("TotEnergy")
-plot(totEnergyPre)
-    
-    subplot(3,2,6)
     totEnergy = totEnergyString + totEnergyPlate;
     totEnergy = (totEnergy-totEnergy(1))/totEnergy(1);
 %     maxTotEnergyDiff = (max(totEnergy) + abs(min(totEnergy)));
     plot(totEnergy)
-    title("Scaled TotEnergy")
+    title("Total Energy")
     drawnow;
 
     uPrev = u;
@@ -212,31 +205,11 @@ plot(totEnergyPre)
 %     scatter(uNext(idx(2)), 2)
 %     drawnow;
 end
-% subplot(2,1,1)
-% plot(out)
-% subplot(2,1,2)
-% plot(out2)
-
-
 % figure;
 totEnergyString = kinEnergyString + potEnergyString;
-% totEnergyStringPlot = (totEnergyString-totEnergyString(1))/totEnergyString(1);
-% plot(totEnergyString)
-
-% hold on;
-% figure;
 totEnergyPlate = kinEnergyPlate + potEnergyPlate;
-% totEnergyPlatePlot = (totEnergyPlate-totEnergyPlate(1))/totEnergyPlate(1);
-% plot(totEnergyPlate)
-
-% figure;
-% totEnergy = totEnergyString + totEnergyPlate;
-% totEnergy = (totEnergy-totEnergy(1))/totEnergy(1);
-
-totEnergy = totEnergyString + H / A * totEnergyPlate;
-% totEnergy = totEnergyString + 63.66197723 * totEnergyPlate;
-% totEnergy = totEnergyString + (1/hS + 1/hP^2) * totEnergyPlate;
-subplot(3, 1, 1)
+totEnergy = totEnergyString + totEnergyPlate;
+subplot(3, 1, 2)
 plot(totEnergyString);
 title("String")
 subplot(3, 1, 2)
