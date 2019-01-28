@@ -20,7 +20,7 @@ MainComponent::MainComponent() : minOut(-1.0), maxOut(1.0), keyboardComponent (k
     
     addAndMakeVisible(keyboardComponent);
     keyboardState.addListener (this);
-    
+    addAndMakeVisible (vuMeter);
     addAndMakeVisible (midiInputList);
     midiInputList.setTextWhenNoChoicesAvailable ("No MIDI Inputs Enabled");
     auto midiInputs = MidiInput::getDevices();
@@ -249,8 +249,8 @@ void MainComponent::prepareToPlay(int samplesPerBlockExpected, double sampleRate
 
         plateStiffness = new Slider(Slider::RotaryVerticalDrag, Slider::NoTextBox);
         plateStiffness->setPopupDisplayEnabled(true, false, this);
-        plateStiffness->setRange(0.1, 6000, 0.001);
-        plateStiffness->setValue(2);
+        plateStiffness->setRange(0.1, instruments[0]->getPlates()[0]->getMaxKappaSq(), 0.001);
+        plateStiffness->setValue(instruments[0]->getPlates()[0]->getMaxKappaSq());
         plateStiffness->addListener(this);
         addAndMakeVisible(plateStiffness);
 
@@ -869,6 +869,8 @@ void MainComponent::getNextAudioBlock(const AudioSourceChannelInfo &bufferToFill
         //        std::cout << output[0] << std::endl;
         channelData1[i] = output[0];
         channelData2[i] = output[0];
+//        outputLvlLeft = abs(output[0]) + outputLvlLeft * 0.9;
+//        outputLvlRight = abs(output[0]) + outputLvlRight * 0.9;
     }
 }
 
@@ -883,6 +885,8 @@ void MainComponent::releaseResources()
 //==============================================================================
 void MainComponent::paint(Graphics &g)
 {
+//    vuMeter.setLvlLeft (outputLvlLeft);
+//    vuMeter.setLvlRight (outputLvlRight);
 }
 
 void MainComponent::resized()
@@ -924,6 +928,8 @@ void MainComponent::resized()
         exciterLengthLabel->setBounds(controlsRect.removeFromTop(20));
         exciterLengthSlider->setBounds(controlsRect.removeFromTop(controlsRect.getWidth()));
     }
+    
+    vuMeter.setBounds(controlsRect.removeFromBottom(100));
 }
 
 float MainComponent::clip(float output)
@@ -955,7 +961,7 @@ void MainComponent::sliderValueChanged(Slider *slider)
     }
     if (slider == plateStiffness)
     {
-        instruments[0]->getPlates()[0]->setFrequency(slider->getValue());
+        instruments[0]->getPlates()[0]->setKappaSq(slider->getValue());
     }
     if (slider == exciterLengthSlider)
     {

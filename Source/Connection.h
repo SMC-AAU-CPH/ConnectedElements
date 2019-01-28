@@ -65,7 +65,7 @@ private:
     double sx, w0, w1; // Spring constants: damping, linear spring constant, non-linear spring constant
     double massRatio; // Ratio of mass between object1 and object2
     
-    double a1, b1, powW1;
+    double phiMin, phiPlus, powW1;
 
 
     double etaRPrev = 0;
@@ -73,4 +73,5 @@ private:
     double etaR, rn, pn, an, bn, jA, jB;
     vector<double> JFc;
     double k;
+    double massDiff;
 };

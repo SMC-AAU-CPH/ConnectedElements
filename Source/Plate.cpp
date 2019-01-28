@@ -21,6 +21,12 @@ void Plate::setSampleRate (double sampleRate)
     fs = sampleRate;
     k = 1.0f / sampleRate;
     
+    kappaSq = maxKappaSq;
+    h = 2*sqrt(k*(sigma1 * sigma1 +sqrt(kappaSq+ sigma1 * sigma1)));
+    
+    Nx = floor(sqrt(LWRatio)/h);
+    Ny = floor(1.0/(sqrt(LWRatio)*h));
+    
     uMats.resize(3);
     excitationArea.resize(Nx);
     
@@ -53,7 +59,7 @@ void Plate::setSampleRate (double sampleRate)
         }
     }
     
-    setFrequency(220);
+    setKappaSq (maxKappaSq);
 }
 
 void Plate::excite()
@@ -125,12 +131,12 @@ void Plate::setImpactPosition (float xPos, float yPos)
     }
 }
 
-void Plate::setFrequency (float f)
+void Plate::setKappaSq (double kappaSquared)
 {
-    frequency = clamp(f, 0.1, 6000); // not really precise frequency here yet
+//    frequency = clamp(f, 0.1, 6000); // not really precise frequency here yet
     
-    kappaSq = static_cast<double>(frequency * (27.15 / 110)); // Stiffness of plate
-    
+//    kappaSq = static_cast<double>(frequency * (27.15 / 110)); // Stiffness of plate
+    kappaSq = clamp(kappaSquared, 0.1, maxKappaSq);
     d = 1.0f / (1.0f + sigma0 * k);
     B1 = -(kappaSq * k * k) / (h * h * h * h) * d;
     B2 = B1 * 2.0f;

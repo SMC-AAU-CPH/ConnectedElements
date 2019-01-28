@@ -4,10 +4,10 @@ function [B, C, N, Nx, Ny, h, kappa, D] = newCreatePlate (Lx, Ly, rho, H, D, s0,
     LWRatio = Lx/Ly;
     h = 2*sqrt(k*(s1^2+sqrt(kappa^2+s1^2)));
 
-    Nx = floor(sqrt(LWRatio)/h);
-    Ny = floor(1/(sqrt(LWRatio)*h));
+    Nx = floor(Lx/h);
+    Ny = floor(Ly/h);
     
-    h = max(sqrt(LWRatio)/Nx, 1/(sqrt(LWRatio)*Ny));
+    h = max(Lx/Nx, Ly/Ny);
     N = (Nx-1)*(Ny-1);
     
     % generate scheme matrices

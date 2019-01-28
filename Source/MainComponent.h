@@ -12,6 +12,7 @@
 #include "../SenselWrapper/SenselWrapper.h"
 #include "Instrument.h"
 #include "Distortion.h"
+#include "VUMeter.h"
 
 //==============================================================================
 /*
@@ -105,7 +106,7 @@ private:
     OwnedArray<Sensel> sensels;
     
     unsigned long stateUpdateCounter = 0;
-    static const InstrumentType chooseInstrument = twoStringViolin;
+    static const InstrumentType chooseInstrument = dulcimer;
     static const unsigned int amountOfSensels = (chooseInstrument == hurdyGurdy) ? 1 : 2;
     
     Distortion dist {None};
@@ -141,6 +142,10 @@ private:
     
     //flip sensels
     bool flip = (chooseInstrument == twoStringViolin || chooseInstrument == bowedSitar) ? false : true;
+    
+    VUMeter vuMeter;
+    double outputLvlLeft = 0;
+    double outputLvlRight = 0;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MainComponent)
 };
 

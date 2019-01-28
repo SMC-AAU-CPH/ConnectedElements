@@ -30,6 +30,8 @@
       <FILE id="ZKt6JY" name="SenselWrapper.h" compile="0" resource="0" file="SenselWrapper/SenselWrapper.h"/>
     </GROUP>
     <GROUP id="{C397437D-6387-2E58-15AE-F03A3C683002}" name="Source">
+      <FILE id="eMWGdk" name="VUMeter.cpp" compile="1" resource="0" file="Source/VUMeter.cpp"/>
+      <FILE id="kSyd5O" name="VUMeter.h" compile="0" resource="0" file="Source/VUMeter.h"/>
       <FILE id="Q9OPBf" name="Serge.hpp" compile="0" resource="0" file="Source/Serge.hpp"/>
       <FILE id="hxnz4Q" name="Clipper.hpp" compile="0" resource="0" file="Source/Clipper.hpp"/>
       <FILE id="DNgOis" name="Distortion.cpp" compile="1" resource="0" file="Source/Distortion.cpp"/>

@@ -51,8 +51,8 @@ s1 = zeros(2, 1);
 
 whatExciter = "raisedCos";
 
-[Bpre{1}, Cpre{1}, N(1), h(1), s0(1)] = createString (objectVars{1, 2}, fs);  
-[Bpre{2}, Cpre{2}, N(2), h(2), s0(2)] = createString (objectVars{2, 2}, fs);
+[Bpre{1}, Cpre{1}, N(1), h(1), s0(1), DS] = createString (objectVars{1, 2}, fs);  
+[Bpre{2}, Cpre{2}, N(2), h(2), s0(2), DS] = createString (objectVars{2, 2}, fs);
 
 Ntot = sum(N);
 
@@ -154,6 +154,17 @@ potEnergyString2 = zeros(lengthSound, 1);
 kinEnergyString2 = zeros(lengthSound, 1);
 JFc = zeros(length(u), 1);
 
+I = zeros(length(u),1);
+
+J = zeros(length(u),1);
+
+I(40) = 1;
+I(240) = -1;
+
+J(40) = k^2 / h(1);
+J(240) = -k^2 / h(2);
+
+
 for n = 1 : lengthSound
     
     % calculate relative displacement
@@ -170,12 +181,16 @@ for n = 1 : lengthSound
     
     % find Fc
     if connected
-        Fc = (u(40) - u(240)) / (-1/h(1) - 1/h(2));
+%         Fc = (u(40) - u(240)) / (-1/h(1) - 1/h(2));
 %         bn = L * uTemp; 
 %         an = Rn * etaRPrev; 
 %         Fc = (L*J-Pn)\(an - bn);
-        JFc(40) = k^2 * Fc * 1/h(1);
-        JFc(240) = -k^2 * Fc * 1/h(2);
+         Fc = (c^2 * k^2 * I(1:NS)' * (DS / hS^2) * u(1:NS) ...
+             + c^2 * k^2 * I(NS+1:end)' * (DS / hS^2) * u(NS+1:end))...
+             / -(I(1:NS)' * J(1:NS) + I(NS+1:end)' * J(NS+1:end));
+%             - kappaP^2 * k^2 * I(NS+1:end)' * (DP * DP) / hP^4 * u(NS+1:end))...
+%             / -(I(1:NS)' * J(1:NS) + I(NS+1:end)' * J(NS+1:end));
+        JFc = J*Fc;
     else 
         JFc = 0;
     end
@@ -203,20 +218,20 @@ for n = 1 : lengthSound
         .* (uPrev(stringVec2 + 1) - 2 * uPrev(stringVec2) + uPrev(stringVec2 - 1)));
     kinEnergyString2(n) = 1 / 2 * sum (h(1) * ((1 / k * (u(stringVec2) - uPrev(stringVec2))).^2));
    
-    clf
-    subplot(2,1,1)
-    plot(u(1:N(1)))
-    hold on;
-    plot(E(1:N(1)))
-    plot(u(N(2):end) * 1e10);
-    subplot(2,1,2)
-    totEnergyString1 = potEnergyString1 + kinEnergyString1;
-    totEnergyString2 = potEnergyString2 + kinEnergyString2;
-    totEnergy = totEnergyString1 + totEnergyString2;
-    totEnergy = (totEnergy-totEnergy(1))/totEnergy(1);
-    plot(totEnergy(1:n))
-    drawnow;
-    
+%     clf
+%     subplot(2,1,1)
+%     plot(u(1:N(1)))
+%     hold on;
+%     plot(E(1:N(1)))
+%     plot(u(N(2):end) * 1e10);
+%     subplot(2,1,2)
+%     totEnergyString1 = potEnergyString1 + kinEnergyString1;
+%     totEnergyString2 = potEnergyString2 + kinEnergyString2;
+%     totEnergy = totEnergyString1 + totEnergyString2;
+%     totEnergy = (totEnergy-totEnergy(1))/totEnergy(1);
+%     plot(totEnergy(1:n))
+%     drawnow;
+%     
     
     out(n) = uNext(floor(N(1)/2));
     out2(n) = u(round(Ntot - 15));

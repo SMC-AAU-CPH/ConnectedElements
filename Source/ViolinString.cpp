@@ -63,7 +63,7 @@ ViolinString::ViolinString(double freq, double fs, ObjectType stringType, int st
         N = floor(1.0 / h); // Number of gridpoints
     }
     h = 1.0 / N; // Recalculate gridspacing
-    std::cout << N << std::endl;
+    
     // Initialise vectors
 
     uVecs.resize(3);

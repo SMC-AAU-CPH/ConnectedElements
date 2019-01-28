@@ -38,7 +38,7 @@ public:
     
     void setImpactPosition (float xPos, float yPos);
 
-    void setFrequency (float f);
+    void setKappaSq (double kappaSquared);
     void setInput (float in) {input = in;};
     void setDamping (float frequencyDependent, float frequencyIndependent);
     
@@ -71,14 +71,17 @@ public:
     void mouseDrag (const MouseEvent& e) override;
     void mouseUp (const MouseEvent& e) override;
     
+    double getMaxKappaSq() { return maxKappaSq; };
+    
 private:
-    float frequency = 1000;
+//    float frequency = 1000;
+    double maxKappaSq  = 400;
     double k;
     double fs;
-    int Nx = 20; // Number of spatial points
-    int Ny = 10;
-    const double h = getGridSpacing();
-    
+    double h;
+    int Nx; // Number of spatial points
+    int Ny;
+    double LWRatio = 2;
     double d, B1, B2, B3, C, C1, C2, C3, C4;
     double kappaSq, sigma0, sigma1;
     //vector<double> u, un, un1, excitationArea;

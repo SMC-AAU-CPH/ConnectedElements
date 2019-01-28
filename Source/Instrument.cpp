@@ -263,7 +263,7 @@ Instrument::Instrument (InstrumentType instrumentType, vector<ObjectType> object
                                                       x,
                                                       y,
                                                       1, 1,
-                                                      1, 1, 10000000000,
+                                                      1, 10000, 100,
                                                       violinStrings[i]->getStringType() == sympString ? 0.5 : 20, fs));
                 }
                 break;
@@ -290,7 +290,7 @@ Instrument::Instrument (InstrumentType instrumentType, vector<ObjectType> object
                                                       x + 0.2,
                                                       y,
                                                       1, 1,
-                                                      1, 10000, 1,
+                                                      1, 100, 100000,
                                                       1, fs));
                     ++j;
                 }
