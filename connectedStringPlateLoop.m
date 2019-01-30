@@ -117,12 +117,26 @@ lengthSound = round(fs);
 
 potEnergyString = zeros(lengthSound, 1);
 kinEnergyString = zeros(lengthSound, 1);
+totEnergyString = zeros(lengthSound, 1);
+totEnergyStringPlot = zeros(lengthSound, 1);
 potEnergyPlate = zeros(lengthSound, 1);
 kinEnergyPlate = zeros(lengthSound, 1);
+totEnergyPlate = zeros(lengthSound, 1);
+totEnergyPlatePlot = zeros(lengthSound, 1);
+totEnergy = zeros(lengthSound, 1);
+totEnergyPlot = zeros(lengthSound, 1);
+energyConnection = zeros(lengthSound, 1);
+totEnergyPlusConn = zeros(lengthSound, 1);
+totEnergyPlusConnPlot = zeros(lengthSound, 1);
+
 curve = zeros(lengthSound, 1);
 
 out = zeros(lengthSound, 1);
 out2 = zeros(lengthSound, 1);
+
+w0 = 1000;
+w1 = 0;
+sx = 0;
 
 stringVec = 2:NS-1;
 
@@ -133,7 +147,7 @@ connected = true;
 % testmatPrev = ones(Nx, Ny);
 
 drawState = false;
-drawEnergy = false;
+drawEnergy = true;
 % figure;
 idx = find(J~=0);
 cIX = connPX * Nx;
@@ -158,17 +172,23 @@ imagesc(testmat)
 
 %     plot(u(NS+1:end))
 drawnow;
+etaPrev = 0;
+eta = 0;
+L = [I(1:NS) * hS; I(NS+1:end) * hP^2]';
 
 for n = 1 : lengthSound
+    eta = I' * u;
     uNext = B * u + C * uPrev; 
     if connected
-        Fc = (c^2 * k^2 * I(1:NS)' * (DS / hS^2) * u(1:NS) ...
-            - kappaS^2 * k^2 * I(1:NS)' * (DS4 / hS^4) * u(1:NS)...
-            - kappaP^2 * k^2 * I(NS+1:end)' * ((DP * DP) / hP^4) * u(NS+1:end))...
-            / -(I' * J);
+%         rn = (2*sx/k - w0.^2 - w1.^4.*(eta).^2)./(2*sx/k + w0.^2 + w1.^4.*(eta).^2);
+%         pn = -2./(2*sx/k + w0.^2 + w1.^4.*(eta).^2);
+%         Fc = (c^2 * k^2 * I(1:NS)' * (DS / hS^2) * u(1:NS) ...
+%             - kappaS^2 * k^2 * I(1:NS)' * (DS4 / hS^4) * u(1:NS)...
+%             - kappaP^2 * k^2 * I(NS+1:end)' * ((DP * DP) / hP^4) * u(NS+1:end))...
+%             / -(I' * J);
         %this will only screw up if the connection is on or next to the
         %point of excitation
-%          Fc = (I(1:NS)' * uNext(1:NS) + I(NS+1:end)' * uNext(NS+1:end)) / -(I' * J);
+        Fc = (-I' * uNext - 2 * eta - etaPrev) / (I' * J + 4 / w0);
 %         testmat = reshape(u(NS+1:end), Ny, Nx);
         JFc = J*Fc;
     else 
@@ -184,41 +204,73 @@ for n = 1 : lengthSound
     kinEnergyPlate(n) = ((rhoP * H) / 2) * hP^2 * sum(sum(1/k^2 * (u(NS + 1 : end) - uPrev(NS + 1 : end)).^2));
     potEnergyPlate(n) = D / (2 * hP^2) * sum((DP * u(NS + 1 : end)) .* (DP * uPrev(NS + 1 : end)));
 
-    if drawEnergy == true% && mod(n, 10) == 0
+    
+    energyConnection(n) = w0 / 2 * (1/2 * (eta + etaPrev))^2;
+    
+    etaPrev = eta;
+    
+    totEnergyString(n) = kinEnergyString(n) + potEnergyString(n);
+    totEnergyStringPlot(n) = (totEnergyString(n)-totEnergyString(1))/totEnergyString(1);
+    totEnergyPlate(n) = kinEnergyPlate(n) + potEnergyPlate(n);
+    totEnergyPlatePlot(n) = (totEnergyPlate(n)-totEnergyPlate(1))/totEnergyPlate(1);
+    totEnergy(n) = totEnergyString(n) + totEnergyPlate(n);
+    totEnergyPlot(n) = (totEnergy(n)-totEnergy(1))/totEnergy(1);
+    totEnergyPlusConn(n) = totEnergyString(n) + totEnergyPlate(n) + energyConnection(n);
+    totEnergyPlusConnPlot(n) = (totEnergyPlusConn(n)-totEnergyPlusConn(1))/totEnergyPlusConn(1);
+        
+        
+    if drawEnergy == true && mod(n, 10) == 0
+
         clf
         subplot(3,2,1)
-        plot(kinEnergyString(1:n))
-        hold on;
-        plot(potEnergyString(1:n));
+%         plot(kinEnergyString(1:n))
+%         hold on;
+%         plot(potEnergyString(1:n));
+%         title("Kinetic and Potential Energy String ")
+%         subplot(3,2,2)
+        plot(totEnergyString(1:n))
+        title("Total String Energy")
+
+        
         subplot(3,2,2)
-        totEnergyString(n) = kinEnergyString(n) + potEnergyString(n);
-        totEnergyStringPlot(n) = (totEnergyString(n)-totEnergyString(1))/totEnergyString(1);
-        plot(totEnergyStringPlot(1:n))
-
-        subplot(3,2,3)
-        plot(kinEnergyPlate(1:n))
-        hold on;
-        plot(potEnergyPlate(1:n));
-
-        subplot(3,2,4)
-        totEnergyPlate(n) = kinEnergyPlate(n) + potEnergyPlate(n);
-        totEnergyPlatePlot(n) = (totEnergyPlate(n)-totEnergyPlate(1))/totEnergyPlate(1);
-        plot(totEnergyPlatePlot(1:n))
+%         plot(kinEnergyString2(1:n))
+%         hold on;
+%         plot(potEnergyString2(1:n));
+%         title("Kinetic and Potential Energy String 2")
+%         subplot(3,2,4)
+        plot(totEnergyPlate(1:n))
         title("Total Plate Energy")
 
+        subplot(3,2,3)
+        plot(energyConnection(1:n))
+        title("Connection Energy")
+        
+        subplot(3,2,4);
+        plot(totEnergy(1:n))
+        title("TotEnergy Without Connection")
+        
         subplot(3,2,5)
-        totEnergy = totEnergyString + totEnergyPlate;
-        totEnergy = (totEnergy-totEnergy(1))/totEnergy(1);
-    %     maxTotEnergyDiff = (max(totEnergy) + abs(min(totEnergy)));
-        plot(totEnergy)
+        plot(totEnergyPlusConnPlot(1:n))
         title("Total Energy")
         drawnow;
+       
+%        subplot(3, 1, 1)
+%        plot(energyConnection(1:n))
+%        title("Connection Energy");
+%        subplot(3, 1, 2);
+%        plot(totEnergy(1:n))
+%        title("Tot Energy Min Connection");
+%        subplot(3, 1, 3);
+%        plot(totEnergyPlusConn(1:n))
+%        title("Tot Energy Plus Connection");
+%        drawnow;
     end
+    
     out(n) = u(round(NS / pi));
     out2(n) = u(round(NS + 1 + NP / pi));
     uPrev = u;
     u = uNext;
-    if drawState == true && mod(n, 100) == 0
+    if drawState == true% && mod(n, 100) == 0
         clf
         subplot(2,1,1)
         plot (u(1:NS))
