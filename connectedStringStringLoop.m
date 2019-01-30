@@ -19,7 +19,6 @@ kappaS2 = sqrt(E*I2 / (rhoS2 * A2));
 [B1, C1, N1, h1, D1, D41] = newCreateString (c1, kappaS1, L1, s0S, s1S, k);
 [B2, C2, N2, h2, D2, D42] = newCreateString (c2, kappaS2, L2, s0S, s1S, k);
 
-
 %% Create full matrices
 Ntot = N1 + N2;
 B = zeros(Ntot);
@@ -34,7 +33,7 @@ C(N1+1:N1+N2, N1+1:N1+N2) = C2;
 %% Initialise state vectors
 u = zeros(Ntot, 1);
 exciteString1 = true;
-exciteString2 = false;
+exciteString2 = true;
 
 %% Excite
 if exciteString1
@@ -67,7 +66,7 @@ I(N1 + 1 + floor(conn2*N2-cW2/2):N1 + 1 + floor(conn2*N2+cW2/2)) = -(1-cos(2*pi*
 J(N1 + 1 + floor(conn2*N2-cW2/2):N1 + 1 + floor(conn2*N2+cW2/2)) = -(1-cos(2*pi*(0:cW2)/cW2)) * 0.5 * k^2 / (rhoS2 * A2 * h2);
 
 %% Length of the sound
-lengthSound = round(fs / 50);
+lengthSound = round(fs);
 
 potEnergyString1 = zeros(lengthSound, 1);
 kinEnergyString1 = zeros(lengthSound, 1);
@@ -94,11 +93,11 @@ connected = true;
 JFc = zeros(Ntot);
 
 drawState = false;
-drawEnergy = true;
+drawEnergy = false;
 idx = find(J~=0);
 
-w0 = 1000;
-w1 = 0;
+w0 = 10000;
+w1 = 10000;
 sx = 0;
 
 L = [I(1:N1) * h1; I(N1+1:end) * h2]';
@@ -118,8 +117,12 @@ for n = 1 : lengthSound
 %             - kappaS2^2 * k^2 * I(N1+1:end)' * (D42 / h2^4) * u(N1+1:end))...
 %             / -(I'*J);
 
-        Fc = (-I' * uNext - 2 * eta - etaPrev) / (I' * J + 4 / w0);
+%         Fc = (-I' * uNext - 2 * eta - etaPrev) / (I' * J + 4 / w0);
+%         Fc = (-I' * uNext - etaPrev) / (I' * J + 2 / (w1 * eta^2));
+    varPhi = w0/4 + (w1 * eta^2)/2;
+    Fc = (-I' * uNext - (w0 * eta) / (2 * varPhi) - etaPrev) / (I' * J + (1 / varPhi));
 %         Fc = (I'*uNext) / -(I' * J);
+        
         JFc = J*Fc;
     else 
         JFc = 0;
@@ -135,8 +138,9 @@ for n = 1 : lengthSound
     kinEnergyString2(n) = (rhoS2 * A2) / 2 * sum (h2 * ((1 / k * (u(stringVec2) - uPrev(stringVec2))).^2));
     
 %     energyConnection(n) = w0/4 * (eta^2 + etaPrev^2); % when using center time difference 
-    energyConnection(n) = w0/2 * (1/2 * (eta + etaPrev))^2; % when using forward * backward time difference
-    
+%     energyConnection(n) = w0/2 * (1/2 * (eta + etaPrev))^2; % when using forward * backward time difference (mu_tt}
+%     energyConnection(n) = w1 / 2 * (1/2 * eta^2 * etaPrev^2); 
+    energyConnection(n) = w0/2 * (1/2 * (eta + etaPrev))^2 + w1 / 2 * (1/2 * eta^2 * etaPrev^2);
     etaPrev = eta;
     
     totEnergyString1(n) = kinEnergyString1(n) + potEnergyString1(n);
@@ -149,7 +153,7 @@ for n = 1 : lengthSound
     totEnergyPlusConnPlot(n) = (totEnergyPlusConn(n)-totEnergyPlusConn(1))/totEnergyPlusConn(1);
         
         
-    if drawEnergy == true && mod(n, 10) == 0
+    if drawEnergy == false && mod(n, 10) == 0
 
         clf
         subplot(3,2,1)
