@@ -233,7 +233,7 @@ Instrument::Instrument (InstrumentType instrumentType, vector<ObjectType> object
             
     }
 
-    if (numPlates != 0)
+    if (numPlates != 0) // If not twoStringViolin
     {
         for (int i = 0; i < numBowedStrings; ++i)
         {
@@ -263,8 +263,8 @@ Instrument::Instrument (InstrumentType instrumentType, vector<ObjectType> object
                                                       x,
                                                       y,
                                                       1, 1,
-                                                      1, 10000, 100,
-                                                      violinStrings[i]->getStringType() == sympString ? 0.5 : 20, fs));
+                                                      1, 100, 100000,
+                                                      violinStrings[i]->getStringType() == sympString ? 0.5 : 1, fs));
                 }
                 break;
             case dulcimer:
@@ -291,7 +291,7 @@ Instrument::Instrument (InstrumentType instrumentType, vector<ObjectType> object
                                                       y,
                                                       1, 1,
                                                       1, 100, 100000,
-                                                      1, fs));
+                                                      100, fs));
                     ++j;
                 }
                 break;

@@ -1,4 +1,4 @@
-function [maxTotEnergyDiff] = connectedStringPlateLoop (fs, rhoS, r, T, rhoP, H, EP, Lx, Ly, connS, connPX, connPY)
+function [maxTotEnergyDiff] = connectedStringPlateLoop (fs, rhoS, r, T, rhoP, H, EP, Lx, Ly, connS, connPX, connPY, w0, w1, exciteType)
 
 
 %% String
@@ -36,8 +36,16 @@ C(NS+1:NS+NP, NS+1:NS+NP) = CP;
 
 %% Initialise state vectors
 u = zeros(Ntot, 1);
-excitePlate = true;
-exciteString = true;
+if exciteType == 0
+    excitePlate = true;
+    exciteString = true;
+elseif exciteType == 1
+    excitePlate = true;
+    exciteString = false;
+elseif exciteType == 2
+    excitePlate = false;
+    exciteString = true;
+end
 
 %% Excite
 if excitePlate
@@ -60,7 +68,7 @@ end
 if exciteString
     exciterPos = 0.75;
     rcW = 2;
-    u(1 + floor(exciterPos*NS-rcW/2):1 + floor(exciterPos*NS+rcW/2)) = (1-cos(2*pi*(0:rcW)/rcW)) * 0.5;
+    u(1 + floor(exciterPos*NS-rcW/2):1 + floor(exciterPos*NS+rcW/2)) = 100 * (1-cos(2*pi*(0:rcW)/rcW)) * 0.5;
 end
 uPrev = u;
 uNext = u;
@@ -113,7 +121,7 @@ J(NS+1 : end) = reshape(Jtest, NP, 1);
 
 
 %% Length of the sound
-lengthSound = round(fs);
+lengthSound = round(fs/50);
 
 potEnergyString = zeros(lengthSound, 1);
 kinEnergyString = zeros(lengthSound, 1);
@@ -134,8 +142,8 @@ curve = zeros(lengthSound, 1);
 out = zeros(lengthSound, 1);
 out2 = zeros(lengthSound, 1);
 
-w0 = 1000;
-w1 = 0;
+% w0 = 100;
+% w1 = 1000000;
 sx = 0;
 
 stringVec = 2:NS-1;
@@ -188,7 +196,11 @@ for n = 1 : lengthSound
 %             / -(I' * J);
         %this will only screw up if the connection is on or next to the
         %point of excitation
-        Fc = (-I' * uNext - 2 * eta - etaPrev) / (I' * J + 4 / w0);
+        varPhi = w0/4 + (w1 * eta^2)/2;
+        Fc = (-I' * uNext * varPhi - (w0 * eta) / 2 - etaPrev * varPhi) ...
+            / (I' * J * varPhi + 1);
+
+%         Fc = (-I' * uNext - 2 * eta - etaPrev) / (I' * J + 4 / w0);
 %         testmat = reshape(u(NS+1:end), Ny, Nx);
         JFc = J*Fc;
     else 
@@ -205,7 +217,9 @@ for n = 1 : lengthSound
     potEnergyPlate(n) = D / (2 * hP^2) * sum((DP * u(NS + 1 : end)) .* (DP * uPrev(NS + 1 : end)));
 
     
-    energyConnection(n) = w0 / 2 * (1/2 * (eta + etaPrev))^2;
+%     energyConnection(n) = w0 / 2 * (1/2 * (eta + etaPrev))^2;
+
+    energyConnection(n) = w0/2 * (1/2 * (eta + etaPrev))^2 + w1 / 2 * (1/2 * eta^2 * etaPrev^2);
     
     etaPrev = eta;
     
@@ -306,7 +320,7 @@ energyTest = log(totEnergyString(2:end) - totEnergyString(1:end-1));
 plot(energyTest - energyTest(1) / energyTest(1));
 
 totEnergyPlate = kinEnergyPlate + potEnergyPlate;
-totEnergy = totEnergyString + totEnergyPlate;
+totEnergy = totEnergyString + totEnergyPlate + energyConnection;
 subplot(3, 1, 1)
 plot(totEnergyString);
 title("String")

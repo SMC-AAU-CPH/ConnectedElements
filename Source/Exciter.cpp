@@ -15,12 +15,12 @@ StringExciter::StringExciter()
   Fe.resize(maxLength);
 
   for (int i = 0; i < exciterLength; i++)
-    Fe[i] = Fmax / 2.0f * (1 - cos(q * M_PI * i / exciterLength));
+      Fe[i] = Fmax / 2.0f * (1 - cos(q * M_PI * i / exciterLength));
 }
 
 void StringExciter::excite()
 {
-  play = true;
+    play = true;
 }
 void StringExciter::setLength(int L)
 {

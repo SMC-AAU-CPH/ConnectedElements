@@ -75,7 +75,7 @@ public:
     
 private:
 //    float frequency = 1000;
-    double maxKappaSq  = 400;
+    double maxKappaSq  = 2500;
     double k;
     double fs;
     double h;

@@ -108,6 +108,8 @@ public:
     
     void setExciterLength (int length) { exciterLength = length; stringExciter.setLength (length); };
     
+    bool isStringBowing() { return _isBowing; };
+    
 private:
     double fs, freq, gamma, k, s0, s1, B, kappa, h, N, muSq, kOh, gOh, a, BM, tol, q, qPrev, b, eps, fp, B1, B2, b1, b2, A1, A2, A3, A4, A5, D, E;
     double ff = 0.7;

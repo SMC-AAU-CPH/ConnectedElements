@@ -7,8 +7,8 @@ A1 = r1^2 * pi;
 A2 = r2^2 * pi;
 L1 = 1; % Length of the string [m]
 L2 = 1; % Length of the string [m]
-s0S = 0; % Frequency independent damping coefficient
-s1S = 0; % Frequency dependent damping coefficient
+s0S = 0.1; % Frequency independent damping coefficient
+s1S = 0.005; % Frequency dependent damping coefficient
 c1 = sqrt(T1 / (rhoS1 * A1));
 c2 = sqrt(T2 / (rhoS2 * A2));
 I1 = pi/4 * r1^4;
@@ -93,11 +93,11 @@ connected = true;
 JFc = zeros(Ntot);
 
 drawState = false;
-drawEnergy = false;
+drawEnergy = true;
 idx = find(J~=0);
 
-w0 = 10000;
-w1 = 10000;
+w0 = 100;
+w1 = 10000000;
 sx = 0;
 
 L = [I(1:N1) * h1; I(N1+1:end) * h2]';
@@ -120,7 +120,7 @@ for n = 1 : lengthSound
 %         Fc = (-I' * uNext - 2 * eta - etaPrev) / (I' * J + 4 / w0);
 %         Fc = (-I' * uNext - etaPrev) / (I' * J + 2 / (w1 * eta^2));
     varPhi = w0/4 + (w1 * eta^2)/2;
-    Fc = (-I' * uNext - (w0 * eta) / (2 * varPhi) - etaPrev) / (I' * J + (1 / varPhi));
+    Fc = (-I' * uNext * varPhi - (w0 * eta) / 2 - etaPrev * varPhi) / (I' * J * varPhi + 1);
 %         Fc = (I'*uNext) / -(I' * J);
         
         JFc = J*Fc;

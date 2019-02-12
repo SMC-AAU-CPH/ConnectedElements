@@ -24,6 +24,8 @@ public:
     double getOutput();
     
     bool isPlaying() { return play; };
+
+    void setQ (int Q)  { q = Q; };
     
 private:
   bool play = false;

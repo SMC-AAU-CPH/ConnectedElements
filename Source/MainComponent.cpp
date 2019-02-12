@@ -359,7 +359,8 @@ void MainComponent::hiResTimerCallback()
 
 void MainComponent::senselMappingTwoStrings()
 {
-    double maxVb = 0.5;
+    double maxVb = 1;
+    double maxFb = 100;
     for (auto sensel : sensels)
     {
         double finger0X = 0;
@@ -374,7 +375,7 @@ void MainComponent::senselMappingTwoStrings()
                 bool state = sensel->fingers[f].state;
                 float x = sensel->fingers[f].x;
                 float y = sensel->fingers[f].y;
-                float Vb = sensel->fingers[f].delta_y * maxVb;
+                float Vb = sensel->fingers[f].delta_y / 2.0;
                 float Fb = sensel->fingers[f].force * 1000;
                 int fingerID = sensel->fingers[f].fingerID;
 
@@ -383,6 +384,8 @@ void MainComponent::senselMappingTwoStrings()
                     finger0X = x;
                     finger0Y = y;
                     instruments[0]->getStrings()[index]->setBow(state);
+                    Vb = clamp(Vb, -maxVb, maxVb);
+                    Fb = clamp(Fb, 0, maxFb);
                     instruments[0]->getStrings()[index]->setVb(Vb);
                     instruments[0]->getStrings()[index]->setFb(Fb);
                     instruments[0]->getStrings()[index]->setBowPos(x, y);
@@ -409,7 +412,8 @@ void MainComponent::senselMappingTwoStrings()
 }
 void MainComponent::senselMappingSitarBowed()
 {
-    double maxVb = 0.5;
+    double maxVb = 1;
+    double maxFb = 100;
     for (auto sensel : sensels)
     {
         if (sensel->senselDetected)
@@ -428,7 +432,7 @@ void MainComponent::senselMappingSitarBowed()
                     bool state = sensel->fingers[f].state;
                     float x = sensel->fingers[f].x;
                     float y = sensel->fingers[f].y;
-                    float Vb = sensel->fingers[f].delta_y * maxVb;
+                    float Vb = sensel->fingers[f].delta_y * 0.5;
                     float Fb = sensel->fingers[f].force * 1000;
                     int fingerID = sensel->fingers[f].fingerID;
 
@@ -445,6 +449,9 @@ void MainComponent::senselMappingSitarBowed()
                             if (ps == pickAString)
                             {
                                 instruments[0]->getStrings()[ps]->setBow(state);
+                                Vb = clamp(Vb, -maxVb, maxVb);
+                                Fb = clamp(Fb, 0, maxFb);
+                                std::cout << "Vb: " << Vb << " Fb: " << Fb << std::endl;
                                 instruments[0]->getStrings()[ps]->setVb(Vb);
                                 instruments[0]->getStrings()[ps]->setFb(Fb);
                                 instruments[0]->getStrings()[ps]->setBowPos(x, y);
@@ -697,7 +704,6 @@ void MainComponent::senselMappingHurdyGurdy()
                     const float y = sensel->fingers[f].y;
                     const float Fb = sensel->fingers[f].force * 1000;
                     const int fingerID = sensel->fingers[f].fingerID;
-
                     const float range = 1.0 / static_cast<float>(instruments[0]->getNumBowedStrings());
 
                     unsigned int pickAString = 0;
@@ -948,6 +954,7 @@ float MainComponent::clip(float output)
 void MainComponent::timerCallback()
 {
     repaint();
+//    std::cout << instruments[0]->getStrings()[0]->isStringBowing() << std::endl;
 }
 
 void MainComponent::sliderValueChanged(Slider *slider)

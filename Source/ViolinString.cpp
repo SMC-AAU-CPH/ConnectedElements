@@ -116,6 +116,9 @@ ViolinString::ViolinString(double freq, double fs, ObjectType stringType, int st
     
 //    if (instrumentType == dulcimer)
 //        stringExciter.setLength (100);
+    if (instrumentType == dulcimer)
+        stringExciter.setQ (2);
+    
     reset();
 }
 
@@ -223,7 +226,6 @@ void ViolinString::bow()
     
     if (_isPicking)
     {
-        
         int width = exciterEnd - exciterStart;
 
         double in = stringExciter.getOutput();
@@ -463,6 +465,8 @@ void ViolinString::mouseDown(const MouseEvent &e)
 {
     if (ModifierKeys::getCurrentModifiers() == ModifierKeys::leftButtonModifier && stringType == bowedString)
     {
+        _Vb = 0.2;
+        _Fb = 80;
         setBow(true);
     } else {
         setRaisedCos(e.x / static_cast<double>(getWidth()), 5, 0.005);
