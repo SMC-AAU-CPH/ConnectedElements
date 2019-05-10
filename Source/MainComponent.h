@@ -24,6 +24,7 @@ class MainComponent : public AudioAppComponent,
                       public HighResolutionTimer,
                       public Timer,
                       public Slider::Listener,
+                      public Button::Listener,
                       private MidiInputCallback,
                       private MidiKeyboardStateListener
 {
@@ -47,6 +48,7 @@ public:
     float clip(float output);
     
     void sliderValueChanged (Slider* slider) override;
+    void buttonClicked (Button* button) override;
     
     // MIDI
     
@@ -106,7 +108,7 @@ private:
     OwnedArray<Sensel> sensels;
     
     unsigned long stateUpdateCounter = 0;
-    static const InstrumentType chooseInstrument = dulcimer;
+    static const InstrumentType chooseInstrument = hurdyGurdy;
     static const unsigned int amountOfSensels = (chooseInstrument == hurdyGurdy) ? 1 : 2;
     
     Distortion dist {None};
@@ -134,6 +136,9 @@ private:
     bool isAddingFromMidiInput = false;         // [4]
     
     TextEditor midiMessagesBox;
+    TextButton graphicsButton {"Graphics"};
+//    TextButton senselButton {"Sensel"};
+    TextButton soundButton {"Sound"};
     double startTime;
     
     vector<bool> midiNotesBool;
@@ -146,6 +151,10 @@ private:
     VUMeter vuMeter;
     double outputLvlLeft = 0;
     double outputLvlRight = 0;
+    
+    bool graphicsToggle = false;
+//    bool senselToggle = true;
+    bool soundToggle = true;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MainComponent)
 };
 

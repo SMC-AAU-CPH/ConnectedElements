@@ -263,11 +263,12 @@ Instrument::Instrument (InstrumentType instrumentType, vector<ObjectType> object
                                                       x,
                                                       y,
                                                       1, 1,
-                                                      1, 100, 100000,
-                                                      violinStrings[i]->getStringType() == sympString ? 0.5 : 1, fs));
+                                                      0, 100, 100000,
+                                                      violinStrings[i]->getStringType() == sympString ? 0.5 : 2, fs));
                 }
                 break;
             case dulcimer:
+            {
                 int j = 0;
                 for (int i = 1; i < numPluckedStrings; i = i + 2)
                 {
@@ -281,10 +282,10 @@ Instrument::Instrument (InstrumentType instrumentType, vector<ObjectType> object
                     double halfFlag = false;
                     if ((j > (numPluckedStrings / 4)) && !halfFlag)
                         halfFlag = true;
-                    
+
                     double x = (j - (halfFlag ? numPluckedStrings / 4 : 0)) / static_cast<double>(plates[0]->getNumXPoints());
                     double y = (halfFlag ? 0.5 : 0.6);
-                    
+
                     connections.push_back (Connection (violinStrings[i], plates[0],
                                                       (violinStrings[i]->getNumPoints() - 4) / static_cast<double>(violinStrings[i]->getNumPoints()),
                                                       x + 0.2,
@@ -295,6 +296,7 @@ Instrument::Instrument (InstrumentType instrumentType, vector<ObjectType> object
                     ++j;
                 }
                 break;
+            }
         }
     }
     totBowedStringHeight = stringPlateDivision;
@@ -519,7 +521,7 @@ vector<double> Instrument::calculateOutput()
                     mixVal = 0;
                     break;
             }
-            output[0] +=  violinStrings[i]->getOutput(0.68) * 2000 * mixVal;
+            output[0] +=  violinStrings[i]->getOutput(0.68) * 50 * mixVal;
         }
         for (int i = 0; i < numPlates; i++)
         {

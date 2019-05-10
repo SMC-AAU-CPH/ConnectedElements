@@ -219,7 +219,7 @@ for n = 1 : lengthSound
     
 %     energyConnection(n) = w0 / 2 * (1/2 * (eta + etaPrev))^2;
 
-    energyConnection(n) = w0/2 * (1/2 * (eta + etaPrev))^2 + w1 / 2 * (1/2 * eta^2 * etaPrev^2);
+    energyConnection(n) = w0/8 * ((eta + etaPrev))^2 + w1 / 4 * (eta^2 * etaPrev^2);
     
     etaPrev = eta;
     

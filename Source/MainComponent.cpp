@@ -40,6 +40,12 @@ MainComponent::MainComponent() : minOut(-1.0), maxOut(1.0), keyboardComponent (k
     setMidiInput (MidiInput::getDevices().size() - 1);
     
     midiNotesBool.resize(25, false);
+    graphicsButton.addListener (this);
+//    senselButton.addListener (this);
+    soundButton.addListener (this);
+    addAndMakeVisible (graphicsButton);
+//    addAndMakeVisible (senselButton);
+    addAndMakeVisible (soundButton);
 }
 
 MainComponent::~MainComponent()
@@ -395,7 +401,7 @@ void MainComponent::senselMappingTwoStrings()
 //                    float dist = sqrt ((finger0X - x) * (finger0X - x) + (finger0Y - y) * (finger0Y - y));
                     float verDist = std::abs(finger0Y - y);
                     float horDist = std::abs(finger0X - x);
-                    std::cout << horDist << std::endl;
+//                    std::cout << horDist << std::endl;
                     if (!(verDist <= 0.3 && horDist < 0.05))
                     {
                         instruments[0]->getStrings()[index]->setFingerPosition(x);
@@ -451,7 +457,7 @@ void MainComponent::senselMappingSitarBowed()
                                 instruments[0]->getStrings()[ps]->setBow(state);
                                 Vb = clamp(Vb, -maxVb, maxVb);
                                 Fb = clamp(Fb, 0, maxFb);
-                                std::cout << "Vb: " << Vb << " Fb: " << Fb << std::endl;
+//                                std::cout << "Vb: " << Vb << " Fb: " << Fb << std::endl;
                                 instruments[0]->getStrings()[ps]->setVb(Vb);
                                 instruments[0]->getStrings()[ps]->setFb(Fb);
                                 instruments[0]->getStrings()[ps]->setBowPos(x, y);
@@ -476,7 +482,7 @@ void MainComponent::senselMappingSitarBowed()
                             {
                                 float verDist = std::abs(finger0Y - y);
                                 float horDist = std::abs(finger0X - x);
-                                std::cout << horDist << std::endl;
+//                                std::cout << horDist << std::endl;
                                 if (!(verDist <= 0.3 && horDist < 0.05))
                                 {
                                     instruments[0]->getStrings()[ps]->setFingerPosition(x);
@@ -860,6 +866,9 @@ void MainComponent::senselMappingDulcimer()
 void MainComponent::getNextAudioBlock(const AudioSourceChannelInfo &bufferToFill)
 {
 
+    if (!soundToggle)
+        return;
+    
     float *const channelData1 = bufferToFill.buffer->getWritePointer(0, bufferToFill.startSample);
     float *const channelData2 = bufferToFill.buffer->getWritePointer(1, bufferToFill.startSample);
 
@@ -935,7 +944,14 @@ void MainComponent::resized()
         exciterLengthSlider->setBounds(controlsRect.removeFromTop(controlsRect.getWidth()));
     }
     
-    vuMeter.setBounds(controlsRect.removeFromBottom(100));
+//    vuMeter.setBounds(controlsRect.removeFromBottom(100));
+    
+//    controlsRect.removeFromTop(10);
+//    graphicsButton.setBounds (controlsRect.removeFromTop(50));
+////    con   trolsRect.removeFromTop(10);
+////    senselButton.setBounds (controlsRect.removeFromTop(50));
+//    controlsRect.removeFromTop(10);
+//    soundButton.setBounds (controlsRect.removeFromTop(50));
 }
 
 float MainComponent::clip(float output)
@@ -953,7 +969,8 @@ float MainComponent::clip(float output)
 
 void MainComponent::timerCallback()
 {
-    repaint();
+    if (graphicsToggle)
+        repaint();
 //    std::cout << instruments[0]->getStrings()[0]->isStringBowing() << std::endl;
 }
 
@@ -976,6 +993,31 @@ void MainComponent::sliderValueChanged(Slider *slider)
         {
             pluckedString->setExciterLength (slider->getValue());
         }
+    }
+}
+
+void MainComponent::buttonClicked (Button* button)
+{
+    if (button == &graphicsButton)
+    {
+        graphicsToggle = !graphicsToggle;
+        if (graphicsToggle)
+            Timer::startTimerHz (chooseInstrument == twoStringViolin ? 60 : 15);
+        else
+            Timer::stopTimer();
+    }
+//    if (button == &senselButton)
+//    {
+//        senselToggle = !senselToggle;
+//        if (senselToggle)
+//            HighResolutionTimer::startTimer(1000.0 / 150.0);
+//        else
+//            HighResolutionTimer::stopTimer();
+//
+//    }
+    if (button == &soundButton)
+    {
+        soundToggle = !soundToggle;
     }
 }
 

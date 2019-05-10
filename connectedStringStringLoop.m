@@ -7,8 +7,8 @@ A1 = r1^2 * pi;
 A2 = r2^2 * pi;
 L1 = 1; % Length of the string [m]
 L2 = 1; % Length of the string [m]
-s0S = 0.1; % Frequency independent damping coefficient
-s1S = 0.005; % Frequency dependent damping coefficient
+s0S = 0.0; % Frequency independent damping coefficient
+s1S = 0.000; % Frequency dependent damping coefficient
 c1 = sqrt(T1 / (rhoS1 * A1));
 c2 = sqrt(T2 / (rhoS2 * A2));
 I1 = pi/4 * r1^4;
@@ -153,7 +153,7 @@ for n = 1 : lengthSound
     totEnergyPlusConnPlot(n) = (totEnergyPlusConn(n)-totEnergyPlusConn(1))/totEnergyPlusConn(1);
         
         
-    if drawEnergy == false && mod(n, 10) == 0
+    if drawEnergy == true && mod(n, 10) == 0
 
         clf
         subplot(3,2,1)

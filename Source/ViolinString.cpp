@@ -1,12 +1,12 @@
 /*
-  ==============================================================================
-
-    ViolinString.cpp
-    Created: 14 Nov 2018 3:10:58pm
-    Author:  Silvin Willemsen
-
-  ==============================================================================
-*/
+ ==============================================================================
+ 
+ ViolinString.cpp
+ Created: 14 Nov 2018 3:10:58pm
+ Author:  Silvin Willemsen
+ 
+ ==============================================================================
+ */
 
 #include "../JuceLibraryCode/JuceHeader.h"
 #include "ViolinString.h"
@@ -16,25 +16,25 @@ ViolinString::ViolinString(double freq, double fs, ObjectType stringType, int st
 {
     // In your constructor, you should add any child components, and
     // initialise any special settings that your component needs.
-
+    
     _bpX = 0.25;
     _bpY = 0;
-
+    
     gamma = ogFreq * 2; // Wave speed
     k = 1 / fs;       // Time-step
-
+    
     s0 = 1;     // Frequency-independent damping
     s1 = 0.005; // Frequency-dependent damping
-
+    
     //    B = 0.0001;                             // Inharmonicity coefficient
     //    kappa = sqrt (B) * (gamma / double_Pi); // Stiffness Factor
     kappa = 2.0;
     // Grid spacing
-//    if (stringType == bowedString && instrumentType == twoStringViolin)
-//    {
-//        N = 10;
-//    }
-//    else
+    //    if (stringType == bowedString && instrumentType == twoStringViolin)
+    //    {
+    //        N = 10;
+    //    }
+    //    else
     if (stringType == pluckedString && instrumentType == dulcimer)
     {
         N = 28;
@@ -65,31 +65,31 @@ ViolinString::ViolinString(double freq, double fs, ObjectType stringType, int st
     h = 1.0 / N; // Recalculate gridspacing
     
     // Initialise vectors
-
+    
     uVecs.resize(3);
     for (int i = 0; i < 3; ++i)
         uVecs[i].resize(N);
-
+    
     uNext = &uVecs[uNextPtrIdx][0];
     u = &uVecs[1][0];
     uPrev = &uVecs[2][0];
-
+    
     // Courant numbers
     lambdaSq = pow(gamma * k / h, 2);
     muSq = pow(k * kappa / (h * h), 2);
-
+    
     kOh = (kappa * kappa) / (h * h);
     gOh = (gamma * gamma) / (h * h);
     // Bow Model
     a = 100; // Free parameter
     BM = sqrt(2 * a) * exp1(0.5);
-
+    
     _Vb = 0.2; // Bowing speed
     _Fb = 80;  // Bowing force / total mass of bow;
     // Initialise variables for Newton Raphson
     tol = 1e-4;
     qPrev = 0;
-
+    
     fp = 0;
     
     B1 = s0 * k;
@@ -97,7 +97,7 @@ ViolinString::ViolinString(double freq, double fs, ObjectType stringType, int st
     
     b1 = 2.0 / (k * k);
     b2 = (2 * s1) / (k * h * h);
-
+    
     D = 1.0 / (1.0 + s0 * k);
     
     A1 = 2 - 2 * lambdaSq - 6 * muSq - 2 * B2;
@@ -114,19 +114,20 @@ ViolinString::ViolinString(double freq, double fs, ObjectType stringType, int st
     
     E = k * k * (1 / h) * BM;
     
-//    if (instrumentType == dulcimer)
-//        stringExciter.setLength (100);
+    //    if (instrumentType == dulcimer)
+    //        stringExciter.setLength (100);
     if (instrumentType == dulcimer)
         stringExciter.setQ (2);
     
     reset();
+    std::cout << N << std::endl;
 }
 
 void ViolinString::reset()
 {
     for (int i = 0; i < 3; ++i)
         for (int j = 0; j < N; ++j)
-             uVecs[i][j] = 0.0;
+            uVecs[i][j] = 0.0;
     qPrev = 0;
 }
 
@@ -137,30 +138,30 @@ ViolinString::~ViolinString()
 void ViolinString::paint(Graphics &g)
 {
     /* This demo code just fills the component's background and
-       draws some placeholder text to get you started.
-
-       You should replace everything in this method with your own
-       drawing code..
-    */
-
+     draws some placeholder text to get you started.
+     
+     You should replace everything in this method with your own
+     drawing code..
+     */
+    
     g.setColour(stringType == bowedString ? Colours::cyan : (stringType == pluckedString ? Colours::mediumpurple : Colours::lawngreen));
     g.strokePath(generateStringPathAdvanced(), PathStrokeType(2.0f));
-//    g.setColour(Colours::green);
-//    for (int i = 1; i < N; ++i)
-//    {
-//        g.fillEllipse(i * getWidth() / double(N) - 3, getHeight() / 2 - 3, 6, 6);
-//    }
+    //    g.setColour(Colours::green);
+    //    for (int i = 1; i < N; ++i)
+    //    {
+    //        g.fillEllipse(i * getWidth() / double(N) - 3, getHeight() / 2 - 3, 6, 6);
+    //    }
     g.setColour(Colours::orange);
     for (int c = 0; c < cpIdx.size(); ++c)
     {
         g.drawEllipse(floor(cpIdx[c] * getWidth() / N - 5), floor(cy[c] - 5), 10, 10, 2);
     }
-
+    
     if (stringType == bowedString)
     {
         g.setColour(Colours::yellow);
         g.fillEllipse(fp * getWidth() - 5, getHeight() / 2.0 - 5, 10, 10);
-
+        
         // draw bow
         g.setColour(Colours::yellow);
         double opa = 90.0 / 100.0;
@@ -178,7 +179,7 @@ void ViolinString::paint(Graphics &g)
         {
             double val = (1 - (pow(2.0, (i / 12.0)) - 1)) * getWidth() / 2.0;
             //            std::cout << val << std::endl;
-
+            
             g.drawLine(val, 0, val, getHeight(), 2);
         }
         g.setColour(Colour::fromRGBA(255, 255, 0, 127));
@@ -189,7 +190,7 @@ void ViolinString::paint(Graphics &g)
         g.setColour(Colour::greyLevel(0.5f).withAlpha(0.5f));
         g.drawLine(0, getHeight() - 1, getWidth(), getHeight() - 1);
     }
-
+    
 }
 
 void ViolinString::resized()
@@ -200,17 +201,17 @@ void ViolinString::resized()
 
 void ViolinString::bow()
 {
-
+    
     double Fb = _Fb.load();
     bowPos.store(clamp(_bpX.load() * N, 2, N - 3));
     int bp = floor(bowPos.load());
     bool isBowing = _isBowing;
-
+    
     if (isBowing)
     {
         newtonRaphson();
     }
-
+    
     //    if (pluck && pluckIdx < pluckLength)
     //    {
     //
@@ -220,14 +221,14 @@ void ViolinString::bow()
     {
         uNext[l] = A1 * u[l] + A2 * (u[l + 1] + u[l - 1]) - A3 * (u[l + 2] + u[l - 2]) + A4 * uPrev[l] - A5 * (uPrev[l + 1] + uPrev[l - 1]);
     }
-
-//    if (!stringExciter.isPlaying() && _isPicking)
-//        _isPicking = false;
+    
+    //    if (!stringExciter.isPlaying() && _isPicking)
+    //        _isPicking = false;
     
     if (_isPicking)
     {
         int width = exciterEnd - exciterStart;
-
+        
         double in = stringExciter.getOutput();
         for (int i = exciterStart; i <= exciterEnd; ++i)
         {
@@ -240,9 +241,9 @@ void ViolinString::bow()
     if (isBowing)
     {
         double alpha = bowPos - floor(bowPos);
-//        if (t % 10000 == 0 && stringID == 0)
-//            std::cout << alpha << " " << excitation * 100000 << std::endl;
-//        ++t;
+        //        if (t % 10000 == 0 && stringID == 0)
+        //            std::cout << alpha << " " << excitation * 100000 << std::endl;
+        //        ++t;
         if (interpolation == noStringInterpol)
         {
             uNext[bp] = uNext[bp] - excitation;
@@ -250,7 +251,7 @@ void ViolinString::bow()
         else if (interpolation == linear)
         {
             uNext[bp] = uNext[bp] - excitation * (1-alpha);
-
+            
             if (bp < N - 3)
                 uNext[bp + 1] = uNext[bp + 1] - excitation * alpha;
         }
@@ -258,16 +259,16 @@ void ViolinString::bow()
         {
             if (bp > 3)
                 uNext[bp - 1] = uNext[bp - 1] - excitation * (alpha * (alpha - 1) * (alpha - 2)) / -6.0;
-
+            
             uNext[bp] = uNext[bp] - excitation * ((alpha - 1) * (alpha + 1) * (alpha - 2)) / 2.0;
-
+            
             if (bp < N - 4)
                 uNext[bp + 1] = uNext[bp + 1] - excitation * (alpha * (alpha + 1) * (alpha - 2)) / -2.0;
             if (bp < N - 5)
                 uNext[bp + 2] = uNext[bp + 2] - excitation * (alpha * (alpha + 1) * (alpha - 1)) / 6.0;
         }
     }
-
+    
     if (ff > 1)
     {
         ff = 1;
@@ -279,29 +280,29 @@ void ViolinString::bow()
         ///////// heuristic interpolation
         int fingerPos = floor(fp * N - 1);
         double scale = 1;
-//        double alphaFP = pow(fp * N - 1 - fingerPos, 7) * scale;
+        //        double alphaFP = pow(fp * N - 1 - fingerPos, 7) * scale;
         double alphaFP = (fp * N - 1 - fingerPos) * scale;
-//        std::cout << alphaFP << std::endl;
-//        if (t % 10000 == 0 && stringID == 0)
-//            std::cout << alphaFP << std::endl;
-//            ++t;
-//        uNext[fingerPos] *= 0;
-//        uNext[fingerPos] *= 0;
+        //        std::cout << alphaFP << std::endl;
+        //        if (t % 10000 == 0 && stringID == 0)
+        //            std::cout << alphaFP << std::endl;
+        //            ++t;
+        //        uNext[fingerPos] *= 0;
+        //        uNext[fingerPos] *= 0;
         if (fingerPos > 1)
         {
             uNext[fingerPos - 1] *= 0;
         }
         if (fingerPos < N - 2)
         {
-//            uNext[fingerPos] = uNext[fingerPos] * (alphaFP + (1-scale));
+            //            uNext[fingerPos] = uNext[fingerPos] * (alphaFP + (1-scale));
             uNext[fingerPos] *= 0;
         }
         if (fingerPos < N - 3)
         {
             uNext[fingerPos + 1] = uNext[fingerPos + 1] * (1 - alphaFP);
         }
-//        uNext[fingerPos] *= 0;
-//        uNext[fingerPos + 1] *= 0.6;
+        //        uNext[fingerPos] *= 0;
+        //        uNext[fingerPos + 1] *= 0.6;
     }
     if (isnan(uNext[static_cast<int>(N*0.5)]))
     {
@@ -350,7 +351,7 @@ void ViolinString::newtonRaphson()
         uIPrev1 = cubicInterpolation(uPrev, bp + 1, alpha);
         uIPrevM1 = cubicInterpolation(uPrev, bp - 1, alpha);
     }
-
+    
     b = 2.0 / k * Vb - b1 * (uI - uIPrev) - gOh * (uI1 - 2 * uI + uIM1) + kOh * (uI2 - 4 * uI1 + 6 * uI - 4 * uIM1 + uIM2) + 2 * s0 * Vb - b2 * ((uI1 - 2 * uI + uIM1) - (uIPrev1 - 2 * uIPrev + uIPrevM1));
     eps = 1;
     int i = 0;
@@ -388,7 +389,7 @@ void ViolinString::updateUVectors()
 
 void ViolinString::setRaisedCos (double exciterPos, double width, double force)
 {
-
+    
     exciterStart = clamp(exciterPos * N - width * 0.5, 2, N - 3);
     exciterEnd = clamp(exciterPos * N + width * 0.5, 2, N - 3);
     float test = pow ((1 - (exciterLength - 10) / (2 * 490.0)) , 2);
@@ -400,10 +401,10 @@ Path ViolinString::generateStringPathAdvanced()
     auto stringBounds = getHeight() / 2.0;
     Path stringPath;
     stringPath.startNewSubPath(0, stringBounds);
-
+    
     auto spacing = getWidth() / double(N);
     auto x = spacing;
-
+    
     for (int y = 0; y < N; y++)
     {
         float newY = uNext[y] * 50000 + stringBounds;
@@ -425,7 +426,7 @@ Path ViolinString::generateStringPathAdvanced()
         x += spacing;
     }
     stringPath.lineTo(getWidth(), stringBounds);
-
+    
     return stringPath;
 }
 
@@ -496,7 +497,7 @@ void ViolinString::mouseDown(const MouseEvent &e)
 void ViolinString::mouseDrag(const MouseEvent &e)
 {
     double maxVb = 0.2;
-
+    
     if (cpMoveIdx != -1 || ModifierKeys::getCurrentModifiers() == ModifierKeys::altModifier + ModifierKeys::leftButtonModifier)
     {
         if (cpMoveIdx != -1)
@@ -509,15 +510,15 @@ void ViolinString::mouseDrag(const MouseEvent &e)
     {
         fp = e.x <= 0 ? 0 : (e.x < getWidth() ? e.x / static_cast<double>(getWidth()) : 1);
     }
-
+    
     else if (cpMoveIdx == -1)
     {
         float bowVelocity = e.y / (static_cast<double>(getHeight())) * maxVb;
         setVb(bowVelocity);
-
+        
         float bowPositionX = e.x <= 0 ? 0 : (e.x < getWidth() ? e.x / static_cast<double>(getWidth()) : 1);
         float bowPositionY = e.y <= 0 ? 0 : (e.y >= getHeight() ? 1 : e.y / static_cast<double>(getHeight()));
-
+        
         _bpX.store(bowPositionX);
         _bpY.store(bowPositionY);
     }
@@ -537,7 +538,7 @@ double ViolinString::linearInterpolation(double* uVec, int bp, double alpha)
 double ViolinString::cubicInterpolation(double* uVec, int bp, double alpha)
 {
     return uVec[bp - 1] * (alpha * (alpha - 1) * (alpha - 2)) / -6.0
-            + uVec[bp] * ((alpha - 1) * (alpha + 1) * (alpha - 2)) / 2.0
-            + uVec[bp + 1] * (alpha * (alpha + 1) * (alpha - 2)) / -2.0
-            + uVec[bp + 2] * (alpha * (alpha + 1) * (alpha - 1)) / 6.0;
+    + uVec[bp] * ((alpha - 1) * (alpha + 1) * (alpha - 2)) / 2.0
+    + uVec[bp + 1] * (alpha * (alpha + 1) * (alpha - 2)) / -2.0
+    + uVec[bp + 2] * (alpha * (alpha + 1) * (alpha - 1)) / 6.0;
 }

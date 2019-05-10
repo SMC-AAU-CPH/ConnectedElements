@@ -25,15 +25,15 @@ k = 1 / fs;     % Time step
 %% Create objects 
 objectVars{1, 1} = "string";
 freq1 = 110.0;
-gamma = freq1 * 2;
+c = freq1 * 2;
 kappaS1 = 0;
-objectVars{1, 2} = [gamma, kappaS1, 1e99, 0];
+objectVars{1, 2} = [c, kappaS1, 1e99, 0];
 
 objectVars{2, 1} = "string";
 freq2 = 110.0;
-gamma = freq2 * 2;
+c = freq2 * 2;
 kappaS2 = 0;
-objectVars{2, 2} = [gamma, kappaS2, 1e99, 0];
+objectVars{2, 2} = [c, kappaS2, 1e99, 0];
 
 %initialise cells/vectors depending on the number of objects
 Bpre = cell(2, 1);
@@ -208,12 +208,12 @@ for n = 1 : lengthSound
 %     uE(2:end-1, 2:end-1) = testmat;
 %     uEPrev(2:end-1, 2:end-1) = testmatPrev;
 
-    potEnergyString1(n) = gamma^2 / 2 * sum (1 / h(1) * (u(stringVec1 + 1) - u(stringVec1)) .* (uPrev(stringVec1 + 1) - uPrev(stringVec1))) ...
+    potEnergyString1(n) = c^2 / 2 * sum (1 / h(1) * (u(stringVec1 + 1) - u(stringVec1)) .* (uPrev(stringVec1 + 1) - uPrev(stringVec1))) ...
         + kappaS1^2 / 2 * 1/h(1)^3 * sum((u(stringVec1 + 1) - 2 * u(stringVec1) + u(stringVec1 - 1)) ...
         .* (uPrev(stringVec1 + 1) - 2 * uPrev(stringVec1) + uPrev(stringVec1 - 1)));
     kinEnergyString1(n) = 1 / 2 * sum (h(1) * ((1 / k * (u(stringVec1) - uPrev(stringVec1))).^2));
      
-     potEnergyString2(n) = gamma^2 / 2 * sum (1 / h(1) * (u(stringVec2 + 1) - u(stringVec2)) .* (uPrev(stringVec2 + 1) - uPrev(stringVec2))) ...
+     potEnergyString2(n) = c^2 / 2 * sum (1 / h(1) * (u(stringVec2 + 1) - u(stringVec2)) .* (uPrev(stringVec2 + 1) - uPrev(stringVec2))) ...
         + kappaS2^2 / 2 * 1/h(1)^3 * sum((u(stringVec2 + 1) - 2 * u(stringVec2) + u(stringVec2 - 1)) ...
         .* (uPrev(stringVec2 + 1) - 2 * uPrev(stringVec2) + uPrev(stringVec2 - 1)));
     kinEnergyString2(n) = 1 / 2 * sum (h(1) * ((1 / k * (u(stringVec2) - uPrev(stringVec2))).^2));
