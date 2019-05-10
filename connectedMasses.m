@@ -7,7 +7,7 @@ lengthSound = fs;
 
 
 %% Drawing functions
-drawMasses = false;
+drawMasses = true;
 
 if drawMasses
     figure('Renderer', 'painters', 'Position', [100 100 700 900])
@@ -35,20 +35,23 @@ u2Prev = u2;
 %% Connection
 w0 = 100;                   % Linear spring coefficient
 w1 = 10;                    % Non-linear spring coefficient
-sx = 0.01;                  % Damping coefficient (creates pitch glides here)
+sx = 0.00;                  % Damping coefficient (creates pitch glides here)
 
+%% Set previous relative displacement
 etaPrev = u1 - u2;
 
 totEnergy = zeros(lengthSound, 1);
 
 for n = 1:lengthSound
     
+    %% Calculate relative displacement
     eta = u1 - u2;
     
+    %% Calculate known part of FDSs
     u1Next = 2 * u1 - u1Prev - k^2 * omega1^2 * (u1 - offset1);
     u2Next = 2 * u2 - u2Prev - k^2 * omega2^2 * (u2 - offset2);
- 
     
+    %% Calculate forces
     a = w0^2 + w1^4*eta^2 + 2 * sx / k;
     r = (-w0^2 - w1^4*eta^2 + 2 * sx / k) / a;
     if w0 == 0 && w1 == 0
@@ -57,23 +60,32 @@ for n = 1:lengthSound
         Fc = (u1Next - u2Next - r * etaPrev) / (-k^2 / M1 - k^2 / M2 - 2 / a);
     end
     
+    %% Add to the previously calculated FDSs
     u1Next = u1Next + k^2 * Fc / M1;
     u2Next = u2Next - k^2 * Fc / M2;
     
     %% Energy analysis
+    
+    % Mass1
     kinEnergy1(n) = M1 / 2 * (1/k * (u1 - u1Prev)).^2;
     potEnergy1(n) = -K1 / 2 * ((u1 - offset1) * (u1Prev - offset1));
     energy1(n) = kinEnergy1(n) - potEnergy1(n);
     
+    % Mass2
     kinEnergy2(n) = M2 / 2 * (1/k * (u2 - u2Prev)).^2;
     potEnergy2(n) = -K2 / 2 * ((u2 - offset2) * (u2Prev - offset2));
     energy2(n) = kinEnergy2(n) - potEnergy2(n);
     
+    % Connection
     linConnEnergy(n) = w0^2 / 4 * (eta^2 + etaPrev^2);
     nonLinConnEnergy(n) = w1^4 / 2 * (1/2 * eta^2 * etaPrev^2);
     totEnergy(n) = energy1(n) + energy2(n) + linConnEnergy(n) + nonLinConnEnergy(n);
+    
+    %% Save states
     u1Save(n) = u1Next;
     u2Save(n) = u2Next;
+    
+    %% Draw
     limX = floor(n*2);
     if drawMasses && mod(n, drawSpeed) == 0
         subplot(3,1,1)
@@ -119,6 +131,8 @@ for n = 1:lengthSound
         drawnow;
     end
     
+    
+    %% Update states
     u1Prev = u1;
     u1 = u1Next;
     
