@@ -81,7 +81,7 @@ Instrument::Instrument (InstrumentType instrumentType, vector<ObjectType> object
             frequencyInHz = {
                 
                 baseFreq * pow(2, -12.0 / 12.0),
-                baseFreq * pow(2, -5.0 / 12.0),
+                baseFreq * pow(2, -4.5 / 12.0),
                 baseFreq,
                 baseFreq * pow(2, 7.0 / 12.0),
                 baseFreq * pow(2, 12.0 / 12.0),

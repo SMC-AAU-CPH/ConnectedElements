@@ -108,7 +108,7 @@ private:
     OwnedArray<Sensel> sensels;
     
     unsigned long stateUpdateCounter = 0;
-    static const InstrumentType chooseInstrument = hurdyGurdy;
+    static const InstrumentType chooseInstrument = bowedSitar;
     static const unsigned int amountOfSensels = (chooseInstrument == hurdyGurdy) ? 1 : 2;
     
     Distortion dist {None};
@@ -152,7 +152,7 @@ private:
     double outputLvlLeft = 0;
     double outputLvlRight = 0;
     
-    bool graphicsToggle = false;
+    bool graphicsToggle = true;
 //    bool senselToggle = true;
     bool soundToggle = true;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MainComponent)
