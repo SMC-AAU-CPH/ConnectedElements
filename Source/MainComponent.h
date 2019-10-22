@@ -108,7 +108,7 @@ private:
     OwnedArray<Sensel> sensels;
     
     unsigned long stateUpdateCounter = 0;
-    static const InstrumentType chooseInstrument = bowedSitar;
+    static const InstrumentType chooseInstrument = hurdyGurdy;
     static const unsigned int amountOfSensels = (chooseInstrument == hurdyGurdy) ? 1 : 2;
     
     Distortion dist {None};

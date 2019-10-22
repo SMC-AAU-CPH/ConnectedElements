@@ -78,7 +78,7 @@ ViolinString::ViolinString(double freq, double fs, ObjectType stringType, int st
     lambdaSq = pow(gamma * k / h, 2);
     muSq = pow(k * kappa / (h * h), 2);
     
-    kOh = (kappa * kappa) / (h * h);
+    kOh = (kappa * kappa) / (h * h * h * h);
     gOh = (gamma * gamma) / (h * h);
     // Bow Model
     a = 100; // Free parameter

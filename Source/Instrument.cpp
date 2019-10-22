@@ -521,7 +521,7 @@ vector<double> Instrument::calculateOutput()
                     mixVal = 0;
                     break;
             }
-            output[0] +=  violinStrings[i]->getOutput(0.68) * 50 * mixVal;
+            output[0] +=  violinStrings[i]->getOutput(0.68) * 100 * mixVal;
         }
         for (int i = 0; i < numPlates; i++)
         {
