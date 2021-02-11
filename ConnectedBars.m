@@ -18,7 +18,7 @@ objectVars{1, 2} = [freq1*2, 2, 1, 0.005];
 % freq2 = freq1 * 2^(7/12);
 % objectVars{2, 2} = [freq2*2, 2, 1, 0.005];
 
-objectVars{2, 1} = "plate";
+objectVars{2, 1} = "string";
 objectVars{2, 2} = [1, 1, 0.005, 4];
 
 Q = length(objectVars); % amount of objects
@@ -135,7 +135,7 @@ for qc = 1:Qc
         error(['Connection ', num2str(qc), ' at component ', num2str(curConn(1)), ' is out of bounds. Change excitation position or width.'])
     end
 
-    [J(:,qc), L(qc,:)] = createConnection(curConn, [N(curConn(1)) N(curConn(2)) Ntot], k, [h(1) h(2)], massRatio, [s0(curConn(1)) s0 curConn(2)], [matIdx(curConn(1)) matIdx(curConn(2))]);
+    [J(:,qc), L(qc,:)] = createConnectionStringString(curConn, [N(curConn(1)) N(curConn(2)) Ntot], k, [h(1) h(2)], massRatio, [s0(curConn(1)) s0 curConn(2)], [matIdx(curConn(1)) matIdx(curConn(2))]);
 
 end
 

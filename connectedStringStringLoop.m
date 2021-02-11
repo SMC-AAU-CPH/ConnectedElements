@@ -16,6 +16,8 @@ I2 = pi/4 * r2^4;
 E = 2e11;
 kappaS1 = sqrt(E*I1 / (rhoS1 * A1));
 kappaS2 = sqrt(E*I2 / (rhoS2 * A2));
+kappaS1 = 5;
+c1 = 424;
 [B1, C1, N1, h1, D1, D41] = newCreateString (c1, kappaS1, L1, s0S, s1S, k);
 [B2, C2, N2, h2, D2, D42] = newCreateString (c2, kappaS2, L2, s0S, s1S, k);
 
@@ -33,18 +35,18 @@ C(N1+1:N1+N2, N1+1:N1+N2) = C2;
 %% Initialise state vectors
 u = zeros(Ntot, 1);
 exciteString1 = true;
-exciteString2 = true;
+exciteString2 = false;
 
 %% Excite
 if exciteString1
     exciterPos = 0.25;
-    rcW = 10;
+    rcW = 6;
     u(1 + floor(exciterPos*N1-rcW/2):1 + floor(exciterPos*N1+rcW/2)) = (1-cos(2*pi*(0:rcW)/rcW)) * 0.5;
 
 end
 if exciteString2
-    exciterPos = 0.35;
-    rcW = 10;
+    exciterPos = 0.25;
+    rcW = 6;
     u(N1 + 1 + floor(exciterPos*N2-rcW/2):N1 + 1 + floor(exciterPos*N2+rcW/2)) = (1-cos(2*pi*(0:rcW)/rcW)) * 0.5;
 end
 uPrev = u;
@@ -57,11 +59,11 @@ uNext = u;
 I = zeros(Ntot, 1);
 J = zeros(Ntot, 1);
 
-cW1 = 2;
+cW1 = 3;
 I(1 + floor(conn1*N1-cW1/2):1 + floor(conn1*N1+cW1/2)) = (1-cos(2*pi*(0:cW1)/cW1)) * 0.5;
 J(1 + floor(conn1*N1-cW1/2):1 + floor(conn1*N1+cW1/2)) = (1-cos(2*pi*(0:cW1)/cW1)) * 0.5 * k^2 / (rhoS1 * A1 * h1);
 
-cW2 = 2;
+cW2 = 3;
 I(N1 + 1 + floor(conn2*N2-cW2/2):N1 + 1 + floor(conn2*N2+cW2/2)) = -(1-cos(2*pi*(0:cW2)/cW2)) * 0.5;
 J(N1 + 1 + floor(conn2*N2-cW2/2):N1 + 1 + floor(conn2*N2+cW2/2)) = -(1-cos(2*pi*(0:cW2)/cW2)) * 0.5 * k^2 / (rhoS2 * A2 * h2);
 
@@ -88,16 +90,16 @@ out2 = zeros(lengthSound, 1);
 stringVec1 = 2:N1-1;
 stringVec2 = N1+2:N1+N2-1;
 
-connected = true;
+connected = false;
 
-JFc = zeros(Ntot);
+JFc = zeros(Ntot, 1);
 
-drawState = false;
-drawEnergy = true;
+drawState = true;
+drawEnergy = false;
 idx = find(J~=0);
 
-w0 = 100;
-w1 = 10000000;
+w0 = 10000;
+w1 = 0;
 sx = 0;
 
 L = [I(1:N1) * h1; I(N1+1:end) * h2]';

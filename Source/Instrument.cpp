@@ -12,8 +12,12 @@
 #include "Instrument.h"
 
 //==============================================================================
-Instrument::Instrument (InstrumentType instrumentType, vector<ObjectType> objectTypes, double fs, int stringPlateDivision, int bowedSympDivision)
-: fs (fs), stringPlateDivision (stringPlateDivision), instrumentType (instrumentType), bowedSympDivision (bowedSympDivision)
+Instrument::Instrument (InstrumentType instrumentType, vector<ObjectType> objectTypes, double fs, int stringPlateDivision, int bowedSympDivision, bool oneSenselVersion)
+:   fs (fs),
+    stringPlateDivision (stringPlateDivision),
+    instrumentType (instrumentType),
+    bowedSympDivision (bowedSympDivision),
+    oneSenselVersion(oneSenselVersion)
 {
     vector<double> frequencyInHz;
 //    double baseFreq = instrumentType == hurdyGurdy ? 113.0 : 105.0;
@@ -22,9 +26,9 @@ Instrument::Instrument (InstrumentType instrumentType, vector<ObjectType> object
     switch (instrumentType)
     {
         case twoStringViolin:
-            frequencyInHz = {baseFreq,
-                             baseFreq * pow(2, 7.0 / 12.0)};
-            mix.resize (2);
+            for (int i = 0; i < objectTypes.size(); ++i)
+                frequencyInHz.push_back(baseFreq * pow(2, (7.0 * i) / 12.0));
+            mix.resize (objectTypes.size());
             break;
         case bowedSitar:
             frequencyInHz = {baseFreq,
@@ -400,8 +404,31 @@ void Instrument::paint (Graphics& g)
                 
                 int sympStringID = string1->getStringID() - numBowedStrings;
                 
-                Line<float> connectionLine (ceil(cpX1 * (getWidth() - bowedSympDivision) / string1->getNumPoints()) + bowedSympDivision, sympStringID * totSympStringHeight / static_cast<double>(numUnbowedStrings) + y1,
-                                            (cpX2 - 1.5) * stateWidth, stringPlateDivision + (cpY2 - 1.5) * stateHeight);
+                
+                bool oneSenselDulc = oneSenselVersion && instrumentType == dulcimer;
+                int halfOfStrings = numUnbowedStrings / 2.0;
+                
+                float xStart;
+                float yStart;
+                if (oneSenselDulc)
+                {
+                    if (sympStringID < halfOfStrings)
+                    {
+                        xStart = ceil(cpX1 * (getWidth() - bowedSympDivision) / string1->getNumPoints());
+                        yStart = sympStringID * totSympStringHeight / static_cast<double>(numUnbowedStrings * 0.5) + y1;
+                    } else {
+                        xStart = ceil(cpX1 * (getWidth() - bowedSympDivision) / string1->getNumPoints()) + bowedSympDivision;
+                        yStart = (sympStringID - halfOfStrings) * totSympStringHeight / static_cast<double>(numUnbowedStrings * 0.5) + y1;
+                    }
+                    
+                } else {
+                    xStart = ceil(cpX1 * (getWidth() - bowedSympDivision) / string1->getNumPoints()) + bowedSympDivision;
+                    
+                    yStart = sympStringID * totSympStringHeight / static_cast<double>(numUnbowedStrings) + y1;
+                }
+                float xEnd = (cpX2 - 1.5) * stateWidth;
+                float yEnd = stringPlateDivision + (cpY2 - 1.5) * stateHeight;
+                Line<float> connectionLine (xStart, yStart, xEnd, yEnd);
                 g.drawDashedLine(connectionLine, dashPattern, 2, dashPattern[0], 0);
                 break;
             }
@@ -420,9 +447,18 @@ void Instrument::resized()
         violinStrings[i]->setBounds(0 , i * (totBowedStringHeight / static_cast<double>(numBowedStrings)), bowedSympDivision, stringPlateDivision / static_cast<double>(numBowedStrings));
     }
     int numUnbowedStrings = numPluckedStrings + numSympStrings;
+    int halfOfStrings = numUnbowedStrings / 2.0;
     for (int i = 0; i < numUnbowedStrings; ++i)
     {
-        violinStrings[i+numBowedStrings]->setBounds(bowedSympDivision , i * (totSympStringHeight / static_cast<double>(numUnbowedStrings)), getWidth() - bowedSympDivision, stringPlateDivision / static_cast<double>(numUnbowedStrings));
+        if (instrumentType == dulcimer && oneSenselVersion)
+        {
+            if (i < halfOfStrings)
+                violinStrings[i]->setBounds(0, i * (totSympStringHeight / static_cast<double>(numUnbowedStrings * 0.5)), getWidth() - bowedSympDivision, stringPlateDivision / static_cast<double>(numUnbowedStrings * 0.5));
+            else
+                violinStrings[i]->setBounds(bowedSympDivision, (i - halfOfStrings) * (totSympStringHeight / static_cast<double>(numUnbowedStrings * 0.5)), getWidth() - bowedSympDivision, stringPlateDivision / static_cast<double>(numUnbowedStrings * 0.5));
+        } else {
+            violinStrings[i+numBowedStrings]->setBounds(bowedSympDivision, i * (totSympStringHeight / static_cast<double>(numUnbowedStrings)), getWidth() - bowedSympDivision, stringPlateDivision / static_cast<double>(numUnbowedStrings));
+        }
     }
     for (int i = 0; i < numPlates; ++i)
     {

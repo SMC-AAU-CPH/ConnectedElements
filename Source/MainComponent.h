@@ -96,6 +96,7 @@ private:
     void senselMappingSitarPlucked();
     void senselMappingHurdyGurdy();
     void senselMappingDulcimer();
+    void senselMappingDulcimerOneSensel();
     //==============================================================================
     double fs;
     double bufferSize;
@@ -108,8 +109,11 @@ private:
     OwnedArray<Sensel> sensels;
     
     unsigned long stateUpdateCounter = 0;
-    static const InstrumentType chooseInstrument = hurdyGurdy;
-    static const unsigned int amountOfSensels = (chooseInstrument == hurdyGurdy) ? 1 : 2;
+    static const bool oneSenselVersion = true;
+    
+    // Options here are: twoStringViolin, sitar, bowedSitar, hurdyGurdy and dulcimer,
+    static const InstrumentType chooseInstrument = dulcimer;
+    static const unsigned int amountOfSensels = oneSenselVersion ? 1 : (chooseInstrument == hurdyGurdy ? 1 : 2);
     
     Distortion dist {None};
     
@@ -155,6 +159,10 @@ private:
     bool graphicsToggle = true;
 //    bool senselToggle = true;
     bool soundToggle = true;
+    
+    unsigned long t = 0;
+    float tt = 0.05;
+    float ttt = 0;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MainComponent)
 };
 

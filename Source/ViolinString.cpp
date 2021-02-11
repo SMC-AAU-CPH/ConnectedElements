@@ -80,6 +80,7 @@ ViolinString::ViolinString(double freq, double fs, ObjectType stringType, int st
     
     kOh = (kappa * kappa) / (h * h * h * h);
     gOh = (gamma * gamma) / (h * h);
+    
     // Bow Model
     a = 100; // Free parameter
     BM = sqrt(2 * a) * exp1(0.5);

@@ -148,14 +148,14 @@ sx = 0;
 
 stringVec = 2:NS-1;
 
-connected = true;
+connected = false;
 
 % JFc = zeros(Ntot);
 % testmat = ones(Nx, Ny);
 % testmatPrev = ones(Nx, Ny);
 
-drawState = false;
-drawEnergy = true;
+drawState = true;
+drawEnergy = false;
 % figure;
 idx = find(J~=0);
 cIX = connPX * Nx;

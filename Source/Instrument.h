@@ -20,7 +20,7 @@
 class Instrument    : public Component
 {
 public:
-    Instrument (InstrumentType instrumentType, vector<ObjectType> objectTypes, double fs, int stringPlateDivision, int bowedSympDivision);
+    Instrument (InstrumentType instrumentType, vector<ObjectType> objectTypes, double fs, int stringPlateDivision, int bowedSympDivision, bool oneSenselVersion);
     ~Instrument();
 
     void paint (Graphics&) override;
@@ -62,6 +62,8 @@ private:
     
     vector<double> mix {0.0, 0.0};
     double mixVal;
-    Random r; 
+    Random r;
+    
+    bool oneSenselVersion;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Instrument)
 };

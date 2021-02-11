@@ -119,12 +119,14 @@ void MainComponent::prepareToPlay(int samplesPerBlockExpected, double sampleRate
     {
     case twoStringViolin:
     {
-        vector<ObjectType> preObjects = {bowedString, bowedString};
+        vector<ObjectType> preObjects = {bowedString};
+        if (!oneSenselVersion)
+            preObjects.push_back (bowedString);
         objects = preObjects;
         int stringPlateDivision = appHeight;
         int bowedSympDivision = appWidth - controlsWidth;
-        instruments.add(new Instrument(chooseInstrument, objects, fs, stringPlateDivision, bowedSympDivision));
-        for (int i = 0; i < 2; ++i)
+        instruments.add (new Instrument(chooseInstrument, objects, fs, stringPlateDivision, bowedSympDivision, oneSenselVersion));
+        for (int i = 0; i < 1; ++i)
         {
             Slider* bowedStringSlider = new Slider();
             bowedStringSlider->setSliderStyle(Slider::LinearVertical);
@@ -144,13 +146,16 @@ void MainComponent::prepareToPlay(int samplesPerBlockExpected, double sampleRate
     }
     case bowedSitar:
     {
-        vector<ObjectType> preObjects{bowedString, bowedString,
-                                      pluckedString, pluckedString, pluckedString, pluckedString, pluckedString,
-                                      sympString, sympString, sympString, sympString,
-                                      sympString, sympString, sympString, sympString,
-                                      sympString, sympString, sympString, sympString,
-                                      sympString,
-                                      plate};
+        vector<ObjectType> preObjects {bowedString, bowedString,
+                                       sympString, sympString, sympString, sympString,
+                                       sympString, sympString, sympString, sympString,
+                                       sympString, sympString, sympString, sympString,
+                                       sympString,
+                                       plate};
+        if (!oneSenselVersion)
+        {
+            preObjects.insert (preObjects.begin() + 2, {pluckedString, pluckedString, pluckedString, pluckedString, pluckedString});
+        }
         objects = preObjects;
         stringPlateDivision = 0.75 * appHeight;
         bowedSympDivision = appHeight;
@@ -215,7 +220,7 @@ void MainComponent::prepareToPlay(int samplesPerBlockExpected, double sampleRate
             plate};
         objects = preObjects;
         stringPlateDivision = 0.75 * appHeight;
-        bowedSympDivision = 0;
+        bowedSympDivision = oneSenselVersion ? (appWidth - controlsWidth) * 0.5 : 0;
         exciterLengthSlider = new Slider(Slider::RotaryVerticalDrag, Slider::TextBoxBelow);
         exciterLengthSlider->setRange(10, 500, 1);
         exciterLengthSlider->setValue(10);
@@ -234,7 +239,7 @@ void MainComponent::prepareToPlay(int samplesPerBlockExpected, double sampleRate
 
     {
         // Everything except for the twoStringViolin will execute this code
-        instruments.add(new Instrument(chooseInstrument, objects, fs, stringPlateDivision, bowedSympDivision));
+        instruments.add (new Instrument(chooseInstrument, objects, fs, stringPlateDivision, bowedSympDivision, oneSenselVersion));
         for (int i = 0; i < names.size(); ++i)
         {
             Slider *bowedStringSlider = new Slider();
@@ -270,72 +275,75 @@ void MainComponent::prepareToPlay(int samplesPerBlockExpected, double sampleRate
     // sensel stuff
     switch (chooseInstrument)
     {
-    case twoStringViolin:
-    {
-        break;
-    }
-    case bowedSitar:
-    {
-        int pluckedStringsAmount = instruments[0]->getNumPluckedStrings();
-
-        float range = 1.0 / static_cast<float>(pluckedStringsAmount);
-
-        for (int i = 0; i < pluckedStringsAmount; i++)
+        case twoStringViolin:
         {
-            sensels[flip ? 0 : 1]->addLEDBrightness(range * i, 1);
+            break;
         }
-        break;
-    }
-
-    case sitar:
-    {
-        int pluckedStringsAmount = instruments[0]->getNumPluckedStrings();
-
-        float range = 1.0 / static_cast<float>(pluckedStringsAmount);
-
-        for (int i = 0; i < pluckedStringsAmount; i++)
+        case bowedSitar:
         {
-            sensels[flip ? 0 : 1]->addLEDBrightness(range * i, 1);
-        }
-        break;
-    }
+            int pluckedStringsAmount = instruments[0]->getNumPluckedStrings();
 
-    case hurdyGurdy:
-    {
-    }
-    case dulcimer:
-    {
+            float range = 1.0 / static_cast<float>(pluckedStringsAmount);
 
-        int pluckedStringsAmount = instruments[0]->getNumPluckedStrings() / 2;
-        float range = 1.0 / static_cast<float>(pluckedStringsAmount);
-        
-        if (flip)
-        {
-            for (int i = amountOfSensels - 1; i >= 0; --i)
+            for (int i = 0; i < pluckedStringsAmount; i++)
             {
-                for (int j = 0; j < pluckedStringsAmount; j += 2)
+                for (auto sensel : sensels)
+                    if (sensel->senselDetected)
+                        sensels[flip ? 0 : 1]->addLEDBrightness(range * i, 1);
+                
+            }
+            break;
+        }
+
+        case sitar:
+        {
+            int pluckedStringsAmount = instruments[0]->getNumPluckedStrings();
+
+            float range = 1.0 / static_cast<float>(pluckedStringsAmount);
+
+            for (int i = 0; i < pluckedStringsAmount; i++)
+            {
+                sensels[flip ? 0 : 1]->addLEDBrightness(range * i, 1);
+            }
+            break;
+        }
+
+        case hurdyGurdy:
+        {
+        }
+        case dulcimer:
+        {
+
+            int pluckedStringsAmount = instruments[0]->getNumPluckedStrings() / 2;
+            float range = 1.0 / static_cast<float>(pluckedStringsAmount);
+            
+            if (flip)
+            {
+                for (int i = amountOfSensels - 1; i >= 0; --i)
                 {
-                    sensels[i]->addLEDBrightness(range * j, 1);
+                    for (int j = 0; j < pluckedStringsAmount; j += 2)
+                    {
+                        sensels[i]->addLEDBrightness(range * j, 1);
+                    }
+                }
+            } else {
+                for (int i = 0; i < amountOfSensels; ++i)
+                {
+                    for (int j = 0; j < pluckedStringsAmount; j += 2)
+                    {
+                        sensels[i]->addLEDBrightness(range * j, 1);
+                    }
                 }
             }
-        } else {
-            for (int i = 0; i < amountOfSensels; ++i)
-            {
-                for (int j = 0; j < pluckedStringsAmount; j += 2)
-                {
-                    sensels[i]->addLEDBrightness(range * j, 1);
-                }
-            }
+            break;
         }
-        break;
-    }
     }
 
     numInstruments = instruments.size();
 
     // start the hi-res timer
-    if (sensels.size() != 0)
-        if (sensels[0]->senselDetected)
+//    if (sensels.size() != 0)
+//        if (sensels[0]->senselDetected)
             HighResolutionTimer::startTimer(1000.0 / 150.0);
     
     Timer::startTimerHz (chooseInstrument == twoStringViolin ? 60 : 15);
@@ -358,7 +366,12 @@ void MainComponent::hiResTimerCallback()
         senselMappingHurdyGurdy();
         break;
     case dulcimer:
-        senselMappingDulcimer();
+        if (oneSenselVersion)
+        {
+            senselMappingDulcimerOneSensel();
+        } else {
+            senselMappingDulcimer();
+        }
         break;
     }
 }
@@ -863,6 +876,97 @@ void MainComponent::senselMappingDulcimer()
     }
 }
 
+void MainComponent::senselMappingDulcimerOneSensel()
+{
+    for (auto sensel : sensels)
+    {
+        if (sensel->senselDetected)
+        {
+            sensel->check();
+            unsigned int fingerCount = sensel->contactAmount;
+            int index = sensel->senselIndex;
+    
+//            ++t;
+//            unsigned int fingerCount = (t % 150 == 0) ? 1 : 0;
+//
+            int pluckedStringsAmount = instruments[0]->getNumPluckedStrings();
+            
+            vector<bool> pickAString(pluckedStringsAmount, false);
+            vector<double> forces(pluckedStringsAmount, 0);
+            vector<double> xPositions(pluckedStringsAmount, 0);
+            
+            float range = 1.0 / (static_cast<float>(pluckedStringsAmount) * 0.25);
+            
+            for (int f = 0; f < fingerCount; f++)
+            {
+//                tt += 0.1;
+//                if (tt > 1)
+//                {
+//                    tt -= 1;
+//                    if (ttt == 0)
+//                        ttt = 0.1;
+//                    else
+//                        ttt = 0;
+//                }
+//                std::cout << ttt << std::endl;
+//                float x = 0.45 + ttt;
+//                float y = tt;
+//                std::cout << "Loc = (" << x << ", " << y << ")" << std::endl;
+//                float Fb = 0.1;
+                bool state = sensel->fingers[f].state;
+                float x = sensel->fingers[f].x;
+                float y = sensel->fingers[f].y;
+//                float Vb = sensel->fingers[f].delta_y * maxVb;
+                float Fb = sensel->fingers[f].force;
+                int fingerID = sensel->fingers[f].fingerID;
+                for (int j = 0; j < pluckedStringsAmount * 0.5; j += 2)
+                {
+                    if (y >= (range * j * 0.5) && y < range * (j + 2) * 0.5)
+                    {
+                        if (x < 0.5)
+                        {
+                            pickAString[j] = true;
+                            forces[j] = Fb;
+                            xPositions[j] = x * 2.0;
+                            pickAString[j + 1] = true;
+                            forces[j + 1] = Fb;
+                            xPositions[j + 1] = x * 2.0;
+                        } else {
+                            pickAString[j + pluckedStringsAmount * 0.5] = true;
+                            forces[j + pluckedStringsAmount * 0.5] = Fb;
+                            xPositions[j + pluckedStringsAmount * 0.5] = (x - 0.5) * 2.0;
+                            pickAString[j + pluckedStringsAmount * 0.5 + 1] = true;
+                            forces[j + pluckedStringsAmount * 0.5 + 1] = Fb;
+                            xPositions[j + pluckedStringsAmount * 0.5 + 1] = (x - 0.5) * 2.0;
+                        }
+                    }
+                }
+            }
+            for (int i = 0; i < pluckedStringsAmount; i += 2)
+            {
+                int stringIndex = i;
+                if (pickAString[i] || pickAString[i + 1])
+                {
+                    
+                    if (!instruments[0]->getStrings()[stringIndex]->isPicking() && !instruments[0]->getStrings()[stringIndex + 1]->isPicking())
+                    {
+                        instruments[0]->getStrings()[stringIndex]->setRaisedCos(xPositions[i], 5, forces[i] / 10.0);
+                        instruments[0]->getStrings()[stringIndex]->pick(true);
+                        instruments[0]->getStrings()[stringIndex + 1]->setRaisedCos(xPositions[i], 5, forces[i] / 10.0);
+                        instruments[0]->getStrings()[stringIndex + 1]->pick(true);
+                    }
+                }
+                else
+                {
+                    instruments[0]->getStrings()[stringIndex]->pick(false);
+                    instruments[0]->getStrings()[stringIndex + 1]->pick(false);
+                }
+            }
+        }
+    }
+}
+
+
 void MainComponent::getNextAudioBlock(const AudioSourceChannelInfo &bufferToFill)
 {
 
@@ -919,6 +1023,8 @@ void MainComponent::resized()
 
         for (int i = row * 2; i < row * 2 + 2; ++i)
         {
+            if (i >= mixSliders.size())
+                break;
             mixSliders[i]->setBounds(slidersArea.removeFromLeft(sliderWidth));
             labels[i]->setBounds(labelsArea.removeFromLeft(sliderWidth));
         }

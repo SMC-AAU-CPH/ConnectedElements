@@ -2,7 +2,7 @@ function [B, C, N, h, Dxx, Dxxxx] = newCreateString(c, kappa, L, s0, s1, k)
    
     h = sqrt((c^2 * k^2 + 4 * s1 * k + sqrt((c^2 * k^2 + 4 * s1 * k)^2 + 16 * kappa^2 * k^2)) / 2);
     N = floor(L/h); % Number of gridpoints
-    h = L/N; % Recalculate gridspacing
+%     h = L/N; % Recalculate gridspacing
     
     N = N - 2;
 
